@@ -1,6 +1,14 @@
 // Each entry is a self-contained "sample industry site" shown inside a
 // browser-chrome frame on /demo/:slug. Swap or extend this list freely —
 // it's plain data, no build step required.
+//
+// Photos come from loremflickr.com — a free, keyword-based photo service
+// built for exactly this (hotlinking placeholder photography, no API key,
+// no attribution wall). Swap any `img()` call for a real client photo URL
+// once you have one.
+
+const img = (keywords, w = 1200, h = 800, seed = 1) =>
+  `https://loremflickr.com/${w}/${h}/${keywords}?lock=${seed}`
 
 export const INDUSTRIES = [
   {
@@ -11,6 +19,8 @@ export const INDUSTRIES = [
     domain: 'ironcore-gym.com',
     brand: 'IronCore Gym',
     tagline: 'Strength training, built around real progress tracking.',
+    heroImage: img('gym,weightlifting', 1400, 900, 11),
+    gallery: [img('gym,dumbbell', 800, 600, 12), img('gym,training', 800, 600, 13), img('yoga,studio', 800, 600, 14)],
     hero: {
       kicker: 'Now open — 24/7 access',
       title: 'Train harder. Track everything.',
@@ -18,34 +28,58 @@ export const INDUSTRIES = [
       cta: 'Book a free trial class',
       stat: { value: '4.9', label: 'member rating' },
     },
+    stats: [
+      { value: '4.9\u2605', label: 'member rating' },
+      { value: '850+', label: 'active members' },
+      { value: '24/7', label: 'access' },
+    ],
+    badges: ['500+ members', 'Certified trainers', 'Open 24/7', 'Free parking'],
     features: [
-      { title: 'Class booking', body: 'Real-time slots for HIIT, strength and yoga with waitlists.' },
-      { title: 'Trainer profiles', body: 'Certifications, specialties and 1-on-1 booking calendars.' },
-      { title: 'Progress dashboard', body: 'Members log lifts and see trends without a third-party app.' },
+      { title: 'Class booking', body: 'Real-time slots for HIIT, strength and yoga with waitlists.', image: img('hiit,workout', 700, 500, 15) },
+      { title: 'Trainer profiles', body: 'Certifications, specialties and 1-on-1 booking calendars.', image: img('personal,trainer', 700, 500, 16) },
+      { title: 'Progress dashboard', body: 'Members log lifts and see trends without a third-party app.', image: img('fitness,app', 700, 500, 17) },
     ],
     testimonial: { quote: 'Sign-ups doubled once people could actually see the class calendar before walking in.', name: 'Owner, IronCore Gym' },
+    pricing: [
+      { name: 'Day Pass', price: '\u20b9299', period: '/day', features: ['Full gym access', 'Locker included', 'No commitment'] },
+      { name: 'Monthly', price: '\u20b91,999', period: '/mo', features: ['Unlimited classes', 'Free trainer check-in', 'Guest passes \u00d72'], highlight: true },
+      { name: 'Annual', price: '\u20b917,999', period: '/yr', features: ['2 months free', 'Priority booking', 'Nutrition plan'] },
+    ],
   },
   {
     slug: 'restaurant-cafe',
-    label: 'Restaurant & Café',
+    label: 'Restaurant & Caf\u00e9',
     icon: '🍽️',
     accent: '#F5A524',
     domain: 'basilandbrine.com',
     brand: 'Basil & Brine',
     tagline: 'A menu site that takes orders, not just shows photos.',
+    heroImage: img('restaurant,plating', 1400, 900, 21),
+    gallery: [img('food,pasta', 800, 600, 22), img('cafe,coffee', 800, 600, 23), img('restaurant,interior', 800, 600, 24)],
     hero: {
-      kicker: 'Open daily · 11am – 11pm',
+      kicker: 'Open daily \u00b7 11am \u2013 11pm',
       title: 'Order online. Skip the wait.',
       body: 'A fast menu with live availability, table reservations and a kitchen-side order feed.',
-      cta: 'View tonight\u2019s menu',
+      cta: "View tonight's menu",
       stat: { value: '3 min', label: 'avg. order time' },
     },
-    features: [
-      { title: 'Live menu', body: 'Sold-out dishes update instantly so no one orders what\u2019s gone.' },
-      { title: 'Table booking', body: 'Guests pick a slot; the host screen updates in real time.' },
-      { title: 'Order feed', body: 'Orders land straight on a kitchen display, no extra tablet fees.' },
+    stats: [
+      { value: '3 min', label: 'avg. order time' },
+      { value: '4.8\u2605', label: 'on Google' },
+      { value: '120+', label: 'covers nightly' },
     ],
-    testimonial: { quote: 'We stopped paying a delivery app 18% just to take our own orders.', name: 'Manager, Basil & Brine' },
+    badges: ['Locally sourced', 'Dine-in & takeaway', "Chef's specials weekly", 'Free reservations'],
+    features: [
+      { title: 'Live menu', body: "Sold-out dishes update instantly so no one orders what's gone.", image: img('menu,food', 700, 500, 25) },
+      { title: 'Table booking', body: 'Guests pick a slot; the host screen updates in real time.', image: img('restaurant,table', 700, 500, 26) },
+      { title: 'Order feed', body: 'Orders land straight on a kitchen display, no extra tablet fees.', image: img('kitchen,chef', 700, 500, 27) },
+    ],
+    testimonial: { quote: "We stopped paying a delivery app 18% just to take our own orders.", name: 'Manager, Basil & Brine' },
+    pricing: [
+      { name: '\u00c0 la carte', price: '\u20b9450', period: 'avg/plate', features: ['Seasonal menu', 'Dine-in or takeaway', 'No booking fee'] },
+      { name: 'Tasting Menu', price: '\u20b91,800', period: '/person', features: ['7-course chef selection', 'Wine pairing add-on', 'Reserve ahead'], highlight: true },
+      { name: 'Private Dining', price: '\u20b935,000', period: '/event', features: ['Up to 20 guests', 'Custom menu', 'Dedicated server'] },
+    ],
   },
   {
     slug: 'car-dealership',
@@ -55,6 +89,8 @@ export const INDUSTRIES = [
     domain: 'northline-motors.com',
     brand: 'Northline Motors',
     tagline: 'Inventory that updates the moment a car sells.',
+    heroImage: img('car,showroom', 1400, 900, 31),
+    gallery: [img('sedan,car', 800, 600, 32), img('suv,car', 800, 600, 33), img('car,dealership', 800, 600, 34)],
     hero: {
       kicker: '48 vehicles in stock',
       title: 'Browse the lot from your phone.',
@@ -62,12 +98,23 @@ export const INDUSTRIES = [
       cta: 'See available inventory',
       stat: { value: '48', label: 'cars in stock' },
     },
-    features: [
-      { title: 'Live inventory', body: 'Filter by price, year and body type; sold cars drop off automatically.' },
-      { title: 'Finance calculator', body: 'Buyers estimate EMIs before they ever call the showroom.' },
-      { title: 'Test-drive booking', body: 'Slots sync to the sales team\u2019s calendar directly.' },
+    stats: [
+      { value: '48', label: 'cars in stock' },
+      { value: '15+', label: 'years trading' },
+      { value: '4.7\u2605', label: 'buyer rating' },
     ],
-    testimonial: { quote: 'Buyers now show up pre-qualified because they\u2019ve already run the numbers.', name: 'Sales Head, Northline Motors' },
+    badges: ['Certified pre-owned', 'Trade-ins welcome', 'On-site financing', 'Free vehicle history'],
+    features: [
+      { title: 'Live inventory', body: 'Filter by price, year and body type; sold cars drop off automatically.', image: img('car,lot', 700, 500, 35) },
+      { title: 'Finance calculator', body: 'Buyers estimate EMIs before they ever call the showroom.', image: img('car,keys', 700, 500, 36) },
+      { title: 'Test-drive booking', body: "Slots sync to the sales team's calendar directly.", image: img('car,test,drive', 700, 500, 37) },
+    ],
+    testimonial: { quote: "Buyers now show up pre-qualified because they've already run the numbers.", name: 'Sales Head, Northline Motors' },
+    pricing: [
+      { name: 'Hatchback', price: '\u20b95.2L', period: 'onwards', features: ['Certified inspection', '1-yr warranty', 'Free 1st service'] },
+      { name: 'Sedan', price: '\u20b99.8L', period: 'onwards', features: ['Certified inspection', '2-yr warranty', 'Free insurance yr 1'], highlight: true },
+      { name: 'SUV', price: '\u20b915.4L', period: 'onwards', features: ['Certified inspection', '2-yr warranty', 'Extended finance terms'] },
+    ],
   },
   {
     slug: 'real-estate',
@@ -77,6 +124,8 @@ export const INDUSTRIES = [
     domain: 'harborview-realty.com',
     brand: 'Harborview Realty',
     tagline: 'Listings with the detail buyers actually ask for.',
+    heroImage: img('modern,house', 1400, 900, 41),
+    gallery: [img('apartment,interior', 800, 600, 42), img('living,room', 800, 600, 43), img('real,estate', 800, 600, 44)],
     hero: {
       kicker: '112 active listings',
       title: 'Find the right property, faster.',
@@ -84,12 +133,23 @@ export const INDUSTRIES = [
       cta: 'Browse listings',
       stat: { value: '112', label: 'active listings' },
     },
+    stats: [
+      { value: '112', label: 'active listings' },
+      { value: '\u20b92,400Cr', label: 'in closed sales' },
+      { value: '4.9\u2605', label: 'buyer rating' },
+    ],
+    badges: ['Verified listings', 'Legal support included', 'Home loan assistance', 'Virtual tours'],
     features: [
-      { title: 'Map search', body: 'Filter by neighborhood, budget and property type on one screen.' },
-      { title: 'Viewing scheduler', body: 'Buyers pick a slot; agents get it on their calendar instantly.' },
-      { title: 'Mortgage estimator', body: 'A simple calculator that keeps buyers on the listing page.' },
+      { title: 'Map search', body: 'Filter by neighborhood, budget and property type on one screen.', image: img('city,map', 700, 500, 45) },
+      { title: 'Viewing scheduler', body: "Buyers pick a slot; agents get it on their calendar instantly.", image: img('house,tour', 700, 500, 46) },
+      { title: 'Mortgage estimator', body: 'A simple calculator that keeps buyers on the listing page.', image: img('house,keys', 700, 500, 47) },
     ],
     testimonial: { quote: 'Serious buyers now book viewings before we even speak on the phone.', name: 'Broker, Harborview Realty' },
+    pricing: [
+      { name: '2BHK Apartment', price: '\u20b985L', period: 'onwards', features: ['Ready to move', 'Legal check done', 'Loan pre-approved'] },
+      { name: '3BHK Villa', price: '\u20b91.6Cr', period: 'onwards', features: ['Gated community', 'Legal check done', 'Loan pre-approved'], highlight: true },
+      { name: 'Commercial Plot', price: '\u20b93.2Cr', period: 'onwards', features: ['Clear title', 'Prime location', 'Flexible payment plan'] },
+    ],
   },
   {
     slug: 'salon-spa',
@@ -98,7 +158,9 @@ export const INDUSTRIES = [
     accent: '#EC4899',
     domain: 'luminarespa.com',
     brand: 'Luminare Spa',
-    tagline: 'Appointment booking that doesn\u2019t need a phone call.',
+    tagline: "Appointment booking that doesn't need a phone call.",
+    heroImage: img('spa,salon', 1400, 900, 51),
+    gallery: [img('haircut,salon', 800, 600, 52), img('spa,massage', 800, 600, 53), img('nail,salon', 800, 600, 54)],
     hero: {
       kicker: 'Walk-ins welcome',
       title: 'Book your slot in under a minute.',
@@ -106,12 +168,23 @@ export const INDUSTRIES = [
       cta: 'Book an appointment',
       stat: { value: '2,300+', label: 'bookings handled' },
     },
+    stats: [
+      { value: '2,300+', label: 'bookings handled' },
+      { value: '4.8\u2605', label: 'client rating' },
+      { value: '12', label: 'stylists on staff' },
+    ],
+    badges: ['Organic products', 'Certified stylists', 'Walk-ins welcome', 'Private rooms available'],
     features: [
-      { title: 'Stylist selection', body: 'Clients pick their preferred stylist and see real availability.' },
-      { title: 'Service menu', body: 'Pricing and duration shown upfront, no surprises at checkout.' },
-      { title: 'Auto reminders', body: 'SMS/email reminders cut no-shows without a front-desk call.' },
+      { title: 'Stylist selection', body: 'Clients pick their preferred stylist and see real availability.', image: img('hairstylist', 700, 500, 55) },
+      { title: 'Service menu', body: 'Pricing and duration shown upfront, no surprises at checkout.', image: img('spa,treatment', 700, 500, 56) },
+      { title: 'Auto reminders', body: 'SMS/email reminders cut no-shows without a front-desk call.', image: img('phone,booking', 700, 500, 57) },
     ],
     testimonial: { quote: 'No-shows dropped by half once reminders went out automatically.', name: 'Owner, Luminare Spa' },
+    pricing: [
+      { name: 'Express', price: '\u20b9599', period: '/session', features: ['Haircut or blow-dry', '30 min slot', 'No booking fee'] },
+      { name: 'Signature', price: '\u20b92,499', period: '/session', features: ['Full styling + spa', '90 min slot', 'Complimentary refreshment'], highlight: true },
+      { name: 'Membership', price: '\u20b96,999', period: '/mo', features: ['4 sessions included', 'Priority booking', '15% off products'] },
+    ],
   },
   {
     slug: 'clinic-healthcare',
@@ -121,6 +194,8 @@ export const INDUSTRIES = [
     domain: 'westgate-clinic.com',
     brand: 'Westgate Family Clinic',
     tagline: 'A site patients trust enough to book through.',
+    heroImage: img('clinic,doctor', 1400, 900, 61),
+    gallery: [img('hospital,reception', 800, 600, 62), img('doctor,consultation', 800, 600, 63), img('medical,equipment', 800, 600, 64)],
     hero: {
       kicker: 'Accepting new patients',
       title: 'Book a consultation online.',
@@ -128,12 +203,23 @@ export const INDUSTRIES = [
       cta: 'Book a consultation',
       stat: { value: '6', label: 'specialists on staff' },
     },
+    stats: [
+      { value: '6', label: 'specialists on staff' },
+      { value: '4.9\u2605', label: 'patient rating' },
+      { value: '15k+', label: 'patients treated' },
+    ],
+    badges: ['Insurance accepted', 'Same-day slots', 'Digital prescriptions', '15+ years serving the area'],
     features: [
-      { title: 'Doctor availability', body: 'Real slots per specialist, synced to the clinic\u2019s calendar.' },
-      { title: 'Intake forms', body: 'Patients fill history online before they arrive.' },
-      { title: 'Appointment types', body: 'New patient, follow-up and urgent visits routed correctly.' },
+      { title: 'Doctor availability', body: "Real slots per specialist, synced to the clinic's calendar.", image: img('doctor,office', 700, 500, 65) },
+      { title: 'Intake forms', body: 'Patients fill history online before they arrive.', image: img('medical,form', 700, 500, 66) },
+      { title: 'Appointment types', body: 'New patient, follow-up and urgent visits routed correctly.', image: img('waiting,room', 700, 500, 67) },
     ],
     testimonial: { quote: 'Front-desk calls dropped noticeably once booking moved online.', name: 'Practice Manager, Westgate Clinic' },
+    pricing: [
+      { name: 'General Consult', price: '\u20b9500', period: '/visit', features: ['20 min with GP', 'Digital prescription', 'Follow-up notes'] },
+      { name: 'Specialist Consult', price: '\u20b91,200', period: '/visit', features: ['30 min with specialist', 'Lab referral included', 'Priority slot'], highlight: true },
+      { name: 'Annual Checkup', price: '\u20b94,999', period: '/package', features: ['Full panel bloodwork', 'Specialist review', 'Report walkthrough'] },
+    ],
   },
   {
     slug: 'education-coaching',
@@ -143,19 +229,32 @@ export const INDUSTRIES = [
     domain: 'pinnacle-academy.com',
     brand: 'Pinnacle Academy',
     tagline: 'Course pages that convert visitors into enrolled students.',
+    heroImage: img('classroom,students', 1400, 900, 71),
+    gallery: [img('online,learning', 800, 600, 72), img('lecture,hall', 800, 600, 73), img('students,studying', 800, 600, 74)],
     hero: {
       kicker: 'New batch starts soon',
-      title: 'Learn from instructors who\u2019ve shipped.',
+      title: "Learn from instructors who've shipped.",
       body: 'Course catalog, batch schedules and a student login area for materials.',
       cta: 'View upcoming batches',
       stat: { value: '340+', label: 'students enrolled' },
     },
+    stats: [
+      { value: '340+', label: 'students enrolled' },
+      { value: '4.8\u2605', label: 'course rating' },
+      { value: '92%', label: 'completion rate' },
+    ],
+    badges: ['Industry-expert instructors', 'Lifetime access', 'Certificate on completion', 'Placement support'],
     features: [
-      { title: 'Course catalog', body: 'Curriculum, duration and pricing laid out clearly per course.' },
-      { title: 'Batch scheduling', body: 'Seats shown live so students know when to enroll.' },
-      { title: 'Student portal', body: 'Materials, recordings and assignments behind a simple login.' },
+      { title: 'Course catalog', body: 'Curriculum, duration and pricing laid out clearly per course.', image: img('online,course', 700, 500, 75) },
+      { title: 'Batch scheduling', body: 'Seats shown live so students know when to enroll.', image: img('calendar,schedule', 700, 500, 76) },
+      { title: 'Student portal', body: 'Materials, recordings and assignments behind a simple login.', image: img('laptop,study', 700, 500, 77) },
     ],
     testimonial: { quote: 'Enrollment questions dropped because the course page finally answered them.', name: 'Director, Pinnacle Academy' },
+    pricing: [
+      { name: 'Self-Paced', price: '\u20b94,999', period: '/course', features: ['Lifetime access', 'Recorded lectures', 'Community forum'] },
+      { name: 'Live Batch', price: '\u20b914,999', period: '/course', features: ['Live weekly classes', 'Doubt-clearing sessions', 'Certificate included'], highlight: true },
+      { name: '1-on-1 Mentorship', price: '\u20b934,999', period: '/course', features: ['Personal mentor', 'Custom project review', 'Placement support'] },
+    ],
   },
   {
     slug: 'ecommerce-retail',
@@ -165,19 +264,32 @@ export const INDUSTRIES = [
     domain: 'fieldandfold.com',
     brand: 'Field & Fold',
     tagline: 'A storefront that loads fast and checks out faster.',
+    heroImage: img('fashion,retail', 1400, 900, 81),
+    gallery: [img('clothing,rack', 800, 600, 82), img('product,packaging', 800, 600, 83), img('online,shopping', 800, 600, 84)],
     hero: {
-      kicker: 'Free shipping over ₹1,999',
+      kicker: 'Free shipping over \u20b91,999',
       title: 'A store built to actually sell.',
       body: 'Product catalog, cart and checkout wired to real payment and inventory data.',
       cta: 'Shop the new collection',
       stat: { value: '1.2s', label: 'avg. page load' },
     },
+    stats: [
+      { value: '1.2s', label: 'avg. page load' },
+      { value: '4.7\u2605', label: 'customer rating' },
+      { value: '2,800+', label: 'orders shipped' },
+    ],
+    badges: ['Free shipping over \u20b91,999', '7-day returns', 'Secure checkout', 'Cash on delivery'],
     features: [
-      { title: 'Product catalog', body: 'Variants, stock and pricing pulled straight from the database.' },
-      { title: 'Cart & checkout', body: 'A short checkout flow built to reduce drop-off.' },
-      { title: 'Order tracking', body: 'Customers check order status without emailing support.' },
+      { title: 'Product catalog', body: 'Variants, stock and pricing pulled straight from the database.', image: img('product,display', 700, 500, 85) },
+      { title: 'Cart & checkout', body: 'A short checkout flow built to reduce drop-off.', image: img('shopping,cart', 700, 500, 86) },
+      { title: 'Order tracking', body: 'Customers check order status without emailing support.', image: img('package,delivery', 700, 500, 87) },
     ],
     testimonial: { quote: 'Checkout abandonment fell once we cut the process down to two steps.', name: 'Founder, Field & Fold' },
+    pricing: [
+      { name: 'Essentials', price: '\u20b9899', period: 'avg. item', features: ['Everyday basics', 'Free size exchange', 'COD available'] },
+      { name: 'Signature Line', price: '\u20b92,499', period: 'avg. item', features: ['Limited drops', 'Premium fabric', 'Free shipping'], highlight: true },
+      { name: 'Bundle Pack', price: '\u20b95,999', period: '/set of 3', features: ['Mix & match', 'Best value per item', 'Gift packaging'] },
+    ],
   },
   {
     slug: 'logistics-transport',
@@ -187,6 +299,8 @@ export const INDUSTRIES = [
     domain: 'swiftroute-logistics.com',
     brand: 'SwiftRoute Logistics',
     tagline: 'Shipment tracking your customers can actually use.',
+    heroImage: img('logistics,warehouse', 1400, 900, 91),
+    gallery: [img('delivery,truck', 800, 600, 92), img('warehouse,shipping', 800, 600, 93), img('cargo,containers', 800, 600, 94)],
     hero: {
       kicker: 'Serving 40+ cities',
       title: 'Know where every shipment is.',
@@ -194,12 +308,23 @@ export const INDUSTRIES = [
       cta: 'Get a shipping quote',
       stat: { value: '40+', label: 'cities served' },
     },
+    stats: [
+      { value: '40+', label: 'cities served' },
+      { value: '99.2%', label: 'on-time delivery' },
+      { value: '4.7\u2605', label: 'client rating' },
+    ],
+    badges: ['Real-time tracking', 'Insured shipments', 'Bulk pricing available', '24/7 dispatch support'],
     features: [
-      { title: 'Live tracking', body: 'Customers track shipments by ID without calling dispatch.' },
-      { title: 'Quote calculator', body: 'Instant estimate by weight, distance and delivery speed.' },
-      { title: 'Business dashboard', body: 'Repeat clients see shipment history and invoices in one place.' },
+      { title: 'Live tracking', body: 'Customers track shipments by ID without calling dispatch.', image: img('gps,tracking', 700, 500, 95) },
+      { title: 'Quote calculator', body: 'Instant estimate by weight, distance and delivery speed.', image: img('shipping,boxes', 700, 500, 96) },
+      { title: 'Business dashboard', body: 'Repeat clients see shipment history and invoices in one place.', image: img('logistics,dashboard', 700, 500, 97) },
     ],
     testimonial: { quote: 'Support calls for "where\u2019s my shipment" nearly disappeared.', name: 'Operations Lead, SwiftRoute' },
+    pricing: [
+      { name: 'Local', price: '\u20b999', period: 'onwards', features: ['Same-city delivery', 'Live tracking', '2-hr window'] },
+      { name: 'Intercity', price: '\u20b9349', period: 'onwards', features: ['2\u20134 day delivery', 'Insured up to \u20b910k', 'SMS updates'], highlight: true },
+      { name: 'Bulk / Business', price: 'Custom', period: 'quote', features: ['Volume pricing', 'Dedicated account manager', 'API access'] },
+    ],
   },
 ]
 

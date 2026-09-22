@@ -35,7 +35,7 @@ export default function Navbar() {
             href={WHATSAPP_LINK()}
             target="_blank"
             rel="noreferrer"
-            className="rounded-md bg-signal px-4 py-2 text-sm font-medium text-white transition hover:bg-signal-bright"
+            className="theme-cta shine rounded-md bg-signal px-4 py-2 text-sm font-medium text-white transition hover:bg-signal-bright"
           >
             Start a project
           </a>

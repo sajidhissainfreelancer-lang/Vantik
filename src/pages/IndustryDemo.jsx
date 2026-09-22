@@ -4,17 +4,19 @@ import Footer from '../components/Footer'
 import BrowserFrame from '../components/BrowserFrame'
 import { INDUSTRIES, getIndustry } from '../data/industries'
 import { WHATSAPP_LINK, SITE } from '../data/site'
+import { useTheme } from '../lib/ThemeContext'
 
 export default function IndustryDemo() {
   const { slug } = useParams()
   const industry = getIndustry(slug)
+  const { theme } = useTheme()
 
   if (!industry) return <Navigate to="/" replace />
 
   const others = INDUSTRIES.filter((i) => i.slug !== slug).slice(0, 3)
 
   return (
-    <div className="min-h-screen bg-ink text-text">
+    <div data-theme={theme} className="min-h-screen bg-ink text-text">
       <Navbar />
 
       <div className="mx-auto max-w-6xl px-5 py-10">
@@ -32,7 +34,7 @@ export default function IndustryDemo() {
             href={WHATSAPP_LINK(`Hi Sajid, I saw the ${industry.label} sample and want something like this for my business.`)}
             target="_blank"
             rel="noreferrer"
-            className="rounded-md bg-signal px-5 py-3 text-sm font-medium text-white transition hover:bg-signal-bright"
+            className="theme-cta shine rounded-md bg-signal px-5 py-3 text-sm font-medium text-white transition hover:bg-signal-bright"
           >
             Get a site like this
           </a>

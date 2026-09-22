@@ -1,0 +1,480 @@
+/*
+  Theme tokens ---------------------------------------------------------
+  Every theme sets the same variable set (colors as "R G B" triplets so
+  Tailwind's <alpha-value> opacity modifiers keep working, plus font,
+  radius and shadow tokens). Swapping [data-theme] on a wrapper element
+  re-themes everything under it — components never need to know which
+  theme is active.
+
+  :root holds the default ("Futuristic"), used when no data-theme is set
+  (e.g. the admin panel itself stays on the neutral default).
+*/
+
+:root {
+  --c-ink: 11 14 20;
+  --c-ink-2: 18 22 32;
+  --c-ink-3: 24 29 42;
+  --c-line: 35 40 56;
+  --c-text: 231 233 238;
+  --c-text-muted: 139 147 167;
+  --c-signal: 91 95 239;
+  --c-signal-bright: 124 128 255;
+  --c-volt: 201 255 61;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 0.75rem;
+  --shadow-card: 0 10px 30px -12px rgb(91 95 239 / 0.35);
+}
+
+[data-theme='minimalism'] {
+  --c-ink: 250 250 249;
+  --c-ink-2: 255 255 255;
+  --c-ink-3: 244 244 242;
+  --c-line: 224 224 220;
+  --c-text: 22 22 20;
+  --c-text-muted: 120 120 116;
+  --c-signal: 22 22 20;
+  --c-signal-bright: 70 70 66;
+  --c-volt: 22 22 20;
+  --font-display: 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 0.25rem;
+  --shadow-card: none;
+}
+
+[data-theme='maximalism'] {
+  --c-ink: 10 8 20;
+  --c-ink-2: 24 14 40;
+  --c-ink-3: 35 18 55;
+  --c-line: 90 40 120;
+  --c-text: 255 255 255;
+  --c-text-muted: 214 184 232;
+  --c-signal: 255 0 128;
+  --c-signal-bright: 255 90 170;
+  --c-volt: 0 255 200;
+  --font-display: 'Unbounded', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 1.5rem;
+  --shadow-card: 0 14px 40px -8px rgb(255 0 128 / 0.5);
+}
+
+[data-theme='futuristic'] {
+  --c-ink: 11 14 20;
+  --c-ink-2: 18 22 32;
+  --c-ink-3: 24 29 42;
+  --c-line: 35 40 56;
+  --c-text: 231 233 238;
+  --c-text-muted: 139 147 167;
+  --c-signal: 91 95 239;
+  --c-signal-bright: 124 128 255;
+  --c-volt: 201 255 61;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 0.75rem;
+  --shadow-card: 0 10px 30px -12px rgb(91 95 239 / 0.35);
+}
+
+[data-theme='vector-art'] {
+  --c-ink: 248 248 250;
+  --c-ink-2: 255 255 255;
+  --c-ink-3: 238 238 242;
+  --c-line: 208 208 216;
+  --c-text: 20 20 30;
+  --c-text-muted: 100 100 115;
+  --c-signal: 255 90 31;
+  --c-signal-bright: 255 130 70;
+  --c-volt: 20 80 255;
+  --font-display: 'Unbounded', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 1rem;
+  --shadow-card: 5px 5px 0 0 rgb(20 20 30 / 0.12);
+}
+
+[data-theme='collage-art'] {
+  --c-ink: 250 244 230;
+  --c-ink-2: 255 250 240;
+  --c-ink-3: 240 230 210;
+  --c-line: 205 185 155;
+  --c-text: 40 30 20;
+  --c-text-muted: 112 96 76;
+  --c-signal: 190 60 40;
+  --c-signal-bright: 220 90 60;
+  --c-volt: 210 160 20;
+  --font-display: 'Caveat', cursive;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 0.4rem;
+  --shadow-card: 5px 5px 0 rgb(40 30 20 / 0.25);
+}
+
+[data-theme='retro'] {
+  --c-ink: 36 24 20;
+  --c-ink-2: 48 32 26;
+  --c-ink-3: 58 40 32;
+  --c-line: 92 64 46;
+  --c-text: 245 230 210;
+  --c-text-muted: 202 172 142;
+  --c-signal: 230 120 40;
+  --c-signal-bright: 250 150 70;
+  --c-volt: 220 190 60;
+  --font-display: 'VT323', monospace;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 0.6rem;
+  --shadow-card: 0 8px 24px -6px rgb(230 120 40 / 0.4);
+}
+
+[data-theme='pop-art'] {
+  --c-ink: 255 255 255;
+  --c-ink-2: 252 246 210;
+  --c-ink-3: 255 240 150;
+  --c-line: 20 20 20;
+  --c-text: 20 20 20;
+  --c-text-muted: 65 65 65;
+  --c-signal: 230 20 40;
+  --c-signal-bright: 255 60 80;
+  --c-volt: 20 90 220;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 0;
+  --shadow-card: 6px 6px 0 rgb(20 20 20 / 1);
+}
+
+[data-theme='glassmorphism'] {
+  --c-ink: 18 22 46;
+  --c-ink-2: 255 255 255;
+  --c-ink-3: 28 34 62;
+  --c-line: 255 255 255;
+  --c-text: 245 246 255;
+  --c-text-muted: 182 192 224;
+  --c-signal: 120 140 255;
+  --c-signal-bright: 160 175 255;
+  --c-volt: 255 255 255;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 1.25rem;
+  --shadow-card: 0 8px 32px 0 rgb(31 38 135 / 0.37);
+}
+
+[data-theme='neumorphism'] {
+  --c-ink: 225 229 235;
+  --c-ink-2: 225 229 235;
+  --c-ink-3: 225 229 235;
+  --c-line: 208 213 222;
+  --c-text: 40 45 55;
+  --c-text-muted: 112 120 132;
+  --c-signal: 90 110 230;
+  --c-signal-bright: 120 140 255;
+  --c-volt: 90 110 230;
+  --font-display: 'Fredoka', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 1.25rem;
+  --shadow-card: 8px 8px 16px rgb(163 177 198 / 0.55), -8px -8px 16px rgb(255 255 255 / 0.8);
+}
+
+[data-theme='cyberpunk'] {
+  --c-ink: 6 4 12;
+  --c-ink-2: 14 8 22;
+  --c-ink-3: 20 12 30;
+  --c-line: 90 30 100;
+  --c-text: 230 255 250;
+  --c-text-muted: 158 205 214;
+  --c-signal: 255 0 170;
+  --c-signal-bright: 255 60 200;
+  --c-volt: 0 255 220;
+  --font-display: 'VT323', monospace;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 0.25rem;
+  --shadow-card: 0 0 24px rgb(255 0 170 / 0.55);
+}
+
+[data-theme='clay'] {
+  --c-ink: 255 240 235;
+  --c-ink-2: 255 250 247;
+  --c-ink-3: 250 233 223;
+  --c-line: 240 208 198;
+  --c-text: 62 40 35;
+  --c-text-muted: 145 112 102;
+  --c-signal: 255 140 110;
+  --c-signal-bright: 255 170 140;
+  --c-volt: 140 200 170;
+  --font-display: 'Fredoka', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 2rem;
+  --shadow-card: 0 14px 0 -4px rgb(255 140 110 / 0.22), 0 20px 32px -10px rgb(200 120 90 / 0.35);
+}
+
+[data-theme='pixel-art'] {
+  --c-ink: 20 20 30;
+  --c-ink-2: 30 30 45;
+  --c-ink-3: 40 40 60;
+  --c-line: 84 84 112;
+  --c-text: 230 230 240;
+  --c-text-muted: 152 152 176;
+  --c-signal: 255 80 80;
+  --c-signal-bright: 255 120 120;
+  --c-volt: 90 220 120;
+  --font-display: '"Press Start 2P"', monospace;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 0;
+  --shadow-card: 4px 4px 0 rgb(0 0 0 / 0.8);
+}
+
+[data-theme='editorial'] {
+  --c-ink: 250 248 244;
+  --c-ink-2: 255 255 255;
+  --c-ink-3: 240 236 228;
+  --c-line: 212 206 195;
+  --c-text: 26 22 20;
+  --c-text-muted: 112 106 98;
+  --c-signal: 150 20 30;
+  --c-signal-bright: 180 40 50;
+  --c-volt: 150 20 30;
+  --font-display: '"Playfair Display"', serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 0;
+  --shadow-card: none;
+}
+
+[data-theme='y2k'] {
+  --c-ink: 245 246 250;
+  --c-ink-2: 255 255 255;
+  --c-ink-3: 230 232 240;
+  --c-line: 210 216 232;
+  --c-text: 30 30 42;
+  --c-text-muted: 112 118 134;
+  --c-signal: 255 60 190;
+  --c-signal-bright: 255 110 210;
+  --c-volt: 60 220 255;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 1.5rem;
+  --shadow-card: 0 6px 24px -6px rgb(255 60 190 / 0.4);
+}
+
+[data-theme='swiss'] {
+  --c-ink: 255 255 255;
+  --c-ink-2: 255 255 255;
+  --c-ink-3: 246 246 246;
+  --c-line: 20 20 20;
+  --c-text: 15 15 15;
+  --c-text-muted: 92 92 92;
+  --c-signal: 220 20 20;
+  --c-signal-bright: 240 50 50;
+  --c-volt: 20 20 20;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 0;
+  --shadow-card: none;
+}
+
+[data-theme='surreal'] {
+  --c-ink: 22 14 30;
+  --c-ink-2: 32 20 42;
+  --c-ink-3: 42 26 55;
+  --c-line: 84 52 104;
+  --c-text: 246 236 250;
+  --c-text-muted: 193 168 213;
+  --c-signal: 255 110 60;
+  --c-signal-bright: 255 140 90;
+  --c-volt: 150 90 255;
+  --font-display: '"Playfair Display"', serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 1.5rem;
+  --shadow-card: 0 10px 40px -10px rgb(150 90 255 / 0.5);
+}
+
+[data-theme='bohemian'] {
+  --c-ink: 40 30 24;
+  --c-ink-2: 52 40 32;
+  --c-ink-3: 64 50 40;
+  --c-line: 102 82 62;
+  --c-text: 240 228 210;
+  --c-text-muted: 197 177 152;
+  --c-signal: 200 100 60;
+  --c-signal-bright: 220 130 85;
+  --c-volt: 150 160 90;
+  --font-display: 'Fredoka', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 1rem;
+  --shadow-card: 0 10px 26px -8px rgb(200 100 60 / 0.35);
+}
+
+[data-theme='victorian'] {
+  --c-ink: 24 14 16;
+  --c-ink-2: 34 20 22;
+  --c-ink-3: 44 26 28;
+  --c-line: 112 82 42;
+  --c-text: 238 220 195;
+  --c-text-muted: 182 157 122;
+  --c-signal: 150 20 30;
+  --c-signal-bright: 180 40 50;
+  --c-volt: 200 165 60;
+  --font-display: '"Playfair Display"', serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 0.25rem;
+  --shadow-card: 0 8px 26px -8px rgb(150 20 30 / 0.4);
+}
+
+[data-theme='graffiti'] {
+  --c-ink: 18 18 20;
+  --c-ink-2: 26 26 30;
+  --c-ink-3: 34 34 38;
+  --c-line: 62 62 68;
+  --c-text: 240 240 235;
+  --c-text-muted: 172 172 166;
+  --c-signal: 255 60 40;
+  --c-signal-bright: 255 100 70;
+  --c-volt: 60 255 120;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 0.5rem;
+  --shadow-card: 0 0 20px rgb(60 255 120 / 0.4);
+}
+
+[data-theme='aurora'] {
+  --c-ink: 8 12 20;
+  --c-ink-2: 14 20 32;
+  --c-ink-3: 18 26 40;
+  --c-line: 42 62 82;
+  --c-text: 230 240 245;
+  --c-text-muted: 152 177 192;
+  --c-signal: 60 220 180;
+  --c-signal-bright: 100 240 200;
+  --c-volt: 150 120 255;
+  --font-display: 'Unbounded', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 1.25rem;
+  --shadow-card: 0 10px 40px -10px rgb(60 220 180 / 0.4);
+}
+
+[data-theme='handwritten'] {
+  --c-ink: 252 248 240;
+  --c-ink-2: 255 253 248;
+  --c-ink-3: 245 238 224;
+  --c-line: 222 207 182;
+  --c-text: 42 36 30;
+  --c-text-muted: 122 110 96;
+  --c-signal: 40 70 160;
+  --c-signal-bright: 70 100 190;
+  --c-volt: 180 60 60;
+  --font-display: 'Caveat', cursive;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 0.5rem;
+  --shadow-card: none;
+}
+
+[data-theme='liquid-glass'] {
+  --c-ink: 8 14 30;
+  --c-ink-2: 255 255 255;
+  --c-ink-3: 16 24 46;
+  --c-line: 255 255 255;
+  --c-text: 240 244 255;
+  --c-text-muted: 172 187 222;
+  --c-signal: 130 170 255;
+  --c-signal-bright: 160 195 255;
+  --c-volt: 255 255 255;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius-card: 1.5rem;
+  --shadow-card: 0 8px 32px rgb(20 40 100 / 0.5);
+}
+
+/* ---------------------------------------------------------------------
+   Signature flourishes for the handful of themes whose whole point is a
+   surface treatment, not just a palette swap.
+------------------------------------------------------------------------ */
+
+/* Glassmorphism + Liquid Glass: frosted, translucent panels */
+[data-theme='glassmorphism'] .theme-panel,
+[data-theme='liquid-glass'] .theme-panel {
+  background: rgb(var(--c-ink-2) / 0.1) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-color: rgb(var(--c-line) / 0.18) !important;
+}
+
+/* Liquid Glass: soft animated color blobs drifting behind the hero */
+[data-theme='liquid-glass'] .theme-hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(circle at 20% 30%, rgb(130 170 255 / 0.35), transparent 55%),
+    radial-gradient(circle at 80% 70%, rgb(255 130 220 / 0.28), transparent 55%),
+    radial-gradient(circle at 50% 90%, rgb(120 255 210 / 0.22), transparent 55%);
+  filter: blur(30px);
+  animation: float-y 10s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Aurora: shifting night-sky gradient behind the hero */
+[data-theme='aurora'] .theme-hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(circle at 15% 20%, rgb(60 220 180 / 0.32), transparent 50%),
+    radial-gradient(circle at 85% 15%, rgb(150 120 255 / 0.28), transparent 50%),
+    radial-gradient(circle at 50% 85%, rgb(60 160 255 / 0.22), transparent 55%);
+  filter: blur(40px);
+  animation: float-y 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Cyberpunk: neon text glow + scanlines */
+[data-theme='cyberpunk'] .font-display {
+  text-shadow: 0 0 12px rgb(var(--c-signal) / 0.7);
+}
+[data-theme='cyberpunk'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, rgb(255 255 255 / 0.02) 0px, transparent 1px, transparent 3px);
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* Pop Art: halftone dot texture on surfaces */
+[data-theme='pop-art'] .theme-panel {
+  background-image: radial-gradient(rgb(var(--c-text) / 0.08) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+/* Pixel Art: staircase, hard-edged borders */
+[data-theme='pixel-art'] .theme-panel {
+  image-rendering: pixelated;
+  clip-path: polygon(0 4px, 4px 4px, 4px 0, calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px));
+}
+
+/* Swiss: bold hairline rule under headings for that grid-system feel */
+[data-theme='swiss'] .theme-hero-title {
+  border-bottom: 4px solid rgb(var(--c-signal));
+  padding-bottom: 0.4em;
+  display: inline-block;
+}
+
+/* Victorian: ornate double border on panels */
+[data-theme='victorian'] .theme-panel {
+  border-width: 3px !important;
+  border-style: double !important;
+}
+
+/* Graffiti: rough offset text shadow like spray drips */
+[data-theme='graffiti'] .theme-hero-title {
+  text-shadow: 3px 3px 0 rgb(var(--c-volt) / 0.5);
+}
+
+/* Y2K: chrome-gradient primary buttons */
+[data-theme='y2k'] .theme-cta {
+  background: linear-gradient(135deg, rgb(var(--c-signal)), rgb(var(--c-volt))) !important;
+}
+
+/* Maximalism: layered rainbow ring behind the hero */
+[data-theme='maximalism'] .theme-hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  background: conic-gradient(from 0deg, rgb(var(--c-signal)), rgb(var(--c-volt)), rgb(var(--c-signal-bright)), rgb(var(--c-signal)));
+  filter: blur(80px);
+  opacity: 0.35;
+  pointer-events: none;
+}

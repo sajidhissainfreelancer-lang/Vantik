@@ -1,17 +1,22 @@
 -- Vantik — Supabase schema
 -- Run this in the Supabase dashboard: SQL Editor → New query → paste → Run.
 
--- 1. Site-wide counters shown on the homepage hero
+-- 1. Site-wide counters + design theme shown on the public homepage
 create table if not exists public.settings (
   id int primary key default 1,
   clients_count int not null default 19,
   projects_count int not null default 21,
+  theme text not null default 'futuristic',
   updated_at timestamptz not null default now(),
   constraint settings_singleton check (id = 1)
 );
 
-insert into public.settings (id, clients_count, projects_count)
-values (1, 19, 21)
+-- Already ran this file before the theme feature existed? This adds the
+-- column without touching your existing row.
+alter table public.settings add column if not exists theme text not null default 'futuristic';
+
+insert into public.settings (id, clients_count, projects_count, theme)
+values (1, 19, 21, 'futuristic')
 on conflict (id) do nothing;
 
 -- 2. Client portfolio projects shown under "Recent client work"

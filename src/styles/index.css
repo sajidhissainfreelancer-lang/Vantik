@@ -1,3 +1,4 @@
+@import './themes.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -11,16 +12,46 @@ html {
 }
 
 body {
-  background-color: #0B0E14;
-  color: #E7E9EE;
-  font-family: 'Inter', sans-serif;
+  background-color: rgb(var(--c-ink));
+  color: rgb(var(--c-text));
+  font-family: var(--font-body), 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 300ms ease, color 300ms ease;
+}
+
+/* Let the themed font-display variable win over the static Tailwind value */
+.font-display {
+  font-family: var(--font-display), 'Space Grotesk', sans-serif;
 }
 
 ::selection {
-  background: #5B5FEF;
+  background: rgb(var(--c-signal));
   color: #ffffff;
 }
+
+/* Themed surface: any card/panel that should pick up per-theme radius,
+   shadow and the special glass/pop-art/pixel/victorian flourishes. */
+.theme-panel {
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+/* Wraps a hero section so theme-specific background flourishes
+   (liquid-glass blobs, aurora glow, maximalism ring) have something to
+   position against. */
+.theme-hero-bg {
+  position: relative;
+  overflow: hidden;
+}
+.theme-hero-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+.theme-cta {
+  border-radius: var(--radius-card);
+}
+
 
 /* Fine grid backdrop used behind the hero */
 .bg-circuit {
@@ -60,9 +91,80 @@ body {
   border-radius: 999px;
 }
 
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 600ms cubic-bezier(0.2, 0.7, 0.2, 1), transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.reveal-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Infinite marquee for trust badges */
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 22s linear infinite;
+}
+.marquee-wrap:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Gentle continuous float, used on decorative 3D badges */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0) rotate(var(--float-rot, 0deg)); }
+  50% { transform: translateY(-10px) rotate(var(--float-rot, 0deg)); }
+}
+.float-el {
+  animation: float-y 4.5s ease-in-out infinite;
+}
+
+/* Slow continuous 3D spin, used sparingly on a single hero accent */
+@keyframes spin-3d {
+  from { transform: perspective(600px) rotateY(0deg); }
+  to { transform: perspective(600px) rotateY(360deg); }
+}
+.spin-3d {
+  animation: spin-3d 9s linear infinite;
+  transform-style: preserve-3d;
+}
+
+/* Shine sweep across primary CTAs on hover */
+.shine {
+  position: relative;
+  overflow: hidden;
+}
+.shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.35) 45%, transparent 60%);
+  transform: translateX(-120%);
+  transition: transform 700ms ease;
+}
+.shine:hover::after {
+  transform: translateX(120%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tilt-card {
     transform: none !important;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .marquee-track,
+  .float-el,
+  .spin-3d {
+    animation: none !important;
   }
   html {
     scroll-behavior: auto;

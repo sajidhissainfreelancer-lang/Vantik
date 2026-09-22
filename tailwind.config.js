@@ -5,27 +5,33 @@ export default {
     extend: {
       colors: {
         ink: {
-          DEFAULT: '#0B0E14',
-          2: '#121620',
-          3: '#181D2A',
+          DEFAULT: 'rgb(var(--c-ink) / <alpha-value>)',
+          2: 'rgb(var(--c-ink-2) / <alpha-value>)',
+          3: 'rgb(var(--c-ink-3) / <alpha-value>)',
         },
-        line: '#232838',
+        line: 'rgb(var(--c-line) / <alpha-value>)',
         signal: {
-          DEFAULT: '#5B5FEF',
-          bright: '#7C80FF',
+          DEFAULT: 'rgb(var(--c-signal) / <alpha-value>)',
+          bright: 'rgb(var(--c-signal-bright) / <alpha-value>)',
         },
-        volt: '#C9FF3D',
+        volt: 'rgb(var(--c-volt) / <alpha-value>)',
         text: {
-          DEFAULT: '#E7E9EE',
-          muted: '#8B93A7',
+          DEFAULT: 'rgb(var(--c-text) / <alpha-value>)',
+          muted: 'rgb(var(--c-text-muted) / <alpha-value>)',
         },
       },
       fontFamily: {
-        display: ['"Space Grotesk"', 'sans-serif'],
-        body: ['"Inter"', 'sans-serif'],
+        display: ['var(--font-display)', '"Space Grotesk"', 'sans-serif'],
+        body: ['var(--font-body)', '"Inter"', 'sans-serif'],
+      },
+      borderRadius: {
+        card: 'var(--radius-card, 0.75rem)',
+      },
+      boxShadow: {
+        card: 'var(--shadow-card, none)',
       },
       backgroundImage: {
-        'grid-fade': 'linear-gradient(to bottom, rgba(11,14,20,0) 0%, #0B0E14 85%)',
+        'grid-fade': 'linear-gradient(to bottom, rgb(var(--c-ink) / 0) 0%, rgb(var(--c-ink)) 85%)',
       },
     },
   },

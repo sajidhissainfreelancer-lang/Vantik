@@ -5,9 +5,20 @@ React + Vite on the frontend, Supabase for data and login, deployed on Render.
 
 - Public site: hero, live client counters, an industry-by-industry sample-site gallery
   (gym, restaurant, car dealership, real estate, salon, clinic, education, e‑commerce,
-  logistics), services, about, contact.
-- `/admin` — a password-protected panel to update the "clients / projects" counters
-  and add, edit or delete real client projects that appear on the homepage.
+  logistics) — each with real photography, a trust-badge marquee, stats, feature cards,
+  a gallery and pricing tiers, laid out like a proper sales page — plus services, about
+  and contact sections with scroll-in animation and 3D hover effects.
+- **22 switchable design styles** (Minimalism, Maximalism, Futuristic, Vector Art,
+  Collage Art, Retro, Pop Art, Glassmorphism, Neumorphism, Cyberpunk, Clay, Pixel Art,
+  Editorial, Y2K, Swiss Design, Surreal, Bohemian, Victorian, Graffiti, Aurora,
+  Handwritten, Liquid Glass) — pick one from `/admin` and your whole public site
+  re-themes instantly (colors, fonts, corners, shadows, a few signature effects).
+  The sample industry demo sites keep their own per-industry branding regardless,
+  since those represent separate client businesses, not Vantik itself.
+- `/admin` — a password-protected panel to change the design theme, update the
+  "clients / projects" counters, and add, edit or delete real client projects that
+  appear on the homepage.
+- Responsive top to bottom — grids, type and images all step down for phones.
 
 ## 1. Run it locally
 
@@ -63,12 +74,13 @@ it up by hand instead:
 
 | Want to change... | Where |
 |---|---|
+| Your site's whole visual style | `/admin` → Website design style (22 presets) |
 | "19+ clients" / "21 projects" numbers | `/admin` → Homepage counters |
 | Add a real client project to the homepage | `/admin` → Add a client project |
-| The sample industry demo sites (gym, car, etc.) | `src/data/industries.js` — plain data, no build tooling needed to understand it |
+| The sample industry demo sites (gym, car, etc.), their photos, pricing | `src/data/industries.js` — plain data, no build tooling needed to understand it |
 | Your name, WhatsApp number, email | `src/data/site.js` |
 | Your photo | replace `public/sajid.jpg` |
-| Colors / fonts | `tailwind.config.js` |
+| Add / tweak a design theme's colors, font, radius | `src/styles/themes.css` (and `src/data/themes.js` for the admin picker label) |
 
 ## Project structure
 

@@ -6,6 +6,7 @@ import BrowserFrame from '../components/BrowserFrame'
 import { INDUSTRIES } from '../data/industries'
 import { SITE, WHATSAPP_LINK, MAIL_LINK } from '../data/site'
 import { useSiteStats, useClientProjects } from '../lib/useSiteData'
+import { useTheme } from '../lib/ThemeContext'
 
 const SERVICES = [
   {
@@ -32,20 +33,21 @@ const PROCESS = [
 export default function Home() {
   const { stats } = useSiteStats()
   const { projects } = useClientProjects()
+  const { theme } = useTheme()
 
   return (
-    <div className="min-h-screen bg-ink text-text">
+    <div data-theme={theme} className="min-h-screen bg-ink text-text">
       <Navbar />
 
       {/* HERO */}
-      <section className="relative overflow-hidden bg-circuit">
+      <section className="theme-hero-bg relative overflow-hidden bg-circuit">
         <div className="absolute inset-0 bg-grid-fade" />
-        <div className="relative mx-auto grid max-w-6xl gap-12 px-5 py-20 md:grid-cols-[1.2fr_0.8fr] md:py-28">
+        <div className="relative mx-auto grid max-w-6xl gap-12 px-5 py-16 sm:py-20 md:grid-cols-[1.2fr_0.8fr] md:py-28">
           <div>
             <span className="inline-block rounded-full border border-line px-3 py-1 text-xs text-text-muted">
               Freelance web developer · Chennai, India
             </span>
-            <h1 className="mt-5 font-display text-4xl font-semibold leading-[1.08] tracking-tight md:text-6xl">
+            <h1 className="theme-hero-title mt-5 font-display text-3xl font-semibold leading-[1.1] tracking-tight sm:text-4xl md:text-6xl">
               I build websites that look like they belong to{' '}
               <span className="text-signal-bright">your industry.</span>
             </h1>
@@ -59,7 +61,7 @@ export default function Home() {
                 href={WHATSAPP_LINK()}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-md bg-signal px-5 py-3 text-sm font-medium text-white transition hover:bg-signal-bright"
+                className="theme-cta shine rounded-md bg-signal px-5 py-3 text-sm font-medium text-white transition hover:bg-signal-bright"
               >
                 Message on WhatsApp
               </a>
@@ -86,7 +88,7 @@ export default function Home() {
 
           <div className="flex items-center justify-center">
             <TiltCard maxTilt={8} className="w-full max-w-xs">
-              <div className="rounded-2xl border border-line bg-ink-2 p-3">
+              <div className="theme-panel border border-line bg-ink-2 p-3">
                 <div className="overflow-hidden rounded-xl">
                   <img
                     src="/sajid.jpg"
@@ -105,7 +107,7 @@ export default function Home() {
       </section>
 
       {/* WORK / INDUSTRY SHOWCASE */}
-      <section id="work" className="mx-auto max-w-6xl px-5 py-20 md:py-28">
+      <section id="work" className="mx-auto max-w-6xl px-5 py-14 sm:py-20 md:py-28">
         <div className="max-w-xl">
           <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">
             Pick your industry, see the pattern.
@@ -144,7 +146,7 @@ export default function Home() {
                   href={p.live_url || '#'}
                   target={p.live_url ? '_blank' : undefined}
                   rel="noreferrer"
-                  className="block rounded-xl border border-line bg-ink-2 p-5 transition hover:border-signal"
+                  className="theme-panel block border border-line bg-ink-2 p-5 transition hover:border-signal"
                 >
                   {p.image_url && (
                     <img src={p.image_url} alt={p.title} className="mb-4 aspect-video w-full rounded-lg object-cover" />
@@ -161,11 +163,11 @@ export default function Home() {
 
       {/* SERVICES */}
       <section id="services" className="border-y border-line bg-ink-2">
-        <div className="mx-auto max-w-6xl px-5 py-20 md:py-28">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:py-20 md:py-28">
           <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">What I build</h2>
           <div className="mt-10 grid gap-8 md:grid-cols-3">
             {SERVICES.map((s) => (
-              <div key={s.title} className="rounded-xl border border-line bg-ink p-6">
+              <div key={s.title} className="theme-panel border border-line bg-ink p-6">
                 <h3 className="font-display text-lg font-semibold">{s.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-text-muted">{s.body}</p>
               </div>
@@ -185,10 +187,10 @@ export default function Home() {
       </section>
 
       {/* ABOUT */}
-      <section id="about" className="mx-auto max-w-6xl px-5 py-20 md:py-28">
+      <section id="about" className="mx-auto max-w-6xl px-5 py-14 sm:py-20 md:py-28">
         <div className="grid gap-12 md:grid-cols-[0.8fr_1.2fr] md:items-center">
           <TiltCard maxTilt={6} className="mx-auto w-full max-w-xs">
-            <div className="overflow-hidden rounded-2xl border border-line">
+            <div className="theme-panel overflow-hidden border border-line">
               <img src="/sajid.jpg" alt={SITE.owner} className="aspect-square w-full object-cover" />
             </div>
           </TiltCard>
@@ -219,7 +221,7 @@ export default function Home() {
 
       {/* CONTACT */}
       <section id="contact" className="border-t border-line bg-ink-2">
-        <div className="mx-auto max-w-6xl px-5 py-20 text-center md:py-28">
+        <div className="mx-auto max-w-6xl px-5 py-14 text-center sm:py-20 md:py-28">
           <h2 className="font-display text-3xl font-semibold tracking-tight md:text-4xl">
             Ready to get your business online?
           </h2>
@@ -232,13 +234,13 @@ export default function Home() {
               href={WHATSAPP_LINK()}
               target="_blank"
               rel="noreferrer"
-              className="rounded-md bg-signal px-6 py-3 text-sm font-medium text-white transition hover:bg-signal-bright"
+              className="theme-cta shine rounded-md bg-signal px-6 py-3 text-sm font-medium text-white transition hover:bg-signal-bright"
             >
               WhatsApp · {SITE.whatsappDisplay}
             </a>
             <a
               href={MAIL_LINK()}
-              className="rounded-md border border-line px-6 py-3 text-sm font-medium text-text transition hover:border-signal"
+              className="theme-panel border border-line px-6 py-3 text-sm font-medium text-text transition hover:border-signal"
             >
               {SITE.email}
             </a>
