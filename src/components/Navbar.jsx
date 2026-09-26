@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { SITE, WHATSAPP_LINK } from '../data/site'
+import { WHATSAPP_LINK } from '../data/site'
+import Brand from './Brand'
 
 const links = [
   { to: '/#work', label: 'Work' },
@@ -15,11 +16,8 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-line/80 bg-ink/85 backdrop-blur">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-md bg-signal text-sm font-bold text-white font-display">
-            V
-          </span>
-          <span className="font-display text-lg font-semibold tracking-tight">{SITE.name}</span>
+        <Link to="/">
+          <Brand />
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">

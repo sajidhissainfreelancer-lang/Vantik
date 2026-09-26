@@ -38,20 +38,24 @@ alter table public.settings enable row level security;
 alter table public.projects enable row level security;
 
 -- Anyone (the public site, using the anon key) can read.
+drop policy if exists "settings are publicly readable" on public.settings;
 create policy "settings are publicly readable"
   on public.settings for select
   using (true);
 
+drop policy if exists "projects are publicly readable" on public.projects;
 create policy "projects are publicly readable"
   on public.projects for select
   using (true);
 
 -- Only signed-in users (you, via the admin panel) can write.
+drop policy if exists "settings are writable by authenticated users" on public.settings;
 create policy "settings are writable by authenticated users"
   on public.settings for all
   using (auth.role() = 'authenticated')
   with check (auth.role() = 'authenticated');
 
+drop policy if exists "projects are writable by authenticated users" on public.projects;
 create policy "projects are writable by authenticated users"
   on public.projects for all
   using (auth.role() = 'authenticated')

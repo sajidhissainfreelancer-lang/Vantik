@@ -1,4 +1,4 @@
-# Vantik
+# Rnexa
 
 Portfolio + admin site for **Sajid Hussain**, freelance web developer.
 React + Vite on the frontend, Supabase for data and login, deployed on Render.
@@ -14,7 +14,7 @@ React + Vite on the frontend, Supabase for data and login, deployed on Render.
   Handwritten, Liquid Glass) — pick one from `/admin` and your whole public site
   re-themes instantly (colors, fonts, corners, shadows, a few signature effects).
   The sample industry demo sites keep their own per-industry branding regardless,
-  since those represent separate client businesses, not Vantik itself.
+  since those represent separate client businesses, not Rnexa itself.
 - `/admin` — a password-protected panel to change the design theme, update the
   "clients / projects" counters, and add, edit or delete real client projects that
   appear on the homepage.
@@ -48,9 +48,9 @@ security note at the bottom.
 ```bash
 git init
 git add .
-git commit -m "Vantik — initial build"
+git commit -m "Rnexa — initial build"
 git branch -M main
-git remote add origin https://github.com/<your-username>/vantik.git
+git remote add origin https://github.com/<your-username>/rnexa.git
 git push -u origin main
 ```
 
@@ -60,7 +60,7 @@ This repo includes a `render.yaml`, so Render can pick up the build settings
 automatically ("New +" → "Blueprint" → select the repo). If you'd rather set
 it up by hand instead:
 
-1. **New +** → **Static Site** → connect the `vantik` repo.
+1. **New +** → **Static Site** → connect the `rnexa` repo.
 2. Build command: `npm install && npm run build`
 3. Publish directory: `dist`
 4. **Environment** tab → add:

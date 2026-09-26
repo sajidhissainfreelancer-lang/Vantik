@@ -1,5 +1,5 @@
 export const SITE = {
-  name: 'Vantik',
+  name: 'Rnexa',
   owner: 'Sajid Hussain',
   role: 'Freelance Web Developer',
   whatsapp: '917358145522', // digits only, for wa.me links
@@ -15,5 +15,5 @@ export const SITE = {
 export const WHATSAPP_LINK = (message = "Hi Sajid, I'd like to talk about a website for my business.") =>
   `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(message)}`
 
-export const MAIL_LINK = (subject = 'Website enquiry — Vantik') =>
+export const MAIL_LINK = (subject = 'Website enquiry — Rnexa') =>
   `mailto:${SITE.email}?subject=${encodeURIComponent(subject)}`

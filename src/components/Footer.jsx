@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { SITE, WHATSAPP_LINK, MAIL_LINK } from '../data/site'
+import Brand from './Brand'
 
 export default function Footer() {
   return (
@@ -7,12 +8,7 @@ export default function Footer() {
       <div className="mx-auto max-w-6xl px-5 py-12">
         <div className="grid gap-10 md:grid-cols-3">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="grid h-7 w-7 place-items-center rounded-md bg-signal text-xs font-bold text-white font-display">
-                V
-              </span>
-              <span className="font-display text-base font-semibold">{SITE.name}</span>
-            </div>
+            <Brand size="sm" />
             <p className="mt-3 max-w-xs text-sm text-text-muted">
               {SITE.owner} designs and builds websites and web apps for local businesses and startups —
               one industry-specific build at a time.
