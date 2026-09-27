@@ -47,23 +47,41 @@ create table if not exists public.clients (
   phone text,
   product_type text not null default 'website', -- 'website' | 'saas' | 'both'
   status text not null default 'lead',            -- 'lead' | 'active' | 'completed' | 'lost'
+  source text,                                     -- 'referral' | 'instagram' | 'whatsapp' | 'google' | 'other'
+  address text,
+  gstin text,
   notes text,
   created_at timestamptz not null default now()
 );
+
+-- Already had an older version of this table? These add the new columns
+-- without touching your existing rows.
+alter table public.clients add column if not exists source text;
+alter table public.clients add column if not exists address text;
+alter table public.clients add column if not exists gstin text;
 
 -- 4. Invoices — your accountant's view. Linked to a client so revenue
 --    reports can be grouped and totalled.
 create table if not exists public.invoices (
   id uuid primary key default gen_random_uuid(),
   client_id uuid references public.clients(id) on delete set null,
+  invoice_no text,
   title text not null,
   amount numeric(12,2) not null default 0,
+  tax_percent numeric(5,2) not null default 0,
+  payment_method text,                    -- 'upi' | 'bank' | 'cash' | 'cheque' | 'other'
   status text not null default 'pending', -- 'paid' | 'pending' | 'overdue'
   issue_date date not null default current_date,
   due_date date,
   notes text,
   created_at timestamptz not null default now()
 );
+
+-- Already had an older version of this table? These add the new columns
+-- without touching your existing rows.
+alter table public.invoices add column if not exists invoice_no text;
+alter table public.invoices add column if not exists tax_percent numeric(5,2) not null default 0;
+alter table public.invoices add column if not exists payment_method text;
 
 alter table public.clients enable row level security;
 alter table public.invoices enable row level security;

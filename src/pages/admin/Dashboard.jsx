@@ -31,16 +31,16 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-ink text-text">
       <header className="sticky top-0 z-10 border-b border-line bg-ink/90 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
-          <div>
-            <div className="font-display text-lg font-semibold">{SITE.name} business dashboard</div>
-            <div className="text-xs text-text-muted">{user?.email}</div>
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-5 py-4">
+          <div className="min-w-0">
+            <div className="font-display text-base font-semibold sm:text-lg">{SITE.name} business dashboard</div>
+            <div className="truncate text-xs text-text-muted">{user?.email}</div>
           </div>
-          <div className="flex items-center gap-3">
-            <a href="/" className="text-sm text-text-muted hover:text-text">View site</a>
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <a href="/" className="text-xs text-text-muted hover:text-text sm:text-sm">View site</a>
             <button
               onClick={handleSignOut}
-              className="rounded-md border border-line px-3 py-1.5 text-sm text-text-muted hover:text-text"
+              className="rounded-md border border-line px-2.5 py-1.5 text-xs text-text-muted hover:text-text sm:px-3 sm:text-sm"
             >
               Sign out
             </button>
@@ -52,7 +52,7 @@ export default function Dashboard() {
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`shrink-0 rounded-md px-3 py-1.5 text-sm font-medium transition ${
+              className={`shrink-0 whitespace-nowrap rounded-md px-2.5 py-1.5 text-xs font-medium transition sm:px-3 sm:text-sm ${
                 activeTab === t.id
                   ? 'bg-signal text-white'
                   : 'text-text-muted hover:bg-ink-2 hover:text-text'

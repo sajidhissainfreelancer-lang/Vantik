@@ -1,5 +1,6 @@
 import Reveal from './Reveal'
 import TiltCard from './TiltCard'
+import { handleImgError } from '../lib/img'
 
 export default function BrowserFrame({ industry, compact = false }) {
   const { domain, brand, accent, hero, icon, heroImage } = industry
@@ -16,7 +17,7 @@ export default function BrowserFrame({ industry, compact = false }) {
           </div>
         </div>
         <div className="relative h-full">
-          <img src={heroImage} alt={brand} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+          <img src={heroImage} alt={brand} className="absolute inset-0 h-full w-full object-cover" loading="lazy" onError={handleImgError} />
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/60 to-transparent" />
           <div className="relative flex h-full flex-col justify-end p-4">
             <div className="flex items-center gap-2">
@@ -57,7 +58,7 @@ function FullSite({ industry }) {
 
       {/* HERO — full-bleed image */}
       <div className="relative overflow-hidden">
-        <img src={heroImage} alt={brand} className="h-[340px] w-full object-cover md:h-[440px]" loading="lazy" />
+        <img src={heroImage} alt={brand} className="h-[340px] w-full object-cover md:h-[440px]" loading="lazy" onError={handleImgError} />
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/70 to-ink/10" />
         <div className="absolute inset-0 bg-gradient-to-r from-ink/80 via-ink/20 to-transparent" />
 
@@ -134,7 +135,7 @@ function FullSite({ industry }) {
           {features.map((f, i) => (
             <Reveal key={f.title} delay={i * 100}>
               <div className="overflow-hidden rounded-lg border border-line bg-ink">
-                <img src={f.image} alt={f.title} className="h-28 w-full object-cover sm:h-32" loading="lazy" />
+                <img src={f.image} alt={f.title} className="h-28 w-full object-cover sm:h-32" loading="lazy" onError={handleImgError} />
                 <div className="p-4">
                   <div className="h-1.5 w-8 rounded-full" style={{ background: accent }} />
                   <h4 className="mt-3 font-display text-sm font-semibold text-text">{f.title}</h4>
@@ -150,7 +151,7 @@ function FullSite({ industry }) {
           <div className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
             {gallery.map((src, i) => (
               <div key={i} className="aspect-square overflow-hidden rounded-lg border border-line">
-                <img src={src} alt="" className="h-full w-full object-cover transition duration-500 hover:scale-110" loading="lazy" />
+                <img src={src} alt="" className="h-full w-full object-cover transition duration-500 hover:scale-110" loading="lazy" onError={handleImgError} />
               </div>
             ))}
           </div>

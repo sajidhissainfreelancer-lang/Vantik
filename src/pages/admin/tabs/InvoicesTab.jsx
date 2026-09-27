@@ -19,6 +19,15 @@ const STATUS_STYLE = {
 }
 
 const money = (n) => `\u20b9${Number(n || 0).toLocaleString('en-IN')}`
+const refNo = (id) => `INV-${id.slice(0, 6).toUpperCase()}`
+
+function daysOverdue(inv) {
+  if (inv.status === 'paid' || !inv.due_date) return 0
+  const due = new Date(inv.due_date)
+  const today = new Date()
+  const diff = Math.floor((today - due) / (1000 * 60 * 60 * 24))
+  return diff > 0 ? diff : 0
+}
 
 export default function InvoicesTab() {
   const [invoices, setInvoices] = useState([])
@@ -28,6 +37,7 @@ export default function InvoicesTab() {
   const [msg, setMsg] = useState('')
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('all')
+  const [clientFilter, setClientFilter] = useState('all')
 
   useEffect(() => {
     load()
@@ -104,14 +114,17 @@ export default function InvoicesTab() {
     load()
   }
 
-  const filtered = statusFilter === 'all' ? invoices : invoices.filter((i) => i.status === statusFilter)
+  const filtered = invoices
+    .filter((i) => statusFilter === 'all' || i.status === statusFilter)
+    .filter((i) => clientFilter === 'all' || i.client_id === clientFilter)
 
   const totals = useMemo(() => {
     const paid = invoices.filter((i) => i.status === 'paid').reduce((s, i) => s + Number(i.amount || 0), 0)
     const pending = invoices
       .filter((i) => i.status === 'pending' || i.status === 'overdue')
       .reduce((s, i) => s + Number(i.amount || 0), 0)
-    return { paid, pending }
+    const overdueCount = invoices.filter((i) => daysOverdue(i) > 0).length
+    return { paid, pending, overdueCount }
   }, [invoices])
 
   function exportCSV() {
@@ -132,7 +145,7 @@ export default function InvoicesTab() {
   return (
     <div>
       {/* REVENUE SUMMARY */}
-      <section className="grid gap-4 sm:grid-cols-2">
+      <section className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-line bg-ink-2 p-5">
           <div className="text-xs text-text-muted">Total received</div>
           <div className="mt-1 font-display text-2xl font-semibold text-emerald-400">{money(totals.paid)}</div>
@@ -140,6 +153,12 @@ export default function InvoicesTab() {
         <div className="rounded-xl border border-line bg-ink-2 p-5">
           <div className="text-xs text-text-muted">Pending / overdue</div>
           <div className="mt-1 font-display text-2xl font-semibold text-yellow-400">{money(totals.pending)}</div>
+        </div>
+        <div className="rounded-xl border border-line bg-ink-2 p-5">
+          <div className="text-xs text-text-muted">Overdue invoices</div>
+          <div className={`mt-1 font-display text-2xl font-semibold ${totals.overdueCount > 0 ? 'text-red-400' : 'text-text'}`}>
+            {totals.overdueCount}
+          </div>
         </div>
       </section>
 
@@ -244,7 +263,7 @@ export default function InvoicesTab() {
       {/* LIST */}
       <section className="mt-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <h2 className="font-display text-lg font-semibold">Invoices ({filtered.length})</h2>
             <select
               value={statusFilter}
@@ -255,6 +274,16 @@ export default function InvoicesTab() {
               <option value="pending">Pending</option>
               <option value="paid">Paid</option>
               <option value="overdue">Overdue</option>
+            </select>
+            <select
+              value={clientFilter}
+              onChange={(e) => setClientFilter(e.target.value)}
+              className="rounded-md border border-line bg-ink px-2 py-1 text-xs text-text-muted outline-none"
+            >
+              <option value="all">All clients</option>
+              {clients.map((c) => (
+                <option key={c.id} value={c.id}>{c.business_name || c.name}</option>
+              ))}
             </select>
           </div>
           {filtered.length > 0 && (
@@ -270,34 +299,46 @@ export default function InvoicesTab() {
           <p className="mt-3 text-sm text-text-muted">No invoices here yet.</p>
         ) : (
           <div className="mt-4 space-y-3">
-            {filtered.map((inv) => (
-              <div key={inv.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-ink-2 p-4">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-medium">{inv.title}</span>
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_STYLE[inv.status] || ''}`}>
-                      {inv.status}
-                    </span>
+            {filtered.map((inv) => {
+              const overdue = daysOverdue(inv)
+              return (
+                <div key={inv.id} className="flex flex-col gap-3 rounded-lg border border-line bg-ink-2 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[10px] font-mono text-text-muted">{refNo(inv.id)}</span>
+                      <span className="text-sm font-medium">{inv.title}</span>
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_STYLE[inv.status] || ''}`}>
+                        {inv.status}
+                      </span>
+                      {overdue > 0 && (
+                        <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-medium text-red-300">
+                          {overdue}d overdue
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-0.5 text-xs text-text-muted">
+                      {clientName(inv.client_id)} · issued {inv.issue_date}{inv.due_date ? ` · due ${inv.due_date}` : ''}
+                    </div>
                   </div>
-                  <div className="mt-0.5 text-xs text-text-muted">
-                    {clientName(inv.client_id)} · {money(inv.amount)} · issued {inv.issue_date}
+                  <div className="flex items-center justify-between gap-3 sm:justify-end">
+                    <span className="font-display text-base font-semibold">{money(inv.amount)}</span>
+                    <div className="flex items-center gap-3">
+                      {inv.status !== 'paid' && (
+                        <button onClick={() => markPaid(inv)} className="text-xs text-emerald-400 hover:underline">
+                          Mark paid
+                        </button>
+                      )}
+                      <button onClick={() => startEdit(inv)} className="text-xs text-signal-bright hover:underline">
+                        Edit
+                      </button>
+                      <button onClick={() => remove(inv.id)} className="text-xs text-red-400 hover:underline">
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  {inv.status !== 'paid' && (
-                    <button onClick={() => markPaid(inv)} className="text-xs text-emerald-400 hover:underline">
-                      Mark paid
-                    </button>
-                  )}
-                  <button onClick={() => startEdit(inv)} className="text-xs text-signal-bright hover:underline">
-                    Edit
-                  </button>
-                  <button onClick={() => remove(inv.id)} className="text-xs text-red-400 hover:underline">
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </section>

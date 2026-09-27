@@ -8,6 +8,7 @@ import { INDUSTRIES } from '../data/industries'
 import { SITE, WHATSAPP_LINK, MAIL_LINK } from '../data/site'
 import { useSiteStats, useClientProjects } from '../lib/useSiteData'
 import { useTheme } from '../lib/ThemeContext'
+import { handleImgError } from '../lib/img'
 
 const SERVICES = [
   {
@@ -49,7 +50,7 @@ export default function Home() {
       {/* HERO */}
       <section
         className="theme-hero-bg hero-photo relative overflow-hidden"
-        style={{ '--hero-photo-url': "url('https://loremflickr.com/1920/1080/webdeveloper,workspace,dark?lock=501')" }}
+        style={{ '--hero-photo-url': "url('https://picsum.photos/seed/rnexa-hero-webdev/1920/1080')" }}
       >
         <div className="absolute inset-0 bg-grid-fade" />
         <div className="relative mx-auto grid max-w-6xl gap-12 px-5 py-16 sm:py-20 md:grid-cols-[1.2fr_0.8fr] md:py-28">
@@ -159,7 +160,7 @@ export default function Home() {
                   className="theme-panel block border border-line bg-ink-2 p-5 transition hover:border-signal"
                 >
                   {p.image_url && (
-                    <img src={p.image_url} alt={p.title} className="mb-4 aspect-video w-full rounded-lg object-cover" />
+                    <img src={p.image_url} alt={p.title} className="mb-4 aspect-video w-full rounded-lg object-cover" onError={handleImgError} />
                   )}
                   <div className="text-xs uppercase tracking-wide text-signal">{p.industry}</div>
                   <div className="mt-1 font-display font-semibold">{p.title}</div>
@@ -199,10 +200,11 @@ export default function Home() {
       {/* TRUST / SECURITY */}
       <section className="relative overflow-hidden border-b border-line">
         <img
-          src="https://loremflickr.com/1920/700/servers,datacenter,blue?lock=502"
+          src="https://picsum.photos/seed/rnexa-trust-servers/1920/700"
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
+          onError={handleImgError}
         />
         <div className="absolute inset-0 bg-ink/90" />
         <div className="relative mx-auto max-w-6xl px-5 py-14 sm:py-20">

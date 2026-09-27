@@ -19,15 +19,25 @@ const STATUS_STYLE = {
   lost: 'bg-red-500/15 text-red-300',
 }
 
+const INVOICE_STATUS_STYLE = {
+  paid: 'bg-emerald-500/15 text-emerald-300',
+  pending: 'bg-yellow-500/15 text-yellow-300',
+  overdue: 'bg-red-500/15 text-red-300',
+}
+
 const PRODUCT_LABEL = { website: 'Website', saas: 'SaaS Tool', both: 'Website + SaaS' }
+const money = (n) => `\u20b9${Number(n || 0).toLocaleString('en-IN')}`
+const refNo = (id) => `INV-${id.slice(0, 6).toUpperCase()}`
 
 export default function ClientsTab() {
   const [clients, setClients] = useState([])
+  const [invoices, setInvoices] = useState([])
   const [form, setForm] = useState(EMPTY)
   const [editingId, setEditingId] = useState(null)
   const [msg, setMsg] = useState('')
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState('all')
+  const [expandedId, setExpandedId] = useState(null)
 
   useEffect(() => {
     load()
@@ -35,9 +45,24 @@ export default function ClientsTab() {
 
   async function load() {
     setLoading(true)
-    const { data } = await supabase.from('clients').select('*').order('created_at', { ascending: false })
-    setClients(data || [])
+    const [cliRes, invRes] = await Promise.all([
+      supabase.from('clients').select('*').order('created_at', { ascending: false }),
+      supabase.from('invoices').select('id, client_id, title, amount, status, issue_date'),
+    ])
+    setClients(cliRes.data || [])
+    setInvoices(invRes.data || [])
     setLoading(false)
+  }
+
+  function invoicesFor(clientId) {
+    return invoices.filter((i) => i.client_id === clientId)
+  }
+
+  function clientTotals(clientId) {
+    const list = invoicesFor(clientId)
+    const billed = list.reduce((s, i) => s + Number(i.amount || 0), 0)
+    const paid = list.filter((i) => i.status === 'paid').reduce((s, i) => s + Number(i.amount || 0), 0)
+    return { billed, paid, outstanding: billed - paid, count: list.length }
   }
 
   function startEdit(c) {
@@ -86,28 +111,35 @@ export default function ClientsTab() {
   function exportCSV() {
     downloadCSV(
       `rnexa-clients-${new Date().toISOString().slice(0, 10)}.csv`,
-      filtered.map((c) => ({
-        name: c.name,
-        business_name: c.business_name || '',
-        email: c.email || '',
-        phone: c.phone || '',
-        product_type: PRODUCT_LABEL[c.product_type] || c.product_type,
-        status: c.status,
-        notes: c.notes || '',
-        added: c.created_at?.slice(0, 10) || '',
-      }))
+      filtered.map((c) => {
+        const t = clientTotals(c.id)
+        return {
+          name: c.name,
+          business_name: c.business_name || '',
+          email: c.email || '',
+          phone: c.phone || '',
+          product_type: PRODUCT_LABEL[c.product_type] || c.product_type,
+          status: c.status,
+          invoices: t.count,
+          total_billed: t.billed,
+          total_paid: t.paid,
+          outstanding: t.outstanding,
+          notes: c.notes || '',
+          added: c.created_at?.slice(0, 10) || '',
+        }
+      })
     )
   }
 
   return (
     <div>
-      <section className="rounded-xl border border-line bg-ink-2 p-6">
+      <section className="rounded-xl border border-line bg-ink-2 p-5 sm:p-6">
         <h2 className="font-display text-lg font-semibold">{editingId ? 'Edit client' : 'Add a client'}</h2>
         <p className="mt-1 text-sm text-text-muted">
           Your private client list — leads, active work, and past clients. Never shown on the public site.
         </p>
 
-        <form onSubmit={submit} className="mt-4 grid gap-4 md:grid-cols-2">
+        <form onSubmit={submit} className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
             <label className="text-xs text-text-muted">Contact name</label>
             <input
@@ -169,7 +201,7 @@ export default function ClientsTab() {
               <option value="lost">Lost</option>
             </select>
           </div>
-          <div className="md:col-span-2">
+          <div className="sm:col-span-2">
             <label className="text-xs text-text-muted">Notes</label>
             <textarea
               rows={2}
@@ -180,7 +212,7 @@ export default function ClientsTab() {
             />
           </div>
 
-          <div className="flex items-center gap-3 md:col-span-2">
+          <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
             <button
               type="submit"
               className="rounded-md bg-signal px-4 py-2 text-sm font-medium text-white hover:bg-signal-bright"
@@ -199,7 +231,7 @@ export default function ClientsTab() {
 
       <section className="mt-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <h2 className="font-display text-lg font-semibold">Clients ({filtered.length})</h2>
             <select
               value={statusFilter}
@@ -226,33 +258,107 @@ export default function ClientsTab() {
           <p className="mt-3 text-sm text-text-muted">No clients here yet.</p>
         ) : (
           <div className="mt-4 space-y-3">
-            {filtered.map((c) => (
-              <div key={c.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-ink-2 p-4">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-medium">{c.name}</span>
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_STYLE[c.status] || ''}`}>
-                      {c.status}
-                    </span>
-                    <span className="rounded-full border border-line px-2 py-0.5 text-[10px] text-text-muted">
-                      {PRODUCT_LABEL[c.product_type] || c.product_type}
-                    </span>
-                  </div>
-                  <div className="mt-0.5 text-xs text-text-muted">
-                    {c.business_name && <span>{c.business_name} · </span>}
-                    {c.email || c.phone || 'No contact info yet'}
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button onClick={() => startEdit(c)} className="text-xs text-signal-bright hover:underline">
-                    Edit
+            {filtered.map((c) => {
+              const isOpen = expandedId === c.id
+              const totals = clientTotals(c.id)
+              const clientInvoices = invoicesFor(c.id)
+              return (
+                <div key={c.id} className="rounded-lg border border-line bg-ink-2">
+                  <button
+                    onClick={() => setExpandedId(isOpen ? null : c.id)}
+                    className="flex w-full flex-col gap-2 p-4 text-left sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-medium">{c.name}</span>
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_STYLE[c.status] || ''}`}>
+                          {c.status}
+                        </span>
+                        <span className="rounded-full border border-line px-2 py-0.5 text-[10px] text-text-muted">
+                          {PRODUCT_LABEL[c.product_type] || c.product_type}
+                        </span>
+                      </div>
+                      <div className="mt-0.5 text-xs text-text-muted">
+                        {c.business_name && <span>{c.business_name} · </span>}
+                        {c.email || c.phone || 'No contact info yet'}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-text-muted">
+                      <span>{totals.count} invoice{totals.count === 1 ? '' : 's'}</span>
+                      {totals.outstanding > 0 && (
+                        <span className="text-yellow-400">{money(totals.outstanding)} due</span>
+                      )}
+                      <span className="text-signal-bright">{isOpen ? 'Hide ▲' : 'View ▾'}</span>
+                    </div>
                   </button>
-                  <button onClick={() => remove(c.id)} className="text-xs text-red-400 hover:underline">
-                    Delete
-                  </button>
+
+                  {isOpen && (
+                    <div className="border-t border-line p-4">
+                      <div className="grid grid-cols-3 gap-3 rounded-lg border border-line bg-ink p-3 text-center sm:gap-4 sm:p-4">
+                        <div>
+                          <div className="font-display text-base font-semibold sm:text-lg">{money(totals.billed)}</div>
+                          <div className="text-[10px] text-text-muted sm:text-[11px]">total billed</div>
+                        </div>
+                        <div>
+                          <div className="font-display text-base font-semibold text-emerald-400 sm:text-lg">{money(totals.paid)}</div>
+                          <div className="text-[10px] text-text-muted sm:text-[11px]">received</div>
+                        </div>
+                        <div>
+                          <div className="font-display text-base font-semibold text-yellow-400 sm:text-lg">{money(totals.outstanding)}</div>
+                          <div className="text-[10px] text-text-muted sm:text-[11px]">outstanding</div>
+                        </div>
+                      </div>
+
+                      {c.notes && (
+                        <p className="mt-3 rounded-md bg-ink px-3 py-2 text-xs text-text-muted">{c.notes}</p>
+                      )}
+
+                      <div className="mt-3 flex flex-wrap gap-3 text-xs">
+                        {c.email && (
+                          <a href={`mailto:${c.email}`} className="text-signal-bright hover:underline">✉ {c.email}</a>
+                        )}
+                        {c.phone && (
+                          <a href={`tel:${c.phone}`} className="text-signal-bright hover:underline">☎ {c.phone}</a>
+                        )}
+                      </div>
+
+                      <h4 className="mt-4 text-xs font-medium uppercase tracking-wide text-text-muted">
+                        Invoice history
+                      </h4>
+                      {clientInvoices.length === 0 ? (
+                        <p className="mt-2 text-xs text-text-muted">No invoices for this client yet — add one from the Invoices tab.</p>
+                      ) : (
+                        <div className="mt-2 space-y-2">
+                          {clientInvoices
+                            .slice()
+                            .sort((a, b) => (a.issue_date < b.issue_date ? 1 : -1))
+                            .map((inv) => (
+                              <div key={inv.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-ink px-3 py-2 text-xs">
+                                <span className="text-text-muted">{refNo(inv.id)} · {inv.title}</span>
+                                <span className="flex items-center gap-2">
+                                  <span className="font-medium">{money(inv.amount)}</span>
+                                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${INVOICE_STATUS_STYLE[inv.status] || ''}`}>
+                                    {inv.status}
+                                  </span>
+                                </span>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+
+                      <div className="mt-4 flex flex-wrap items-center gap-3">
+                        <button onClick={() => startEdit(c)} className="text-xs text-signal-bright hover:underline">
+                          Edit client
+                        </button>
+                        <button onClick={() => remove(c.id)} className="text-xs text-red-400 hover:underline">
+                          Delete client
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </section>
