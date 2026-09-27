@@ -18,6 +18,7 @@
   --c-text: 231 233 238;
   --c-text-muted: 139 147 167;
   --c-signal: 91 95 239;
+  --c-on-signal: 255 255 255;
   --c-signal-bright: 124 128 255;
   --c-volt: 201 255 61;
   --font-display: 'Space Grotesk', sans-serif;
@@ -196,6 +197,7 @@
   --c-signal: 255 140 110;
   --c-signal-bright: 255 170 140;
   --c-volt: 140 200 170;
+  --c-on-signal: 40 26 20;
   --font-display: 'Fredoka', sans-serif;
   --font-body: 'Inter', sans-serif;
   --radius-card: 2rem;
@@ -244,6 +246,7 @@
   --c-signal: 255 60 190;
   --c-signal-bright: 255 110 210;
   --c-volt: 60 220 255;
+  --c-on-signal: 25 20 35;
   --font-display: 'Bebas Neue', sans-serif;
   --font-body: 'Inter', sans-serif;
   --radius-card: 1.5rem;
@@ -340,6 +343,7 @@
   --c-signal: 60 220 180;
   --c-signal-bright: 100 240 200;
   --c-volt: 150 120 255;
+  --c-on-signal: 8 26 22;
   --font-display: 'Unbounded', sans-serif;
   --font-body: 'Inter', sans-serif;
   --radius-card: 1.25rem;
@@ -372,6 +376,7 @@
   --c-signal: 130 170 255;
   --c-signal-bright: 160 195 255;
   --c-volt: 255 255 255;
+  --c-on-signal: 10 18 40;
   --font-display: 'Space Grotesk', sans-serif;
   --font-body: 'Inter', sans-serif;
   --radius-card: 1.5rem;

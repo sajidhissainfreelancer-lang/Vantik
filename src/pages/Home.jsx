@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import TiltCard from '../components/TiltCard'
+import Reveal from '../components/Reveal'
 import BrowserFrame from '../components/BrowserFrame'
 import { INDUSTRIES } from '../data/industries'
 import { SITE, WHATSAPP_LINK, MAIL_LINK } from '../data/site'
@@ -14,13 +15,19 @@ const SERVICES = [
     body: 'A site built around what your business actually sells — not a stock template with your logo dropped in.',
   },
   {
-    title: 'Web applications',
-    body: 'Booking systems, dashboards and internal tools that run in Chrome, Edge or any modern browser.',
+    title: 'SaaS & web applications',
+    body: 'Booking systems, dashboards, internal tools and full SaaS products — real backends, real logins, built to run in Chrome, Edge or any modern browser.',
   },
   {
     title: 'Ongoing changes',
     body: 'Need new pages, pricing updates or a redesign later? I keep working on it after launch, not just at handoff.',
   },
+]
+
+const TRUST_POINTS = [
+  { title: 'Row-level security by default', body: 'Every database table is locked down so only signed-in requests can write — even a leaked public key can\u2019t change your data.' },
+  { title: 'Free, auto-renewing SSL', body: 'Every site ships on HTTPS with certificates that renew themselves. No expired-padlock surprises.' },
+  { title: 'You own every account', body: 'Your GitHub, your Render, your Supabase. I build on infrastructure you control \u2014 nothing sits in a developer\u2019s personal account you can lose access to.' },
 ]
 
 const PROCESS = [
@@ -40,7 +47,10 @@ export default function Home() {
       <Navbar />
 
       {/* HERO */}
-      <section className="theme-hero-bg relative overflow-hidden bg-circuit">
+      <section
+        className="theme-hero-bg hero-photo relative overflow-hidden"
+        style={{ '--hero-photo-url': "url('https://loremflickr.com/1920/1080/webdeveloper,workspace,dark?lock=501')" }}
+      >
         <div className="absolute inset-0 bg-grid-fade" />
         <div className="relative mx-auto grid max-w-6xl gap-12 px-5 py-16 sm:py-20 md:grid-cols-[1.2fr_0.8fr] md:py-28">
           <div>
@@ -49,7 +59,7 @@ export default function Home() {
             </span>
             <h1 className="theme-hero-title mt-5 font-display text-3xl font-semibold leading-[1.1] tracking-tight sm:text-4xl md:text-6xl">
               I build websites that look like they belong to{' '}
-              <span className="text-signal-bright">your industry.</span>
+              <span className="text-signal">your industry.</span>
             </h1>
             <p className="mt-5 max-w-lg text-base text-text-muted md:text-lg">
               {SITE.owner} designs and codes websites and web applications for gyms, clinics, dealerships,
@@ -61,7 +71,7 @@ export default function Home() {
                 href={WHATSAPP_LINK()}
                 target="_blank"
                 rel="noreferrer"
-                className="theme-cta shine rounded-md bg-signal px-5 py-3 text-sm font-medium text-white transition hover:bg-signal-bright"
+                className="theme-cta shine rounded-md bg-signal px-5 py-3 text-sm font-medium text-on-signal transition hover:bg-signal-bright"
               >
                 Message on WhatsApp
               </a>
@@ -128,7 +138,7 @@ export default function Home() {
               </TiltCard>
               <div className="mt-3 flex items-center justify-between px-1">
                 <span className="text-sm font-medium text-text">{industry.label}</span>
-                <span className="text-xs text-text-muted transition group-hover:text-signal-bright">
+                <span className="text-xs text-text-muted transition group-hover:text-signal">
                   View sample →
                 </span>
               </div>
@@ -151,7 +161,7 @@ export default function Home() {
                   {p.image_url && (
                     <img src={p.image_url} alt={p.title} className="mb-4 aspect-video w-full rounded-lg object-cover" />
                   )}
-                  <div className="text-xs uppercase tracking-wide text-signal-bright">{p.industry}</div>
+                  <div className="text-xs uppercase tracking-wide text-signal">{p.industry}</div>
                   <div className="mt-1 font-display font-semibold">{p.title}</div>
                   {p.description && <p className="mt-2 text-sm text-text-muted">{p.description}</p>}
                 </a>
@@ -177,10 +187,40 @@ export default function Home() {
           <div className="mt-16 grid gap-8 md:grid-cols-4">
             {PROCESS.map((p, i) => (
               <div key={p.step} className="border-t border-line pt-4">
-                <div className="font-display text-sm text-signal-bright">{String(i + 1).padStart(2, '0')}</div>
+                <div className="font-display text-sm text-signal">{String(i + 1).padStart(2, '0')}</div>
                 <h4 className="mt-2 font-display text-sm font-semibold">{p.step}</h4>
                 <p className="mt-1.5 text-xs leading-relaxed text-text-muted">{p.body}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TRUST / SECURITY */}
+      <section className="relative overflow-hidden border-b border-line">
+        <img
+          src="https://loremflickr.com/1920/700/servers,datacenter,blue?lock=502"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-ink/90" />
+        <div className="relative mx-auto max-w-6xl px-5 py-14 sm:py-20">
+          <h2 className="font-display text-2xl font-semibold tracking-tight md:text-3xl">
+            Built on infrastructure you control
+          </h2>
+          <p className="mt-2 max-w-lg text-sm text-text-muted">
+            Every site runs on your own GitHub, Render and Supabase accounts — not mine — with the
+            database locked down from day one.
+          </p>
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
+            {TRUST_POINTS.map((t) => (
+              <Reveal key={t.title}>
+                <div className="theme-panel border border-line bg-ink-2/80 p-5 backdrop-blur">
+                  <h3 className="font-display text-sm font-semibold text-text">{t.title}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-text-muted">{t.body}</p>
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -234,7 +274,7 @@ export default function Home() {
               href={WHATSAPP_LINK()}
               target="_blank"
               rel="noreferrer"
-              className="theme-cta shine rounded-md bg-signal px-6 py-3 text-sm font-medium text-white transition hover:bg-signal-bright"
+              className="theme-cta shine rounded-md bg-signal px-6 py-3 text-sm font-medium text-on-signal transition hover:bg-signal-bright"
             >
               WhatsApp · {SITE.whatsappDisplay}
             </a>

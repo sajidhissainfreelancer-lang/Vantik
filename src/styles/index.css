@@ -52,6 +52,24 @@ body {
   border-radius: var(--radius-card);
 }
 
+/* HD photographic hero backdrop — tinted toward the active theme's own
+   background color so text always stays legible no matter which photo
+   or which of the 22 themes is showing. */
+.hero-photo {
+  position: relative;
+}
+.hero-photo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to bottom, rgb(var(--c-ink) / 0.82) 0%, rgb(var(--c-ink) / 0.94) 70%, rgb(var(--c-ink)) 100%),
+    var(--hero-photo-url);
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+}
+
 
 /* Fine grid backdrop used behind the hero */
 .bg-circuit {

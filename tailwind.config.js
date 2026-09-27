@@ -15,6 +15,7 @@ export default {
           bright: 'rgb(var(--c-signal-bright) / <alpha-value>)',
         },
         volt: 'rgb(var(--c-volt) / <alpha-value>)',
+        'on-signal': 'rgb(var(--c-on-signal) / <alpha-value>)',
         text: {
           DEFAULT: 'rgb(var(--c-text) / <alpha-value>)',
           muted: 'rgb(var(--c-text-muted) / <alpha-value>)',
