@@ -112,6 +112,30 @@ create policy "invoices are writable by authenticated users"
   using (auth.role() = 'authenticated')
   with check (auth.role() = 'authenticated');
 
+-- 5. Expenses — the other half of the Finance tab's income-vs-expenses view.
+create table if not exists public.expenses (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  category text not null default 'other', -- 'software' | 'hosting' | 'marketing' | 'equipment' | 'other'
+  amount numeric(12,2) not null default 0,
+  expense_date date not null default current_date,
+  notes text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.expenses enable row level security;
+
+drop policy if exists "expenses are readable by authenticated users" on public.expenses;
+create policy "expenses are readable by authenticated users"
+  on public.expenses for select
+  using (auth.role() = 'authenticated');
+
+drop policy if exists "expenses are writable by authenticated users" on public.expenses;
+create policy "expenses are writable by authenticated users"
+  on public.expenses for all
+  using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');
+
 -- Anyone (the public site, using the anon key) can read.
 drop policy if exists "settings are publicly readable" on public.settings;
 create policy "settings are publicly readable"

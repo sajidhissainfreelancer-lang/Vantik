@@ -4,13 +4,19 @@ import { downloadCSV } from '../../../lib/csv'
 
 const EMPTY = {
   client_id: '',
+  invoice_no: '',
   title: '',
   amount: '',
+  tax_percent: '',
+  payment_method: '',
   status: 'pending',
   issue_date: new Date().toISOString().slice(0, 10),
   due_date: '',
   notes: '',
 }
+
+const PAYMENT_LABEL = { upi: 'UPI', bank: 'Bank Transfer', cash: 'Cash', cheque: 'Cheque', other: 'Other' }
+const totalWithTax = (amount, taxPercent) => Number(amount || 0) * (1 + Number(taxPercent || 0) / 100)
 
 const STATUS_STYLE = {
   paid: 'bg-emerald-500/15 text-emerald-300',
@@ -63,8 +69,11 @@ export default function InvoicesTab() {
     setEditingId(inv.id)
     setForm({
       client_id: inv.client_id || '',
+      invoice_no: inv.invoice_no || '',
       title: inv.title || '',
       amount: inv.amount ?? '',
+      tax_percent: inv.tax_percent ?? '',
+      payment_method: inv.payment_method || '',
       status: inv.status || 'pending',
       issue_date: inv.issue_date || new Date().toISOString().slice(0, 10),
       due_date: inv.due_date || '',
@@ -83,8 +92,11 @@ export default function InvoicesTab() {
     setMsg('')
     const payload = {
       client_id: form.client_id || null,
+      invoice_no: form.invoice_no || null,
       title: form.title,
       amount: Number(form.amount) || 0,
+      tax_percent: Number(form.tax_percent) || 0,
+      payment_method: form.payment_method || null,
       status: form.status,
       issue_date: form.issue_date,
       due_date: form.due_date || null,
@@ -131,9 +143,13 @@ export default function InvoicesTab() {
     downloadCSV(
       `rnexa-invoices-${new Date().toISOString().slice(0, 10)}.csv`,
       filtered.map((i) => ({
+        invoice_no: i.invoice_no || refNo(i.id),
         title: i.title,
         client: clientName(i.client_id),
         amount: i.amount,
+        tax_percent: i.tax_percent || 0,
+        total_with_tax: totalWithTax(i.amount, i.tax_percent),
+        payment_method: PAYMENT_LABEL[i.payment_method] || i.payment_method || '',
         status: i.status,
         issue_date: i.issue_date || '',
         due_date: i.due_date || '',
@@ -182,6 +198,15 @@ export default function InvoicesTab() {
             </select>
           </div>
           <div>
+            <label className="text-xs text-text-muted">Invoice #</label>
+            <input
+              value={form.invoice_no}
+              onChange={(e) => setForm((f) => ({ ...f, invoice_no: e.target.value }))}
+              className="mt-1 w-full rounded-md border border-line bg-ink px-3 py-2 text-sm outline-none focus:border-signal"
+              placeholder="Leave blank to auto-reference from the invoice ID"
+            />
+          </div>
+          <div className="sm:col-span-2">
             <label className="text-xs text-text-muted">Title</label>
             <input
               required
@@ -204,6 +229,21 @@ export default function InvoicesTab() {
             />
           </div>
           <div>
+            <label className="text-xs text-text-muted">Tax / GST (%)</label>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={form.tax_percent}
+              onChange={(e) => setForm((f) => ({ ...f, tax_percent: e.target.value }))}
+              className="mt-1 w-full rounded-md border border-line bg-ink px-3 py-2 text-sm outline-none focus:border-signal"
+              placeholder="0"
+            />
+            {form.amount && Number(form.tax_percent) > 0 && (
+              <p className="mt-1 text-[11px] text-text-muted">Total with tax: {money(totalWithTax(form.amount, form.tax_percent))}</p>
+            )}
+          </div>
+          <div>
             <label className="text-xs text-text-muted">Status</label>
             <select
               value={form.status}
@@ -213,6 +253,21 @@ export default function InvoicesTab() {
               <option value="pending">Pending</option>
               <option value="paid">Paid</option>
               <option value="overdue">Overdue</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-text-muted">Payment method</label>
+            <select
+              value={form.payment_method}
+              onChange={(e) => setForm((f) => ({ ...f, payment_method: e.target.value }))}
+              className="mt-1 w-full rounded-md border border-line bg-ink px-3 py-2 text-sm outline-none focus:border-signal"
+            >
+              <option value="">— not set —</option>
+              <option value="upi">UPI</option>
+              <option value="bank">Bank Transfer</option>
+              <option value="cash">Cash</option>
+              <option value="cheque">Cheque</option>
+              <option value="other">Other</option>
             </select>
           </div>
           <div>
@@ -305,7 +360,7 @@ export default function InvoicesTab() {
                 <div key={inv.id} className="flex flex-col gap-3 rounded-lg border border-line bg-ink-2 p-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[10px] font-mono text-text-muted">{refNo(inv.id)}</span>
+                      <span className="text-[10px] font-mono text-text-muted">{inv.invoice_no || refNo(inv.id)}</span>
                       <span className="text-sm font-medium">{inv.title}</span>
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_STYLE[inv.status] || ''}`}>
                         {inv.status}
@@ -315,13 +370,24 @@ export default function InvoicesTab() {
                           {overdue}d overdue
                         </span>
                       )}
+                      {inv.payment_method && (
+                        <span className="rounded-full border border-line px-2 py-0.5 text-[10px] text-text-muted">
+                          {PAYMENT_LABEL[inv.payment_method] || inv.payment_method}
+                        </span>
+                      )}
                     </div>
                     <div className="mt-0.5 text-xs text-text-muted">
                       {clientName(inv.client_id)} · issued {inv.issue_date}{inv.due_date ? ` · due ${inv.due_date}` : ''}
+                      {Number(inv.tax_percent) > 0 && ` · +${inv.tax_percent}% tax`}
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-3 sm:justify-end">
-                    <span className="font-display text-base font-semibold">{money(inv.amount)}</span>
+                    <div className="text-right">
+                      <span className="font-display text-base font-semibold">{money(totalWithTax(inv.amount, inv.tax_percent))}</span>
+                      {Number(inv.tax_percent) > 0 && (
+                        <div className="text-[10px] text-text-muted">{money(inv.amount)} + tax</div>
+                      )}
+                    </div>
                     <div className="flex items-center gap-3">
                       {inv.status !== 'paid' && (
                         <button onClick={() => markPaid(inv)} className="text-xs text-emerald-400 hover:underline">

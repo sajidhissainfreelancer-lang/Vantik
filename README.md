@@ -19,15 +19,22 @@ React + Vite on the frontend, Supabase for data and login, deployed on Render.
   them go unreadable (an earlier version had this bug on a few pastel themes — fixed).
 - `/admin` is a full **business dashboard**, not just a content editor:
   - **Overview** — revenue and client snapshot at a glance, plus the homepage counters
+  - **Finance** — income vs. expenses, filterable by Today / This Week / This Month /
+    This Year / a custom date range, a bar chart of both over time, net profit,
+    average deal size, top clients for the period, and expense tracking by category
   - **Clients** — a private CRM: leads, active work, completed and lost clients,
-    tagged by product line (Website / SaaS Tool / Both)
-  - **Invoices** — your accountant's view: amounts, paid / pending / overdue status,
+    tagged by product line (Website / SaaS Tool / Both), with GSTIN, billing address
+    and lead source (Referral / Instagram / WhatsApp / Google). Click a client to
+    expand their full invoice history and running totals inline.
+  - **Invoices** — your accountant's view: invoice numbers, tax/GST %, payment
+    method, paid / pending / overdue status with an automatic "Xd overdue" badge,
     running totals, one-click "mark paid"
   - **Projects** — the portfolio pieces shown on the public homepage
   - **Theme** — the 22-style picker
-  - Every list (Clients, Invoices, Projects) has a **CSV export** button — instant
-    downloadable reports, no server involved.
-- Responsive top to bottom — grids, type and images all step down for phones.
+  - Every list (Finance, Clients, Invoices, Projects) has a **CSV export** button —
+    instant downloadable reports, no server involved.
+- Responsive top to bottom — grids, type and images all step down for phones, and
+  the admin header/tabs wrap instead of overflowing on narrow screens.
 
 ## 1. Run it locally
 
@@ -35,6 +42,9 @@ React + Vite on the frontend, Supabase for data and login, deployed on Render.
 npm install
 npm run dev
 ```
+
+This pulls in **recharts** (used for the Finance tab's chart) along with everything
+else — `npm install` picks up every dependency in `package.json` automatically.
 
 The `.env` file already has your Supabase project's URL and anon key in it
 (see `.env.example` for the format). `.env` is git-ignored on purpose — see the
@@ -51,9 +61,10 @@ security note at the bottom.
    - `clients` — your private CRM. **No public-read policy at all** — only a
      signed-in session can see this table.
    - `invoices` — your private billing record. Same lockdown as `clients`.
-   - Row Level Security on all four: `settings`/`projects` are publicly readable
-     (so the site works) but only writable when signed in; `clients`/`invoices`
-     are neither readable nor writable by anyone who isn't signed in — not even
+   - `expenses` — your business costs, feeding the Finance tab. Same lockdown too.
+   - Row Level Security on all five: `settings`/`projects` are publicly readable
+     (so the site works) but only writable when signed in; `clients`/`invoices`/
+     `expenses` are neither readable nor writable by anyone who isn't signed in — not even
      with the public anon key.
 3. Create yourself an admin login: **Authentication → Users → Add user**, enter
    an email and password. That's what you sign in with at `/admin/login` —
@@ -92,8 +103,9 @@ it up by hand instead:
 |---|---|
 | Your site's whole visual style | `/admin` → Theme tab (22 presets) |
 | "19+ clients" / "21 projects" numbers | `/admin` → Overview tab |
-| Track a client, lead, or invoice | `/admin` → Clients / Invoices tabs |
-| Download a Clients, Invoices or Projects report | `/admin` → that tab → Export CSV |
+| Track a client, lead, invoice, or expense | `/admin` → Clients / Invoices / Finance tabs |
+| See income vs. expenses for a day, week, month, year, or custom range | `/admin` → Finance tab |
+| Download a Finance, Clients, Invoices or Projects report | `/admin` → that tab → Export CSV |
 | Add a real client project to the homepage | `/admin` → Projects tab |
 | The sample industry demo sites (gym, car, etc.), their photos, pricing | `src/data/industries.js` — plain data, no build tooling needed to understand it |
 | Your name, WhatsApp number, email | `src/data/site.js` |
@@ -107,10 +119,10 @@ it up by hand instead:
 src/
   components/     Navbar, Footer, Brand (logo mark), TiltCard, Reveal, BrowserFrame, ProtectedRoute
   data/           site.js (your details), industries.js (sample-site content), themes.js (theme registry)
-  lib/            supabaseClient.js, AuthContext.jsx, ThemeContext.jsx, useSiteData.js, csv.js
+  lib/            supabaseClient.js, AuthContext.jsx, ThemeContext.jsx, useSiteData.js, csv.js, dateRange.js, img.js
   pages/          Home.jsx, IndustryDemo.jsx, NotFound.jsx
   pages/admin/    Login.jsx, Dashboard.jsx (tab shell)
-  pages/admin/tabs/  OverviewTab, ClientsTab, InvoicesTab, ProjectsTab, ThemeTab
+  pages/admin/tabs/  OverviewTab, FinanceTab, ClientsTab, InvoicesTab, ProjectsTab, ThemeTab
 supabase/
   schema.sql      run this every time it changes — safe to re-run top-to-bottom
 ```

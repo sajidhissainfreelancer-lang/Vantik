@@ -9,8 +9,13 @@ const EMPTY = {
   phone: '',
   product_type: 'website',
   status: 'lead',
+  source: '',
+  address: '',
+  gstin: '',
   notes: '',
 }
+
+const SOURCE_LABEL = { referral: 'Referral', instagram: 'Instagram', whatsapp: 'WhatsApp', google: 'Google', other: 'Other' }
 
 const STATUS_STYLE = {
   lead: 'bg-yellow-500/15 text-yellow-300',
@@ -74,6 +79,9 @@ export default function ClientsTab() {
       phone: c.phone || '',
       product_type: c.product_type || 'website',
       status: c.status || 'lead',
+      source: c.source || '',
+      address: c.address || '',
+      gstin: c.gstin || '',
       notes: c.notes || '',
     })
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -120,6 +128,9 @@ export default function ClientsTab() {
           phone: c.phone || '',
           product_type: PRODUCT_LABEL[c.product_type] || c.product_type,
           status: c.status,
+          source: SOURCE_LABEL[c.source] || c.source || '',
+          gstin: c.gstin || '',
+          address: c.address || '',
           invoices: t.count,
           total_billed: t.billed,
           total_paid: t.paid,
@@ -200,6 +211,39 @@ export default function ClientsTab() {
               <option value="completed">Completed</option>
               <option value="lost">Lost</option>
             </select>
+          </div>
+          <div>
+            <label className="text-xs text-text-muted">Source</label>
+            <select
+              value={form.source}
+              onChange={(e) => setForm((f) => ({ ...f, source: e.target.value }))}
+              className="mt-1 w-full rounded-md border border-line bg-ink px-3 py-2 text-sm outline-none focus:border-signal"
+            >
+              <option value="">— not set —</option>
+              <option value="referral">Referral</option>
+              <option value="instagram">Instagram</option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="google">Google</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-text-muted">GSTIN (if registered)</label>
+            <input
+              value={form.gstin}
+              onChange={(e) => setForm((f) => ({ ...f, gstin: e.target.value.toUpperCase() }))}
+              className="mt-1 w-full rounded-md border border-line bg-ink px-3 py-2 text-sm uppercase outline-none focus:border-signal"
+              placeholder="22AAAAA0000A1Z5"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="text-xs text-text-muted">Billing address</label>
+            <input
+              value={form.address}
+              onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+              className="mt-1 w-full rounded-md border border-line bg-ink px-3 py-2 text-sm outline-none focus:border-signal"
+              placeholder="For invoices — street, city, state, PIN"
+            />
           </div>
           <div className="sm:col-span-2">
             <label className="text-xs text-text-muted">Notes</label>
@@ -320,7 +364,17 @@ export default function ClientsTab() {
                         {c.phone && (
                           <a href={`tel:${c.phone}`} className="text-signal-bright hover:underline">☎ {c.phone}</a>
                         )}
+                        {c.source && (
+                          <span className="text-text-muted">via {SOURCE_LABEL[c.source] || c.source}</span>
+                        )}
                       </div>
+
+                      {(c.gstin || c.address) && (
+                        <div className="mt-2 space-y-0.5 text-xs text-text-muted">
+                          {c.gstin && <div>GSTIN: <span className="font-mono">{c.gstin}</span></div>}
+                          {c.address && <div>{c.address}</div>}
+                        </div>
+                      )}
 
                       <h4 className="mt-4 text-xs font-medium uppercase tracking-wide text-text-muted">
                         Invoice history
