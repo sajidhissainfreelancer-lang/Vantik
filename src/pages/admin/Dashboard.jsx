@@ -4,6 +4,7 @@ import { useAuth } from '../../lib/AuthContext'
 import { SITE } from '../../data/site'
 import OverviewTab from './tabs/OverviewTab'
 import FinanceTab from './tabs/FinanceTab'
+import LeadsTab from './tabs/LeadsTab'
 import ClientsTab from './tabs/ClientsTab'
 import InvoicesTab from './tabs/InvoicesTab'
 import ProjectsTab from './tabs/ProjectsTab'
@@ -12,6 +13,7 @@ import ThemeTab from './tabs/ThemeTab'
 const TABS = [
   { id: 'overview', label: 'Overview', component: OverviewTab },
   { id: 'finance', label: 'Finance', component: FinanceTab },
+  { id: 'leads', label: 'Leads', component: LeadsTab },
   { id: 'clients', label: 'Clients', component: ClientsTab },
   { id: 'invoices', label: 'Invoices', component: InvoicesTab },
   { id: 'projects', label: 'Projects', component: ProjectsTab },

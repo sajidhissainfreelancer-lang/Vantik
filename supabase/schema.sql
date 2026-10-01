@@ -136,6 +136,36 @@ create policy "expenses are writable by authenticated users"
   using (auth.role() = 'authenticated')
   with check (auth.role() = 'authenticated');
 
+-- 6. Leads — the Lead Assistant's call queue. Imported from an uploaded
+--    Excel/CSV, then worked through with one-tap dialing (tel: links) and
+--    logged with an outcome after each call. No telephony happens here —
+--    see the README for why that's a paid, separate category of product.
+create table if not exists public.leads (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  phone text not null,
+  industry text,
+  area text,
+  status text not null default 'new', -- 'new' | 'contacted' | 'interested_website' | 'interested_saas' | 'interested_upgrade' | 'callback' | 'not_interested' | 'no_answer'
+  remarks text,
+  callback_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.leads enable row level security;
+
+drop policy if exists "leads are readable by authenticated users" on public.leads;
+create policy "leads are readable by authenticated users"
+  on public.leads for select
+  using (auth.role() = 'authenticated');
+
+drop policy if exists "leads are writable by authenticated users" on public.leads;
+create policy "leads are writable by authenticated users"
+  on public.leads for all
+  using (auth.role() = 'authenticated')
+  with check (auth.role() = 'authenticated');
+
 -- Anyone (the public site, using the anon key) can read.
 drop policy if exists "settings are publicly readable" on public.settings;
 create policy "settings are publicly readable"
