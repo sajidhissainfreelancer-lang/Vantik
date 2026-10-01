@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rnexa - Websites &amp; AI Calling for your business</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#16202e;--mut:#5d6b80;--pri:#2457e6;--line:#dfe5ef;--err:#c62828}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{max-width:460px;margin:6vh auto;padding:0 16px}.wide{max-width:900px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px;margin-bottom:16px}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:17px;margin:0 0 10px}p{color:var(--mut);margin:4px 0 14px;line-height:1.5}
+label{display:block;font-size:13px;font-weight:600;margin:12px 0 4px}
+input,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:8px;font-size:15px}
+button{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:12px 16px;font-size:15px;font-weight:600;cursor:pointer;width:100%;margin-top:16px}
+button:disabled{opacity:.5;cursor:not-allowed}button.ghost{background:none;color:var(--pri);width:auto;margin:0;padding:6px}
+.msg{font-size:13px;margin-top:10px;color:var(--err)}.ok{color:#1b7a3a}
+.terms{height:200px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:12px;font-size:13px;line-height:1.55;background:#fafbfd}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:var(--card);border-bottom:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.stat{border:1px solid var(--line);border-radius:10px;padding:14px}.stat b{font-size:24px;display:block}
+.hide{display:none}.row{display:flex;gap:12px}.row>div{flex:1}
+table{border-collapse:collapse;font-size:13px;width:100%}td,th{border:1px solid var(--line);padding:6px 8px;text-align:left}.nav{display:flex;justify-content:space-between;align-items:center;padding:14px 5vw;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0}
+.nav a{color:var(--ink);text-decoration:none;margin-left:18px;font-size:14px}.nav .btn{background:var(--pri);color:#fff;padding:9px 14px;border-radius:8px}
+.hero{padding:9vh 5vw;text-align:center;background:linear-gradient(#eaf0ff,#f4f6fb)}.hero h1{font-size:clamp(28px,5vw,46px);max-width:760px;margin:0 auto 12px}
+.sec{max-width:1000px;margin:0 auto;padding:36px 5vw}.sec h2{font-size:24px}.tag{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:20px;padding:8px 14px;margin:4px;font-size:14px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}footer{text-align:center;color:var(--mut);padding:30px 16px;font-size:14px}
+.nav .ghostb{border:1px solid var(--line);padding:8px 14px;border-radius:8px}.nav .links a{margin-left:16px}
+.hero2{padding:11vh 5vw 9vh;text-align:center;background:radial-gradient(circle at 50% 0,#dfe8ff,#f4f6fb 70%)}
+.hero2 h1{font-size:clamp(30px,5.5vw,54px);line-height:1.1;max-width:820px;margin:0 auto 14px}.hero2 p{max-width:640px;margin:0 auto 24px;font-size:18px}
+.cta{display:inline-block;padding:13px 22px;border-radius:9px;font-weight:600;text-decoration:none;margin:4px}.cta.p{background:var(--pri);color:#fff}.cta.s{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}.g3 .card{margin:0}.ico{font-size:26px}
+details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px}summary{font-weight:600;cursor:pointer}
+.alt{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+@media(max-width:720px){.nav .links{display:none}}
+</style></head><body>
+
+<div id="home" class="hide">
+ <div class="nav"><b style="font-size:20px;color:var(--pri)">Rnexa</b>
+  <span class="links"><a href="#services">Services</a><a href="#aicaller">AI Caller</a><a href="#how">How it works</a><a href="#faq">FAQ</a><a href="#contact">Contact</a></span>
+  <span><a class="ghostb" id="navLogin" href="#/login">Log in</a><a class="btn" id="navCta" href="#/signup">Sign up</a></span></div>
+ <div class="hero2"><h1>Websites that bring customers. AI that follows up with them.</h1>
+  <p>Rnexa builds fast, clean and friendly websites and web apps for gyms, restaurants, car dealers, clinics, real estate and local businesses, and gives you an AI caller that talks to your leads for you.</p>
+  <a class="cta p" href="#/signup">Try the AI Caller</a><a class="cta s" href="#contact">Get a website</a></div>
+ <div class="sec" id="services"><h2>What we build</h2><p>Everything you need to go online, handled by one team.</p>
+  <div class="g3">
+   <div class="card"><div class="ico">🌐</div><h2>Business websites</h2><p>Fast, clean, mobile-friendly websites made for your industry.</p></div>
+   <div class="card"><div class="ico">🧩</div><h2>Web apps</h2><p>Software that runs in any browser like Chrome or Edge. Nothing to install.</p></div>
+   <div class="card"><div class="ico">🔎</div><h2>Domain help</h2><p>Our team helps you pick a better domain name and sets it up for you.</p></div>
+   <div class="card"><div class="ico">🔒</div><h2>Secure data</h2><p>Your customer and business data is stored in a secure database.</p></div>
+  </div></div>
+ <div class="alt"><div class="sec" id="aicaller"><h2>Rnexa AI Caller</h2>
+  <p>Upload your leads. The AI calls them in a natural, friendly conversation and hands you back an Excel with a remark for every lead.</p>
+  <div class="g3">
+   <div class="card"><div class="ico">📞</div><h2>Sales follow-ups</h2><p>Find out who is still interested and who wants a callback.</p></div>
+   <div class="card"><div class="ico">🎧</div><h2>Customer support</h2><p>Check in with customers and collect their needs.</p></div>
+   <div class="card"><div class="ico">🛎️</div><h2>Reception</h2><p>Confirm visits and bookings without a calling team.</p></div>
+  </div></div></div>
+ <div class="sec" id="how"><h2>How it works</h2>
+  <div class="g3"><div class="card"><h2>1. Create your account</h2><p>Sign up and add your company details.</p></div>
+  <div class="card"><h2>2. Upload your leads</h2><p>Upload an Excel or CSV with phone numbers.</p></div>
+  <div class="card"><h2>3. Download results</h2><p>Get your Excel back with interest level, needs, and callback time.</p></div></div>
+  <p style="margin-top:16px"><a class="cta p" href="#/signup">Create free account</a></p></div>
+ <div class="alt"><div class="sec" id="faq"><h2>Questions</h2>
+  <details><summary>What do I get back?</summary><p>Your original Excel plus new columns: call status, interest level, requirement, callback time, next step, summary and a short remark.</p></details>
+  <details><summary>Do the calls sound like a real person?</summary><p>The AI speaks naturally, answers questions and handles objections. It always says it is an AI assistant if asked.</p></details>
+  <details><summary>Can I call anyone?</summary><p>No. You must have consent or a lawful right to contact every lead, and follow TRAI / DND rules. You accept this when you sign up.</p></details>
+  <details><summary>Which language does it speak?</summary><p>English for now. More languages can be added.</p></details>
+  <details><summary>What does it cost?</summary><p>Contact us and we will share a plan that fits the number of calls you need.</p></details></div></div>
+ <div class="sec" id="contact"><h2>Contact</h2><p>Tell us about your business and we will reply quickly.</p>
+  <a class="cta p" data-wa href="#">Chat on WhatsApp</a><a class="cta s" data-email href="#">Email us</a></div>
+ <footer><b>Rnexa</b> &middot; Built by <span id="owner"></span> &middot; &copy; <span id="yr"></span> Rnexa. All rights reserved.</footer></div>
+<!-- AUTH -->
+<div id="auth" class="wrap hide"><div class="card">
+  <h1>Rnexa AI Caller</h1><p id="authSub">Log in to your client account.</p>
+  <label>Email</label><input id="email" type="email" autocomplete="email">
+  <label>Password</label><input id="pass" type="password" autocomplete="current-password" placeholder="Minimum 8 characters">
+  <button id="authBtn">Log in</button>
+  <div id="authMsg" class="msg"></div>
+  <p style="margin-top:14px"><span id="swText">New here?</span> <button class="ghost" id="swBtn">Create account</button></p>
+</div></div>
+
+<!-- ONBOARDING -->
+<div id="onb" class="wrap wide hide"><div class="card">
+  <h1>Tell us about your company</h1><p>Step 2 of 2. Fill the details and accept our terms to continue.</p>
+  <div class="row"><div><label>Company name *</label><input id="company"></div><div><label>Your name *</label><input id="cname"></div></div>
+  <div class="row"><div><label>Phone *</label><input id="phone" type="tel" placeholder="+91..."></div>
+  <div><label>Industry</label><select id="industry"><option value="">Select</option><option>Real estate</option><option>Education / coaching</option><option>Clinic / healthcare</option><option>Insurance / finance</option><option>Gym / fitness</option><option>Retail / other</option></select></div></div>
+  <label>City</label><input id="city">
+  <h2 style="margin-top:20px">Terms &amp; Conditions and Privacy Policy</h2>
+  <div class="terms" id="terms">
+    <b>Version 1.0 (draft - have a lawyer review before launch)</b><br><br>
+    <b>1. Service.</b> Rnexa provides an AI calling service that calls the leads you upload and returns a report with call results.<br>
+    <b>2. Consent and legal compliance.</b> You confirm that every person you upload has agreed to be contacted, or that you otherwise have a lawful right to call them. You are responsible for following Indian telecom rules (including TRAI / DND regulations) and any other applicable law.<br>
+    <b>3. AI disclosure.</b> Calls are made by an AI assistant, may be recorded and transcribed, and the AI will say it is an AI if asked.<br>
+    <b>4. Your data.</b> You own your lead data. Rnexa uses it only to provide the service, stores it securely, and does not sell it. Call recordings and transcripts are processed by our voice and AI providers to deliver the service.<br>
+    <b>5. Accuracy.</b> Call remarks are generated by AI and may contain errors. Please review important results.<br>
+    <b>6. Prohibited use.</b> No fraud, harassment, misleading offers, illegal products, or calls to people who asked not to be contacted.<br>
+    <b>7. Payments.</b> Pricing, credits and refunds are as agreed in writing or shown at purchase. Unused call credits are non-transferable.<br>
+    <b>8. Liability.</b> The service is provided "as is". To the extent allowed by law, Rnexa is not liable for indirect losses or lost business.<br>
+    <b>9. Privacy.</b> We collect your account and company details to run your account and support you. Contact us at your Rnexa support email to access or delete your data.<br>
+    <b>10. Changes and termination.</b> We may update these terms; continued use means acceptance. We may suspend accounts that break these terms.<br><br>
+    <b>End of terms.</b>
+  </div>
+  <p id="scrollHint" style="font-size:12px">Scroll to the end of the terms to enable the checkbox.</p>
+  <label style="font-weight:400"><input id="agree" type="checkbox" disabled style="width:auto"> I have read and accept the Terms &amp; Conditions and Privacy Policy.</label>
+  <button id="saveBtn" disabled>Save and continue</button><div id="onbMsg" class="msg"></div>
+</div></div>
+
+<!-- DASHBOARD -->
+<div id="dash" class="hide">
+  <div class="bar"><b>Rnexa AI Caller</b><span><span id="who" style="color:var(--mut);font-size:14px"></span> <button class="ghost" id="out">Log out</button></span></div>
+  <div class="wrap wide" style="margin-top:20px">
+    <div class="card"><h1 id="hello"></h1><p>Upload your leads and let the AI call them. You get an Excel report with remarks.</p></div>
+    <div class="card"><h2>1. Upload your leads</h2>
+      <p>Excel or CSV with a <b>phone_number</b> column. Optional: customer_name, business_name, product_or_service.</p>
+      <input id="file" type="file" accept=".xlsx,.xls,.csv"><div id="prev"></div></div>
+    <div class="card"><h2>2. Start calling</h2><p id="est">Upload a file first.</p>
+      <button id="go" disabled style="width:auto">Start calling</button><div id="goMsg" class="msg"></div></div>
+    <div class="card"><h2>Your campaigns</h2><div id="camps"><p>No campaigns yet.</p></div></div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// 1) Paste your Supabase values here (Project Settings > API). The anon key is safe to be public.
+const SITE={owner:"Sajid Hussain",email:"YOUR_EMAIL",whatsapp:"91XXXXXXXXXX"}; // <- put your real email and WhatsApp number (with country code, no +)
+const SUPABASE_URL = "PASTE_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY";
+const TERMS_VERSION = "1.0";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const $ = id => document.getElementById(id);
+document.querySelectorAll("[data-email]").forEach(e=>{e.href="mailto:"+SITE.email});
+document.querySelectorAll("[data-wa]").forEach(e=>{e.href="https://wa.me/"+SITE.whatsapp});
+$("owner").textContent=SITE.owner;$("yr").textContent=new Date().getFullYear();
+let signup = false;
+function show(v){["home","auth","onb","dash"].forEach(x=>$(x).classList.toggle("hide",x!==v))}
+
+function setMode(v){signup=v;$("authBtn").textContent=signup?"Create account":"Log in";
+  $("authSub").textContent=signup?"Step 1 of 2. Create your account.":"Log in to your client account.";
+  $("swText").textContent=signup?"Already have an account?":"New here?";$("swBtn").textContent=signup?"Log in":"Create account";$("authMsg").textContent=""}
+$("swBtn").onclick=()=>{location.hash=signup?"#/login":"#/signup"};
+
+$("authBtn").onclick=async()=>{
+  const email=$("email").value.trim(),password=$("pass").value,m=$("authMsg");m.className="msg";m.textContent="";
+  if(!email||password.length<8){m.textContent="Enter a valid email and a password of 8+ characters.";return}
+  $("authBtn").disabled=true;
+  const {data,error}=signup?await sb.auth.signUp({email,password}):await sb.auth.signInWithPassword({email,password});
+  $("authBtn").disabled=false;
+  if(error){m.textContent=error.message;return}
+  if(signup&&!data.session){m.className="msg ok";m.textContent="Check your email and click the confirmation link, then log in.";return}
+  location.hash="#/app";route();
+};
+
+const t=$("terms");
+t.onscroll=()=>{if(t.scrollTop+t.clientHeight>=t.scrollHeight-8){$("agree").disabled=false;$("scrollHint").textContent="Thank you. You can now accept."}};
+$("agree").onchange=()=>$("saveBtn").disabled=!$("agree").checked;
+
+$("saveBtn").onclick=async()=>{
+  const {data:{user}}=await sb.auth.getUser(),m=$("onbMsg");m.textContent="";
+  const row={id:user.id,company_name:$("company").value.trim(),contact_name:$("cname").value.trim(),phone:$("phone").value.trim(),
+    industry:$("industry").value||null,city:$("city").value.trim()||null,terms_version:TERMS_VERSION,terms_accepted_at:new Date().toISOString()};
+  if(!row.company_name||!row.contact_name||!row.phone){m.textContent="Please fill company name, your name and phone.";return}
+  const {error}=await sb.from("profiles").upsert(row);
+  if(error){m.textContent=error.message;return}
+  route();
+};
+
+$("out").onclick=async()=>{await sb.auth.signOut();location.hash="#/"};
+
+async function route(){
+  const h=location.hash,{data:{session}}=await sb.auth.getSession();
+  $("navLogin").style.display=session?"none":"";$("navCta").textContent=session?"My dashboard":"Sign up";$("navCta").href=session?"#/app":"#/signup";
+  if(h==="#/login"||h==="#/signup"){ if(session){location.hash="#/app";return} setMode(h==="#/signup");show("auth");return}
+  if(h==="#/app"){
+    if(!session){location.hash="#/login";return}
+    const {data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
+    if(!p||p.terms_version!==TERMS_VERSION){show("onb");return}
+    $("hello").textContent="Welcome, "+p.company_name;$("who").textContent=session.user.email;show("dash");return}
+  show("home");
+}
+window.onhashchange=route;
+sb.auth.onAuthStateChange((ev)=>{if(ev==="SIGNED_IN"&&["","#/login","#/signup"].includes(location.hash)&&location.hash)location.hash="#/app"});
+const esc=v=>String(v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+$("file").onchange=async e=>{const f=e.target.files[0];if(!f)return;
+  const wb=XLSX.read(await f.arrayBuffer());const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""});
+  if(!rows.length||!("phone_number" in rows[0])){$("prev").innerHTML='<div class="msg">Your file needs a column named phone_number.</div>';$("est").textContent="Upload a file first.";lastFile=null;$("go").disabled=true;return}
+  const cols=Object.keys(rows[0]);
+  $("prev").innerHTML='<p>Preview (first 5 rows):</p><div style="overflow:auto"><table><tr>'+cols.map(c=>"<th>"+esc(c)+"</th>").join("")+"</tr>"+
+    rows.slice(0,5).map(r=>"<tr>"+cols.map(c=>"<td>"+esc(r[c])+"</td>").join("")+"</tr>").join("")+"</table></div>";
+  $("est").textContent=rows.length+" leads ready.";lastFile=f;$("go").disabled=false;
+};
+let lastFile=null;
+const tok=async()=>(await sb.auth.getSession()).data.session.access_token;
+async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{Authorization:"Bearer "+await tok()}});
+  if(!r.ok){let m="Error";try{m=(await r.json()).detail||m}catch(e){}throw new Error(m)}return r}
+$("go").onclick=async()=>{const m=$("goMsg");m.className="msg";m.textContent="";$("go").disabled=true;
+  try{const fd=new FormData();fd.append("file",lastFile);const c=await(await api("/api/campaigns",{method:"POST",body:fd})).json();
+    m.className="msg ok";m.textContent="Calling started for "+c.total+" leads."+(c.limited?" (Test limit: first "+c.limit+" leads only.)":"");loadCamps()}
+  catch(e){m.textContent=e.message}$("go").disabled=false};
+async function loadCamps(){if($("dash").classList.contains("hide"))return;
+  try{const L=await(await api("/api/campaigns")).json();if(!L.length)return;
+  $("camps").innerHTML="<table><tr><th>File</th><th>Status</th><th>Progress</th><th></th></tr>"+L.map(c=>"<tr><td>"+esc(c.name)+"</td><td>"+esc(c.status)+"</td><td>"+c.done+" / "+c.total+
+    '</td><td><button class="ghost" data-id="'+c.id+'">Download Excel</button></td></tr>').join("")+"</table>"}catch(e){}}
+$("camps").onclick=async e=>{const id=e.target.dataset.id;if(!id)return;
+  const b=await(await api("/api/campaigns/"+id+"/download")).blob();const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="rnexa_results.xlsx";a.click()};
+setInterval(loadCamps,8000);
+route();
+</script></body></html>
