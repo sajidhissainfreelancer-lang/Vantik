@@ -66,9 +66,12 @@ details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:
   <details><summary>Can I call anyone?</summary><p>No. You must have consent or a lawful right to contact every lead, and follow TRAI / DND rules. You accept this when you sign up.</p></details>
   <details><summary>Which language does it speak?</summary><p>English for now. More languages can be added.</p></details>
   <details><summary>What does it cost?</summary><p>Contact us and we will share a plan that fits the number of calls you need.</p></details></div></div>
+ <div class="sec" id="pricing"><h2>Pricing</h2><p>Buy call credits. One credit = one AI call. Prices in INR, including all features.</p><div class="g3" id="packs"></div></div>
  <div class="sec" id="contact"><h2>Contact</h2><p>Tell us about your business and we will reply quickly.</p>
   <a class="cta p" data-wa href="#">Chat on WhatsApp</a><a class="cta s" data-email href="#">Email us</a></div>
- <footer><b>Rnexa</b> &middot; Built by <span id="owner"></span> &middot; &copy; <span id="yr"></span> Rnexa. All rights reserved.</footer></div>
+ <footer><p><a href="#/terms">Terms &amp; Conditions</a> &middot; <a href="#/privacy">Privacy Policy</a> &middot; <a href="#/refund">Refund &amp; Cancellation</a> &middot; <a href="#/contact">Contact Us</a></p><b>Rnexa</b> &middot; Built by <span id="owner"></span> &middot; &copy; <span id="yr"></span> Rnexa. All rights reserved.</footer></div>
+<div id="legal" class="hide"><div class="nav"><b style="font-size:20px;color:var(--pri)">Rnexa</b><span><a href="#/">&larr; Home</a></span></div>
+ <div class="wrap wide"><div class="card" id="legalBody"></div></div></div>
 <!-- AUTH -->
 <div id="auth" class="wrap hide"><div class="card">
   <h1>Rnexa AI Caller</h1><p id="authSub">Log in to your client account.</p>
@@ -122,7 +125,8 @@ details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // 1) Paste your Supabase values here (Project Settings > API). The anon key is safe to be public.
-const SITE={owner:"Sajid Hussain",email:"YOUR_EMAIL",whatsapp:"91XXXXXXXXXX"}; // <- put your real email and WhatsApp number (with country code, no +)
+const SITE={owner:"Sajid Hussain",business:"Rnexa",email:"ss.rnexa.in",phone:"+91 7358145522",whatsapp:"917358145522",address:"162/80 Nethaji Nagar 5th Street Tondiarpet, Chennai, Tamilnadu, 600081, India"}; // <- fill in your real details
+const PACKS=[{name:"Starter",calls:50,price:1000},{name:"Growth",calls:100,price:1800},{name:"Business",calls:500,price:8000}]; // <- edit your prices (INR)
 const SUPABASE_URL = "https://atrpmyhcunujohlpftbr.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0cnBteWhjdW51am9obHBmdGJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDk0MDYsImV4cCI6MjEwNTU4NTQwNn0.LZtt_t4M6_oxhemRzdMKekXBEYemSXWl37uAxKRqO9M";
 const TERMS_VERSION = "1.0";
@@ -130,9 +134,10 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
 document.querySelectorAll("[data-email]").forEach(e=>{e.href="mailto:"+SITE.email});
 document.querySelectorAll("[data-wa]").forEach(e=>{e.href="https://wa.me/"+SITE.whatsapp});
+$("packs").innerHTML=PACKS.map(p=>'<div class="card"><h2>'+p.name+'</h2><p style="font-size:26px;color:var(--ink);margin:0"><b>&#8377;'+p.price.toLocaleString("en-IN")+'</b></p><p>'+p.calls+' AI calls &middot; about &#8377;'+Math.round(p.price/p.calls)+' per call</p><a class="cta p" href="#/signup" style="margin:0">Get started</a></div>').join("");
 $("owner").textContent=SITE.owner;$("yr").textContent=new Date().getFullYear();
 let signup = false;
-function show(v){["home","auth","onb","dash"].forEach(x=>$(x).classList.toggle("hide",x!==v))}
+function show(v){["home","auth","onb","dash","legal"].forEach(x=>$(x).classList.toggle("hide",x!==v))}
 
 function setMode(v){signup=v;$("authBtn").textContent=signup?"Create account":"Log in";
   $("authSub").textContent=signup?"Step 1 of 2. Create your account.":"Log in to your client account.";
@@ -166,6 +171,33 @@ $("saveBtn").onclick=async()=>{
 
 $("out").onclick=async()=>{await sb.auth.signOut();location.hash="#/"};
 
+const upd="Last updated: October 2026. Draft - please get it reviewed by a lawyer.";
+const PAGES={
+terms:()=>`<h1>Terms &amp; Conditions</h1><p>${upd}</p>
+<h2>1. Service</h2><p>${SITE.business} ("we") provides an AI calling service: you upload a list of leads, our AI calls them, and you download a report with the results. We also build websites and web apps.</p>
+<h2>2. Your account</h2><p>You must give correct company details and keep your password safe. You are responsible for all activity in your account.</p>
+<h2>3. Consent and legal compliance</h2><p>You confirm that every person you upload has agreed to be contacted or that you otherwise have a lawful right to call them. You must follow Indian telecom rules, including TRAI and DND regulations, and any other applicable law.</p>
+<h2>4. AI disclosure and recording</h2><p>Calls are made by an AI assistant and may be recorded and transcribed. The AI says it is an AI if asked.</p>
+<h2>5. Credits and payment</h2><p>Calls are paid using prepaid credits. Prices are shown on our website in INR. Payments are processed securely by Razorpay. Credits are for your account only and cannot be transferred.</p>
+<h2>6. Prohibited use</h2><p>No fraud, harassment, misleading offers, illegal products, or calls to people who asked not to be contacted. We may suspend accounts that break these terms.</p>
+<h2>7. Accuracy</h2><p>Call remarks are generated by AI and may contain errors. Please review important results.</p>
+<h2>8. Liability</h2><p>The service is provided "as is". To the extent allowed by law, we are not liable for indirect losses or lost business.</p>
+<h2>9. Changes and contact</h2><p>We may update these terms. Questions: ${SITE.email}.</p>`,
+privacy:()=>`<h1>Privacy Policy</h1><p>${upd}</p>
+<h2>What we collect</h2><p>Your name, email, phone, company details; the lead lists you upload (names, phone numbers and other columns you include); and call recordings, transcripts and results created by the service.</p>
+<h2>How we use it</h2><p>To run your account, make the calls you request, produce your report, process payments, give support, and keep the service secure. We do not sell your data.</p>
+<h2>Who processes it</h2><p>We use trusted providers: a secure database (Supabase), voice and telephony providers (Bolna and its partners), AI language models, hosting (Render) and Razorpay for payments. They process data only to provide the service.</p>
+<h2>Your uploaded leads</h2><p>You own your lead data and are responsible for having the right to contact those people.</p>
+<h2>Storage and security</h2><p>Data is stored in access-controlled databases; each client can see only their own data. You can ask us to delete your account and data at any time.</p>
+<h2>Contact</h2><p>${SITE.email}, ${SITE.phone}</p>`,
+refund:()=>`<h1>Refund &amp; Cancellation Policy</h1><p>${upd}</p>
+<h2>Credits</h2><p>Credits are digital and are used when calls are made. Used credits are not refundable.</p>
+<h2>Unused credits</h2><p>If you have not used any credits from a purchase, you can request a full refund within 7 days of payment by emailing ${SITE.email}.</p>
+<h2>Failed or duplicate payments</h2><p>If money is debited but credits are not added, or you are charged twice, contact us. We will fix it or refund the amount.</p>
+<h2>Calls that did not connect</h2><p>Calls that were not answered or failed to connect can be credited back at our discretion.</p>
+<h2>Refund timeline</h2><p>Approved refunds go back to the original payment method in 5 to 7 working days.</p>
+<h2>Cancellation</h2><p>You can stop using the service at any time. Website projects are covered by the written agreement for that project.</p>`,
+contact:()=>`<h1>Contact Us</h1><h2>${SITE.business}</h2><p>Owner: ${SITE.owner}</p><p>Email: <a href="mailto:${SITE.email}">${SITE.email}</a></p><p>Phone: ${SITE.phone}</p><p>WhatsApp: <a href="https://wa.me/${SITE.whatsapp}">Chat now</a></p><p>Address: ${SITE.address}</p>`};
 async function route(){
   const h=location.hash,{data:{session}}=await sb.auth.getSession();
   $("navLogin").style.display=session?"none":"";$("navCta").textContent=session?"My dashboard":"Sign up";$("navCta").href=session?"#/app":"#/signup";
@@ -175,6 +207,7 @@ async function route(){
     const {data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
     if(!p||p.terms_version!==TERMS_VERSION){show("onb");return}
     $("hello").textContent="Welcome, "+p.company_name;$("who").textContent=session.user.email;show("dash");return}
+  const pg=PAGES[h.slice(2)];if(pg){$("legalBody").innerHTML=pg();show("legal");scrollTo(0,0);return}
   show("home");
 }
 window.onhashchange=route;
