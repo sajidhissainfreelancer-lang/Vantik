@@ -9,13 +9,16 @@ from core import Bolna, process_row
 SB = os.environ["SUPABASE_URL"].rstrip("/")
 SKEY, ANON = os.environ["SUPABASE_SERVICE_KEY"], os.environ["SUPABASE_ANON_KEY"]
 MAX_CALLS = int(os.getenv("MAX_CALLS_PER_CAMPAIGN", "5"))   # safety limit while testing
-H = {"apikey": SKEY, "Authorization": f"Bearer {SKEY}", "Content-Type": "application/json", "Prefer": "return=representation"}
+H = {"apikey": SKEY, "Content-Type": "application/json", "Prefer": "return=representation"}
+if not SKEY.startswith("sb_"):          # old-style JWT service_role keys also need the Authorization header
+    H["Authorization"] = f"Bearer {SKEY}"
 app = FastAPI()
 
 
 def db(method, table, params=None, json=None):
     r = requests.request(method, f"{SB}/rest/v1/{table}", headers=H, params=params, json=json, timeout=30)
-    r.raise_for_status()
+    if not r.ok:
+        raise HTTPException(500, f"Database error on '{table}' ({r.status_code}): {r.text[:160]}")
     return r.json() if r.text else []
 
 
