@@ -1,5 +1,6 @@
 """Rnexa backend: website + API (credits, Razorpay payments, Bolna calling). Secrets only in environment variables."""
 import hashlib, hmac, io, json, os, threading
+from typing import Optional
 import pandas as pd, requests
 from fastapi import FastAPI, UploadFile, File, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse
@@ -13,7 +14,9 @@ RZP_ID, RZP_SECRET = os.getenv("RAZORPAY_KEY_ID", ""), os.getenv("RAZORPAY_KEY_S
 RZP_WEBHOOK = os.getenv("RAZORPAY_WEBHOOK_SECRET", "")
 FREE_CALLS = int(os.getenv("FREE_CALLS", "2"))                    # free trial calls for each new client
 MAX_CALLS = int(os.getenv("MAX_CALLS_PER_CAMPAIGN", "500"))
-PACKS = [  # price in rupees. This is the only place prices live; the website reads them from /api/packs
+ADMINS = {e.strip().lower() for e in os.getenv("ADMIN_EMAILS", "syedshahid3533@gmail.com").split(",") if e.strip()}
+COST_PER_CALL = float(os.getenv("COST_PER_CALL_INR", "8"))   # your estimated cost per call, for the profit estimate
+DEFAULT_PACKS = [  # used only if the packs table is empty; real prices are edited in the admin panel
     {"id": "starter", "name": "Starter", "calls": 50, "price": 1000},
     {"id": "growth", "name": "Growth", "calls": 100, "price": 1800},
     {"id": "business", "name": "Business", "calls": 500, "price": 8000},
@@ -38,16 +41,41 @@ def rpc(fn, args):
     return _check(requests.post(f"{SB}/rest/v1/rpc/{fn}", headers=H, json=args, timeout=30), fn)
 
 
-def current_user(auth):
+def auth_user(auth):
     if not auth or not auth.startswith("Bearer "):
         raise HTTPException(401, "Please log in")
     r = requests.get(f"{SB}/auth/v1/user", headers={"apikey": ANON, "Authorization": auth}, timeout=15)
     if r.status_code != 200:
         raise HTTPException(401, "Session expired, please log in again")
-    uid = r.json()["id"]
+    return r.json()
+
+
+def current_user(auth):
+    u = auth_user(auth)
+    uid = u["id"]
+    st = db("GET", "account_status", {"user_id": f"eq.{uid}"})
+    if not st:
+        db("POST", "account_status", json={"user_id": uid, "email": u.get("email")})
+    elif st[0]["suspended"]:
+        raise HTTPException(403, "Your account is suspended. Please contact support.")
     if not db("GET", "profiles", {"id": f"eq.{uid}", "select": "id"}):
         raise HTTPException(403, "Complete your company details first")
     return uid
+
+
+def current_admin(auth):
+    u = auth_user(auth)
+    if (u.get("email") or "").lower() not in ADMINS or not u.get("email_confirmed_at"):
+        raise HTTPException(403, "Admin only")
+    return u
+
+
+def load_packs(everything=False):
+    try:
+        rows = db("GET", "packs", {"order": "sort"} if everything else {"order": "sort", "active": "eq.true"})
+        return rows or DEFAULT_PACKS
+    except HTTPException:
+        return DEFAULT_PACKS
 
 
 def credits_of(uid):
@@ -76,7 +104,7 @@ def run_campaign(cid, uid):
 
 @app.get("/api/packs")
 def packs():
-    return PACKS
+    return load_packs()
 
 
 @app.get("/api/me")
@@ -152,7 +180,7 @@ def credit_order(order_id, payment_id):
 @app.post("/api/orders")
 def create_order(b: OrderIn, authorization: str = Header(None)):
     uid = current_user(authorization)
-    p = next((x for x in PACKS if x["id"] == b.pack), None)
+    p = next((x for x in load_packs() if x["id"] == b.pack), None)
     if not p or not RZP_ID:
         raise HTTPException(400, "This pack is not available")
     r = requests.post("https://api.razorpay.com/v1/orders", auth=(RZP_ID, RZP_SECRET), timeout=30,
@@ -188,6 +216,131 @@ async def razorpay_webhook(request: Request):
     if ev.get("event") in ("payment.captured", "order.paid"):
         pay = ev["payload"]["payment"]["entity"]
         credit_order(pay["order_id"], pay["id"])
+    return {"ok": True}
+
+
+# ---------- support tickets ----------
+class TicketIn(BaseModel):
+    subject: str
+    message: str
+
+
+@app.post("/api/tickets")
+def new_ticket(b: TicketIn, authorization: str = Header(None)):
+    uid = current_user(authorization)
+    return db("POST", "tickets", json={"user_id": uid, "subject": b.subject[:80], "message": b.message[:2000]})[0]
+
+
+@app.get("/api/tickets")
+def my_tickets(authorization: str = Header(None)):
+    uid = current_user(authorization)
+    return db("GET", "tickets", {"user_id": f"eq.{uid}", "order": "created_at.desc", "limit": "20"})
+
+
+# ---------- admin ----------
+class ClientEdit(BaseModel):
+    company_name: Optional[str] = None
+    contact_name: Optional[str] = None
+    phone: Optional[str] = None
+    industry: Optional[str] = None
+    city: Optional[str] = None
+    suspended: Optional[bool] = None
+    credits_delta: Optional[int] = None
+
+
+class PackEdit(BaseModel):
+    name: str
+    calls: int
+    price: int
+    active: bool = True
+
+
+class TicketEdit(BaseModel):
+    status: str
+    admin_reply: Optional[str] = None
+
+
+@app.get("/api/admin/me")
+def admin_me(authorization: str = Header(None)):
+    return {"email": current_admin(authorization).get("email")}
+
+
+@app.get("/api/admin/overview")
+def admin_overview(authorization: str = Header(None)):
+    current_admin(authorization)
+    calls = sum(c["total"] or 0 for c in db("GET", "campaigns", {"select": "total"}))
+    revenue = sum(p["amount_paise"] or 0 for p in db("GET", "payments", {"status": "eq.paid", "select": "amount_paise"})) / 100
+    est_cost = round(calls * COST_PER_CALL)
+    return {"clients": len(db("GET", "profiles", {"select": "id"})), "calls": calls, "revenue": revenue,
+            "credits": sum(w["credits"] for w in db("GET", "wallets")), "est_cost": est_cost, "est_profit": revenue - est_cost}
+
+
+@app.get("/api/admin/clients")
+def admin_clients(authorization: str = Header(None)):
+    current_admin(authorization)
+    st = {x["user_id"]: x for x in db("GET", "account_status")}
+    wl = {x["user_id"]: x["credits"] for x in db("GET", "wallets")}
+    return [{**p, "email": st.get(p["id"], {}).get("email"), "suspended": st.get(p["id"], {}).get("suspended", False),
+             "credits": wl.get(p["id"], 0)} for p in db("GET", "profiles", {"order": "created_at.desc"})]
+
+
+@app.patch("/api/admin/clients/{uid}")
+def admin_edit_client(uid: str, b: ClientEdit, authorization: str = Header(None)):
+    current_admin(authorization)
+    f = {k: getattr(b, k) for k in ("company_name", "contact_name", "phone", "industry", "city") if getattr(b, k) is not None}
+    if f:
+        db("PATCH", "profiles", {"id": f"eq.{uid}"}, f)
+    if b.suspended is not None and not db("PATCH", "account_status", {"user_id": f"eq.{uid}"}, {"suspended": b.suspended}):
+        db("POST", "account_status", json={"user_id": uid, "suspended": b.suspended})
+    if b.credits_delta:
+        credits_of(uid)
+        if rpc("add_credits" if b.credits_delta > 0 else "use_credits", {"p_user": uid, "p_n": abs(b.credits_delta)}) is None:
+            raise HTTPException(400, "Client does not have that many credits")
+    return {"ok": True}
+
+
+@app.delete("/api/admin/clients/{uid}")
+def admin_delete_client(uid: str, authorization: str = Header(None)):
+    current_admin(authorization)
+    r = requests.delete(f"{SB}/auth/v1/admin/users/{uid}", headers=H, timeout=30)
+    if not r.ok:
+        raise HTTPException(502, f"Could not delete the account: {r.text[:120]}")
+    return {"ok": True}
+
+
+@app.get("/api/admin/packs")
+def admin_packs(authorization: str = Header(None)):
+    current_admin(authorization)
+    return load_packs(True)
+
+
+@app.put("/api/admin/packs/{pid}")
+def admin_edit_pack(pid: str, b: PackEdit, authorization: str = Header(None)):
+    current_admin(authorization)
+    if b.calls < 1 or b.price < 1:
+        raise HTTPException(400, "Calls and price must be above zero")
+    db("PATCH", "packs", {"id": f"eq.{pid}"}, b.dict())
+    return {"ok": True}
+
+
+@app.get("/api/admin/payments")
+def admin_payments(authorization: str = Header(None)):
+    current_admin(authorization)
+    em = {x["user_id"]: x["email"] for x in db("GET", "account_status")}
+    return [{**p, "email": em.get(p["user_id"])} for p in db("GET", "payments", {"order": "created_at.desc", "limit": "100"})]
+
+
+@app.get("/api/admin/tickets")
+def admin_tickets(authorization: str = Header(None)):
+    current_admin(authorization)
+    em = {x["user_id"]: x["email"] for x in db("GET", "account_status")}
+    return [{**t, "email": em.get(t["user_id"])} for t in db("GET", "tickets", {"order": "created_at.desc", "limit": "100"})]
+
+
+@app.patch("/api/admin/tickets/{tid}")
+def admin_edit_ticket(tid: str, b: TicketEdit, authorization: str = Header(None)):
+    current_admin(authorization)
+    db("PATCH", "tickets", {"id": f"eq.{tid}"}, {"status": b.status, "admin_reply": b.admin_reply})
     return {"ok": True}
 
 

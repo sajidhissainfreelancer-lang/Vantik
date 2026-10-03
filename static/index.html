@@ -72,6 +72,8 @@ details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:
  <footer><p><a href="#/terms">Terms &amp; Conditions</a> &middot; <a href="#/privacy">Privacy Policy</a> &middot; <a href="#/refund">Refund &amp; Cancellation</a> &middot; <a href="#/contact">Contact Us</a></p><b>Rnexa</b> &middot; Built by <span id="owner"></span> &middot; &copy; <span id="yr"></span> Rnexa. All rights reserved.</footer></div>
 <div id="legal" class="hide"><div class="nav"><b style="font-size:20px;color:var(--pri)">Rnexa</b><span><a href="#/">&larr; Home</a></span></div>
  <div class="wrap wide"><div class="card" id="legalBody"></div></div></div>
+<div id="admin" class="hide"><div class="bar"><b>Rnexa Admin</b><span><a href="#/app" style="margin-right:12px">Client view</a><button class="ghost" id="aout">Log out</button></span></div>
+ <div class="wrap wide" style="margin-top:16px"><div id="atabs" style="margin-bottom:12px"></div><div class="card" id="abody" style="overflow:auto"></div></div></div>
 <!-- AUTH -->
 <div id="auth" class="wrap hide"><div class="card">
   <h1>Rnexa AI Caller</h1><p id="authSub">Log in to your client account.</p>
@@ -111,7 +113,7 @@ details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:
 
 <!-- DASHBOARD -->
 <div id="dash" class="hide">
-  <div class="bar"><b>Rnexa AI Caller</b><span><b id="cr" style="margin-right:12px"></b><span id="who" style="color:var(--mut);font-size:14px"></span> <button class="ghost" id="out">Log out</button></span></div>
+  <div class="bar"><b>Rnexa AI Caller</b><span><a id="aLink" href="#/admin" style="display:none;margin-right:12px">Admin panel</a><b id="cr" style="margin-right:12px"></b><span id="who" style="color:var(--mut);font-size:14px"></span> <button class="ghost" id="out">Log out</button></span></div>
   <div class="wrap wide" style="margin-top:20px">
     <div class="card"><h1 id="hello"></h1><p>Upload your leads and let the AI call them. You get an Excel report with remarks.</p></div>
     <div class="card"><h2>Buy call credits</h2><p>One credit = one AI call. Calls that do not connect are credited back.</p><div class="grid" id="buy"></div><div id="payMsg" class="msg"></div></div>
@@ -120,6 +122,9 @@ details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:
       <input id="file" type="file" accept=".xlsx,.xls,.csv"><div id="prev"></div></div>
     <div class="card"><h2>2. Start calling</h2><p id="est">Upload a file first.</p>
       <button id="go" disabled style="width:auto">Start calling</button><div id="goMsg" class="msg"></div></div>
+    <div class="card"><h2>Support</h2><p>Need to change your details, delete your account, or get help? Send us a ticket.</p>
+      <select id="tsub"><option>Change my account details</option><option>Delete my account</option><option>Billing question</option><option>Other</option></select>
+      <label>Message</label><input id="tmsg"><button id="tgo" style="width:auto">Send ticket</button><div id="tout" class="msg"></div><div id="tlist"></div></div>
     <div class="card"><h2>Your campaigns</h2><div id="camps"><p>No campaigns yet.</p></div></div>
   </div>
 </div>
@@ -127,9 +132,9 @@ details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // 1) Paste your Supabase values here (Project Settings > API). The anon key is safe to be public.
-const SITE={owner:"Sajid Hussain",business:"Rnexa",email:"ss@rnexa.in",phone:"+91 7358145522",whatsapp:"917358145522",address:"162/80 Nethaji Nagar 5th Street Tondiarpet, Chennai, Tamil Nadu, 600081, India"}; // <- fill in your real details
-const SUPABASE_URL = "https://atrpmyhcunujohlpftbr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0cnBteWhjdW51am9obHBmdGJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDk0MDYsImV4cCI6MjEwNTU4NTQwNn0.LZtt_t4M6_oxhemRzdMKekXBEYemSXWl37uAxKRqO9M";
+const SITE={owner:"Sajid Hussain",business:"Rnexa",email:"ss@rnexa.in",phone:"+91 7358145522",whatsapp:"917358145522",address:"YOUR_BUSINESS_ADDRESS, City, State, PIN, India"}; // <- fill in your real details
+const SUPABASE_URL = "PASTE_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "PASTE_SUPABASE_ANON_KEY";
 const TERMS_VERSION = "1.0";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
@@ -141,7 +146,7 @@ $("buy").innerHTML=L.map(p=>'<div class="stat"><b>'+p.calls+' calls</b>&#8377;'+
 fetch("/api/packs").then(r=>r.json()).then(renderPacks).catch(()=>{});
 $("owner").textContent=SITE.owner;$("yr").textContent=new Date().getFullYear();
 let signup = false;
-function show(v){["home","auth","onb","dash","legal"].forEach(x=>$(x).classList.toggle("hide",x!==v))}
+function show(v){["home","auth","onb","dash","legal","admin"].forEach(x=>$(x).classList.toggle("hide",x!==v))}
 
 function setMode(v){signup=v;$("authBtn").textContent=signup?"Create account":"Log in";
   $("authSub").textContent=signup?"Step 1 of 2. Create your account.":"Log in to your client account.";
@@ -206,11 +211,12 @@ async function route(){
   const h=location.hash,{data:{session}}=await sb.auth.getSession();
   $("navLogin").style.display=session?"none":"";$("navCta").textContent=session?"My dashboard":"Sign up";$("navCta").href=session?"#/app":"#/signup";
   if(h==="#/login"||h==="#/signup"){ if(session){location.hash="#/app";return} setMode(h==="#/signup");show("auth");return}
+  if(h==="#/admin"){if(!session){location.hash="#/login";return}show("admin");adminTab("overview");return}
   if(h==="#/app"){
     if(!session){location.hash="#/login";return}
     const {data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
     if(!p||p.terms_version!==TERMS_VERSION){show("onb");return}
-    $("hello").textContent="Welcome, "+p.company_name;$("who").textContent=session.user.email;show("dash");loadCredits();return}
+    $("hello").textContent="Welcome, "+p.company_name;$("who").textContent=session.user.email;show("dash");loadCredits();checkAdmin();loadTickets();return}
   const pg=PAGES[h.slice(2)];if(pg){$("legalBody").innerHTML=pg();show("legal");scrollTo(0,0);return}
   show("home");
 }
@@ -246,5 +252,40 @@ $("buy").onclick=async e=>{const id=e.target.dataset.pack;if(!id)return;const m=
   new Razorpay({key:o.key_id,amount:o.amount,currency:"INR",order_id:o.order_id,name:"Rnexa",description:o.description,
    handler:async r=>{try{await api("/api/payments/verify",{method:"POST",headers:j,body:JSON.stringify(r)});m.className="msg ok";m.textContent="Payment successful. Credits added.";loadCredits()}catch(er){m.textContent=er.message}}}).open()}
  catch(er){m.textContent=er.message}};
+
+const J=async(m,p,b)=>await(await api(p,{method:m,headers:{"Content-Type":"application/json"},body:JSON.stringify(b)})).json();
+const inr=n=>"\u20b9"+Number(n).toLocaleString("en-IN");
+async function checkAdmin(){try{await api("/api/admin/me");$("aLink").style.display=""}catch(e){}}
+async function loadTickets(){try{const L=await(await api("/api/tickets")).json();$("tlist").innerHTML=L.length?"<table><tr><th>Subject</th><th>Status</th><th>Reply</th></tr>"+L.map(t=>"<tr><td>"+esc(t.subject)+"</td><td>"+esc(t.status)+"</td><td>"+esc(t.admin_reply||"")+"</td></tr>").join("")+"</table>":""}catch(e){}}
+$("tgo").onclick=async()=>{const o=$("tout");o.className="msg";o.textContent="";if(!$("tmsg").value.trim()){o.textContent="Please type a message.";return}
+  try{await J("POST","/api/tickets",{subject:$("tsub").value,message:$("tmsg").value});$("tmsg").value="";o.className="msg ok";o.textContent="Ticket sent. We will reply soon.";loadTickets()}catch(e){o.textContent=e.message}};
+$("aout").onclick=async()=>{await sb.auth.signOut();location.hash="#/"};
+let CL=[];
+const TABS={overview:"Overview",clients:"Clients",tickets:"Tickets",pricing:"Pricing",payments:"Payments",account:"My account"};
+const VIEW={
+ async overview(){const o=await(await api("/api/admin/overview")).json();return '<div class="grid">'+[["Clients",o.clients],["Calls made",o.calls],["Revenue",inr(o.revenue)],["Est. call cost",inr(o.est_cost)],["Est. profit",inr(o.est_profit)],["Credits held by clients",o.credits]].map(x=>'<div class="stat"><b>'+x[1]+'</b>'+x[0]+'</div>').join("")+'</div><p>Cost is an estimate: calls x the cost per call set in Render (COST_PER_CALL_INR).</p>'},
+ async clients(){CL=await(await api("/api/admin/clients")).json();return "<table><tr><th>Email</th><th>Company</th><th>Phone</th><th>Credits</th><th>Status</th><th>Actions</th></tr>"+CL.map(c=>"<tr><td>"+esc(c.email||"")+"</td><td>"+esc(c.company_name)+"</td><td>"+esc(c.phone)+"</td><td>"+c.credits+"</td><td>"+(c.suspended?"Suspended":"Active")+'</td><td><button class="ghost" data-a="edit" data-id="'+c.id+'">Edit</button> <button class="ghost" data-a="cr" data-id="'+c.id+'">Credits</button> <button class="ghost" data-a="sus" data-id="'+c.id+'">'+(c.suspended?"Activate":"Suspend")+'</button> <button class="ghost" style="color:var(--err)" data-a="del" data-id="'+c.id+'">Delete</button></td></tr>').join("")+"</table>"},
+ async tickets(){const L=await(await api("/api/admin/tickets")).json();return L.length?L.map(t=>'<div style="border-bottom:1px solid var(--line);padding:10px 0"><b>'+esc(t.subject)+'</b> <small>'+esc(t.email||"")+'</small><p>'+esc(t.message)+'</p><input id="r'+t.id+'" placeholder="Reply" value="'+esc(t.admin_reply||"")+'"><select id="s'+t.id+'">'+["open","in progress","done"].map(x=>"<option"+(x===t.status?" selected":"")+">"+x+"</option>").join("")+'</select> <button class="ghost" data-a="tk" data-id="'+t.id+'">Save</button></div>').join(""):"<p>No tickets yet.</p>"},
+ async pricing(){const L=await(await api("/api/admin/packs")).json();return "<p>Change the price or number of calls. The website and checkout update straight away.</p><table><tr><th>Pack</th><th>Calls</th><th>Price (INR)</th><th>On sale</th><th></th></tr>"+L.map(p=>'<tr><td><input id="pn'+p.id+'" value="'+esc(p.name)+'"></td><td><input id="pc'+p.id+'" type="number" value="'+p.calls+'"></td><td><input id="pp'+p.id+'" type="number" value="'+p.price+'"></td><td><input id="pa'+p.id+'" type="checkbox" style="width:auto"'+(p.active?" checked":"")+'></td><td><button class="ghost" data-a="pk" data-id="'+p.id+'">Save</button></td></tr>').join("")+"</table>"},
+ async payments(){const L=await(await api("/api/admin/payments")).json();return "<table><tr><th>Date</th><th>Client</th><th>Pack</th><th>Amount</th><th>Status</th></tr>"+L.map(p=>"<tr><td>"+new Date(p.created_at).toLocaleString("en-IN")+"</td><td>"+esc(p.email||"")+"</td><td>"+esc(p.pack)+"</td><td>"+inr(p.amount_paise/100)+"</td><td>"+esc(p.status)+"</td></tr>").join("")+"</table>"},
+ async account(){return '<h2>Change my admin login</h2><label>New email (a confirmation link is sent)</label><input id="ne" type="email"><label>New password (8+ characters)</label><input id="np" type="password"><button id="ago" style="width:auto">Update</button><div id="amsg" class="msg"></div>'}
+};
+async function adminTab(t){$("atabs").innerHTML=Object.keys(TABS).map(k=>'<button class="ghost" data-t="'+k+'" style="'+(k===t?"font-weight:800;border-bottom:2px solid var(--pri)":"")+'">'+TABS[k]+"</button>").join(" ");
+  $("abody").innerHTML="Loading...";try{$("abody").innerHTML=await VIEW[t]()}catch(e){$("abody").innerHTML='<div class="msg">'+esc(e.message)+"</div>"}}
+$("atabs").onclick=e=>{if(e.target.dataset.t)adminTab(e.target.dataset.t)};
+$("abody").onclick=async e=>{const a=e.target.dataset.a,id=e.target.dataset.id;if(!a)return;const c=CL.find(x=>x.id===id);
+  try{
+  if(a==="sus"){if(confirm((c.suspended?"Activate ":"Suspend ")+c.company_name+"?")){await J("PATCH","/api/admin/clients/"+id,{suspended:!c.suspended});adminTab("clients")}}
+  else if(a==="cr"){const n=parseInt(prompt("Add (+) or remove (-) credits for "+c.company_name+":"));if(n){await J("PATCH","/api/admin/clients/"+id,{credits_delta:n});adminTab("clients")}}
+  else if(a==="del"){if(prompt('Type DELETE to permanently delete '+c.company_name+" and all their data:")==="DELETE"){await api("/api/admin/clients/"+id,{method:"DELETE"});adminTab("clients")}}
+  else if(a==="edit"){$("abody").innerHTML='<h2>Edit '+esc(c.company_name)+'</h2><label>Company</label><input id="ec" value="'+esc(c.company_name)+'"><label>Contact name</label><input id="en" value="'+esc(c.contact_name)+'"><label>Phone</label><input id="ep" value="'+esc(c.phone)+'"><label>City</label><input id="ey" value="'+esc(c.city||"")+'"><button id="esave" data-id="'+id+'" style="width:auto">Save</button> <span class="msg" id="emsg"></span>';
+    $("esave").onclick=async()=>{try{await J("PATCH","/api/admin/clients/"+id,{company_name:$("ec").value,contact_name:$("en").value,phone:$("ep").value,city:$("ey").value});adminTab("clients")}catch(er){$("emsg").textContent=er.message}}}
+  else if(a==="tk"){await J("PATCH","/api/admin/tickets/"+id,{status:$("s"+id).value,admin_reply:$("r"+id).value});e.target.textContent="Saved"}
+  else if(a==="pk"){await J("PUT","/api/admin/packs/"+id,{name:$("pn"+id).value,calls:+$("pc"+id).value,price:+$("pp"+id).value,active:$("pa"+id).checked});e.target.textContent="Saved"}
+  }catch(er){alert(er.message)}
+  if(e.target.id==="ago"){}};
+document.addEventListener("click",async e=>{if(e.target.id!=="ago")return;const m=$("amsg");m.className="msg";m.textContent="";const u={};if($("ne").value)u.email=$("ne").value;if($("np").value.length>=8)u.password=$("np").value;
+  if(!Object.keys(u).length){m.textContent="Enter a new email or a password of 8+ characters.";return}
+  const {error}=await sb.auth.updateUser(u);if(error)m.textContent=error.message;else{m.className="msg ok";m.textContent="Updated. If you changed email, confirm it from your inbox. Remember to update ADMIN_EMAILS in Render."}});
 route();
 </script></body></html>
