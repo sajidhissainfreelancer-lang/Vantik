@@ -111,9 +111,10 @@ details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:
 
 <!-- DASHBOARD -->
 <div id="dash" class="hide">
-  <div class="bar"><b>Rnexa AI Caller</b><span><span id="who" style="color:var(--mut);font-size:14px"></span> <button class="ghost" id="out">Log out</button></span></div>
+  <div class="bar"><b>Rnexa AI Caller</b><span><b id="cr" style="margin-right:12px"></b><span id="who" style="color:var(--mut);font-size:14px"></span> <button class="ghost" id="out">Log out</button></span></div>
   <div class="wrap wide" style="margin-top:20px">
     <div class="card"><h1 id="hello"></h1><p>Upload your leads and let the AI call them. You get an Excel report with remarks.</p></div>
+    <div class="card"><h2>Buy call credits</h2><p>One credit = one AI call. Calls that do not connect are credited back.</p><div class="grid" id="buy"></div><div id="payMsg" class="msg"></div></div>
     <div class="card"><h2>1. Upload your leads</h2>
       <p>Excel or CSV with a <b>phone_number</b> column. Optional: customer_name, business_name, product_or_service.</p>
       <input id="file" type="file" accept=".xlsx,.xls,.csv"><div id="prev"></div></div>
@@ -122,11 +123,11 @@ details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:
     <div class="card"><h2>Your campaigns</h2><div id="camps"><p>No campaigns yet.</p></div></div>
   </div>
 </div>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // 1) Paste your Supabase values here (Project Settings > API). The anon key is safe to be public.
-const SITE={owner:"Sajid Hussain",business:"Rnexa",email:"ss.rnexa.in",phone:"+91 7358145522",whatsapp:"917358145522",address:"162/80 Nethaji Nagar 5th Street Tondiarpet, Chennai, Tamilnadu, 600081, India"}; // <- fill in your real details
-const PACKS=[{name:"Starter",calls:50,price:1000},{name:"Growth",calls:100,price:1800},{name:"Business",calls:500,price:8000}]; // <- edit your prices (INR)
+const SITE={owner:"Sajid Hussain",business:"Rnexa",email:"ss@rnexa.in",phone:"+91 7358145522",whatsapp:"917358145522",address:"162/80 Nethaji Nagar 5th Street Tondiarpet, Chennai, Tamil Nadu, 600081, India"}; // <- fill in your real details
 const SUPABASE_URL = "https://atrpmyhcunujohlpftbr.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0cnBteWhjdW51am9obHBmdGJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDk0MDYsImV4cCI6MjEwNTU4NTQwNn0.LZtt_t4M6_oxhemRzdMKekXBEYemSXWl37uAxKRqO9M";
 const TERMS_VERSION = "1.0";
@@ -134,7 +135,10 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
 document.querySelectorAll("[data-email]").forEach(e=>{e.href="mailto:"+SITE.email});
 document.querySelectorAll("[data-wa]").forEach(e=>{e.href="https://wa.me/"+SITE.whatsapp});
-$("packs").innerHTML=PACKS.map(p=>'<div class="card"><h2>'+p.name+'</h2><p style="font-size:26px;color:var(--ink);margin:0"><b>&#8377;'+p.price.toLocaleString("en-IN")+'</b></p><p>'+p.calls+' AI calls &middot; about &#8377;'+Math.round(p.price/p.calls)+' per call</p><a class="cta p" href="#/signup" style="margin:0">Get started</a></div>').join("");
+function renderPacks(L){
+$("packs").innerHTML=L.map(p=>'<div class="card"><h2>'+p.name+'</h2><p style="font-size:26px;color:var(--ink);margin:0"><b>&#8377;'+p.price.toLocaleString("en-IN")+'</b></p><p>'+p.calls+' AI calls &middot; about &#8377;'+Math.round(p.price/p.calls)+' per call</p><a class="cta p" href="#/signup" style="margin:0">Get started</a></div>').join("");
+$("buy").innerHTML=L.map(p=>'<div class="stat"><b>'+p.calls+' calls</b>&#8377;'+p.price.toLocaleString("en-IN")+'<br><button data-pack="'+p.id+'" style="margin-top:8px">Buy</button></div>').join("")}
+fetch("/api/packs").then(r=>r.json()).then(renderPacks).catch(()=>{});
 $("owner").textContent=SITE.owner;$("yr").textContent=new Date().getFullYear();
 let signup = false;
 function show(v){["home","auth","onb","dash","legal"].forEach(x=>$(x).classList.toggle("hide",x!==v))}
@@ -206,7 +210,7 @@ async function route(){
     if(!session){location.hash="#/login";return}
     const {data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
     if(!p||p.terms_version!==TERMS_VERSION){show("onb");return}
-    $("hello").textContent="Welcome, "+p.company_name;$("who").textContent=session.user.email;show("dash");return}
+    $("hello").textContent="Welcome, "+p.company_name;$("who").textContent=session.user.email;show("dash");loadCredits();return}
   const pg=PAGES[h.slice(2)];if(pg){$("legalBody").innerHTML=pg();show("legal");scrollTo(0,0);return}
   show("home");
 }
@@ -223,11 +227,11 @@ $("file").onchange=async e=>{const f=e.target.files[0];if(!f)return;
 };
 let lastFile=null;
 const tok=async()=>(await sb.auth.getSession()).data.session.access_token;
-async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{Authorization:"Bearer "+await tok()}});
+async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{Authorization:"Bearer "+await tok(),...(opt.headers||{})}});
   if(!r.ok){let m="Error";try{m=(await r.json()).detail||m}catch(e){}throw new Error(m)}return r}
 $("go").onclick=async()=>{const m=$("goMsg");m.className="msg";m.textContent="";$("go").disabled=true;
   try{const fd=new FormData();fd.append("file",lastFile);const c=await(await api("/api/campaigns",{method:"POST",body:fd})).json();
-    m.className="msg ok";m.textContent="Calling started for "+c.total+" leads."+(c.limited?" (Test limit: first "+c.limit+" leads only.)":"");loadCamps()}
+    m.className="msg ok";m.textContent="Calling started for "+c.total+" leads."+(c.limited?" (Only "+c.limit+" leads started - not enough credits.)":"");loadCamps();loadCredits()}
   catch(e){m.textContent=e.message}$("go").disabled=false};
 async function loadCamps(){if($("dash").classList.contains("hide"))return;
   try{const L=await(await api("/api/campaigns")).json();if(!L.length)return;
@@ -236,5 +240,11 @@ async function loadCamps(){if($("dash").classList.contains("hide"))return;
 $("camps").onclick=async e=>{const id=e.target.dataset.id;if(!id)return;
   const b=await(await api("/api/campaigns/"+id+"/download")).blob();const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="rnexa_results.xlsx";a.click()};
 setInterval(loadCamps,8000);
+async function loadCredits(){try{const m=await(await api("/api/me")).json();$("cr").textContent="Credits: "+m.credits}catch(e){}}
+$("buy").onclick=async e=>{const id=e.target.dataset.pack;if(!id)return;const m=$("payMsg");m.className="msg";m.textContent="";
+ try{const j={"Content-Type":"application/json"};const o=await(await api("/api/orders",{method:"POST",headers:j,body:JSON.stringify({pack:id})})).json();
+  new Razorpay({key:o.key_id,amount:o.amount,currency:"INR",order_id:o.order_id,name:"Rnexa",description:o.description,
+   handler:async r=>{try{await api("/api/payments/verify",{method:"POST",headers:j,body:JSON.stringify(r)});m.className="msg ok";m.textContent="Payment successful. Credits added.";loadCredits()}catch(er){m.textContent=er.message}}}).open()}
+ catch(er){m.textContent=er.message}};
 route();
 </script></body></html>
