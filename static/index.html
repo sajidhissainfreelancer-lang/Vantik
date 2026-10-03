@@ -103,6 +103,10 @@ footer{border-top:1px solid var(--line);margin-top:30px}footer a{margin:0 6px}
  <div class="sec" id="contact"><h2>Contact</h2><p>Tell us about your business and we will reply quickly.</p>
   <a class="cta p" data-wa href="#">Chat on WhatsApp</a><a class="cta s" data-email href="#">Email us</a></div>
  <footer><p><a href="#/terms">Terms &amp; Conditions</a> &middot; <a href="#/privacy">Privacy Policy</a> &middot; <a href="#/refund">Refund &amp; Cancellation</a> &middot; <a href="#/contact">Contact Us</a></p><b>Rnexa</b> &middot; Built by <span id="owner"></span> &middot; &copy; <span id="yr"></span> Rnexa. All rights reserved.</footer></div>
+<div id="reset" class="hide wrap"><div class="card"><a href="#/" class="brand"><img src="/logo-mark.png" alt=""><span>Rnexa</span></a>
+ <h1 style="margin-top:14px">Set a new password</h1><p>Choose a new password for your account.</p>
+ <label>New password (8+ characters)</label><input id="rp1" type="password" autocomplete="new-password"><label>Confirm new password</label><input id="rp2" type="password" autocomplete="new-password">
+ <button id="rpb">Save new password</button><div id="rpm" class="msg"></div></div></div>
 <div id="legal" class="hide"><div class="nav"><a href="#/" class="brand"><img src="/logo-mark.png" alt=""><span>Rnexa</span></a><span><a href="#/">&larr; Home</a></span></div>
  <div class="wrap wide"><div class="card" id="legalBody"></div></div></div>
 <div id="admin" class="hide shell"><aside class="side"><a href="#/" class="brand"><img src="/logo-mark.png" alt=""><span>Rnexa</span></a><small style="color:var(--pri);letter-spacing:3px">ADMIN</small><div id="atabs"></div>
@@ -114,7 +118,7 @@ footer{border-top:1px solid var(--line);margin-top:30px}footer a{margin:0 6px}
   <label>Email</label><input id="email" type="email" autocomplete="email">
   <label>Password</label><input id="pass" type="password" autocomplete="current-password" placeholder="Minimum 8 characters">
   <button id="authBtn">Log in</button>
-  <div id="authMsg" class="msg"></div>
+  <div id="authMsg" class="msg"></div><button class="ghost" id="fpBtn" style="width:auto;padding:6px 0">Forgot password?</button>
   <p style="margin-top:14px"><span id="swText">New here?</span> <button class="ghost" id="swBtn">Create account</button></p>
 </div></div>
 
@@ -190,9 +194,9 @@ $("buy").innerHTML=L.map(p=>'<div class="stat"><b>'+p.calls+' calls</b>&#8377;'+
 fetch("/api/packs").then(r=>r.json()).then(renderPacks).catch(()=>{});
 $("owner").textContent=SITE.owner;$("yr").textContent=new Date().getFullYear();
 let signup = false;
-function show(v){["home","auth","onb","dash","legal","admin"].forEach(x=>$(x).classList.toggle("hide",x!==v))}
+function show(v){["home","auth","onb","dash","legal","admin","reset"].forEach(x=>$(x).classList.toggle("hide",x!==v))}
 
-function setMode(v){signup=v;$("authBtn").textContent=signup?"Create account":"Log in";
+function setMode(v){signup=v;$("fpBtn").style.display=signup?"none":"";$("authBtn").textContent=signup?"Create account":"Log in";
   $("authSub").textContent=signup?"Step 1 of 2. Create your account.":"Log in to your client account.";
   $("swText").textContent=signup?"Already have an account?":"New here?";$("swBtn").textContent=signup?"Log in":"Create account";$("authMsg").textContent=""}
 $("swBtn").onclick=()=>{location.hash=signup?"#/login":"#/signup"};
@@ -253,6 +257,7 @@ refund:()=>`<h1>Refund &amp; Cancellation Policy</h1><p>${upd}</p>
 contact:()=>`<h1>Contact Us</h1><h2>${SITE.business}</h2><p>Owner: ${SITE.owner}</p><p>Email: <a href="mailto:${SITE.email}">${SITE.email}</a></p><p>Phone: ${SITE.phone}</p><p>WhatsApp: <a href="https://wa.me/${SITE.whatsapp}">Chat now</a></p><p>Address: ${SITE.address}</p>`};
 async function route(){
   const h=location.hash,{data:{session}}=await sb.auth.getSession();
+  if(recovering||(session&&location.search.includes("reset=1"))){show("reset");return}
   $("navLogin").style.display=session?"none":"";$("navCta").textContent=session?"My dashboard":"Sign up";$("navCta").href=session?"#/app":"#/signup";
   if(h==="#/login"||h==="#/signup"){ if(session){location.hash="#/app";return} setMode(h==="#/signup");show("auth");return}
   if(h==="#/admin"){if(!session){location.hash="#/login";return}show("admin");adminTab("overview");return}
@@ -351,5 +356,16 @@ $("ssave").onclick=async()=>{const m=$("smsg");m.className="msg";const {data:{se
   if(error)m.textContent=error.message;else{m.className="msg ok";m.textContent="Saved."}};
 $("spwb").onclick=async()=>{const m=$("spm");m.className="msg";if($("spw").value.length<8){m.textContent="Use 8 or more characters.";return}
   const {error}=await sb.auth.updateUser({password:$("spw").value});if(error)m.textContent=error.message;else{m.className="msg ok";m.textContent="Password updated.";$("spw").value=""}};
+let recovering=false;
+sb.auth.onAuthStateChange(ev=>{if(ev==="PASSWORD_RECOVERY"){recovering=true;show("reset")}});
+$("fpBtn").onclick=async()=>{const m=$("authMsg"),email=$("email").value.trim();m.className="msg";
+  if(!email){m.textContent="Type your email above first, then click Forgot password.";return}
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+"/?reset=1"});
+  if(error){m.textContent=error.message;return}m.className="msg ok";m.textContent="If this email has an account, a reset link is on its way. Check your inbox and spam folder."};
+$("rpb").onclick=async()=>{const m=$("rpm"),a=$("rp1").value;m.className="msg";
+  if(a.length<8){m.textContent="Use 8 or more characters.";return}if(a!==$("rp2").value){m.textContent="The two passwords do not match.";return}
+  const {error}=await sb.auth.updateUser({password:a});if(error){m.textContent=error.message;return}
+  m.className="msg ok";m.textContent="Password updated. Taking you to your dashboard...";
+  setTimeout(()=>{recovering=false;history.replaceState(null,"","/");location.hash="#/app";route()},1200)};
 route();
 </script></body></html>
