@@ -10,4 +10,10 @@ services:
       - {key: SUPABASE_SERVICE_KEY, sync: false}
       - {key: BOLNA_API_KEY, sync: false}
       - {key: BOLNA_AGENT_ID, sync: false}
-      - {key: MAX_CALLS_PER_CAMPAIGN, value: "5"}
+      - {key: RAZORPAY_KEY_ID, sync: false}
+      - {key: RAZORPAY_KEY_SECRET, sync: false}
+      - {key: RAZORPAY_WEBHOOK_SECRET, sync: false}
+      - {key: ADMIN_EMAILS, value: "syedshahid3533@gmail.com"}
+      - {key: COST_PER_CALL_INR, value: "8"}
+      - {key: FREE_CALLS, value: "2"}
+      - {key: MAX_CALLS_PER_CAMPAIGN, value: "500"}

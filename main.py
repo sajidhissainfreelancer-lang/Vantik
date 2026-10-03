@@ -219,6 +219,13 @@ async def razorpay_webhook(request: Request):
     return {"ok": True}
 
 
+@app.get("/api/payments")
+def my_payments(authorization: str = Header(None)):
+    uid = current_user(authorization)
+    return db("GET", "payments", {"user_id": f"eq.{uid}", "status": "eq.paid", "order": "created_at.desc", "limit": "50",
+                                  "select": "pack,calls,amount_paise,created_at"})
+
+
 # ---------- support tickets ----------
 class TicketIn(BaseModel):
     subject: str

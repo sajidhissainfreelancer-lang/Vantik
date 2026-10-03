@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rnexa - Websites &amp; AI Calling for your business</title>
+<link rel="icon" href="/favicon.png"><script src="/config.js"></script><title>Rnexa - Websites &amp; AI Calling for your business</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{--bg:#f4f6fb;--card:#fff;--ink:#16202e;--mut:#5d6b80;--pri:#2457e6;--line:#dfe5ef;--err:#c62828}
@@ -32,13 +32,46 @@ table{border-collapse:collapse;font-size:13px;width:100%}td,th{border:1px solid 
 details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px}summary{font-weight:600;cursor:pointer}
 .alt{background:#fff;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 @media(max-width:720px){.nav .links{display:none}}
+
+:root{--bg:#09090b;--card:#131316;--ink:#f6f2e9;--mut:#a39e92;--pri:#f5a623;--line:#2a2a30;--err:#ff7b6e}
+.hide{display:none!important}
+body{background:radial-gradient(1100px 520px at 75% -8%,#21180a 0,transparent 62%),var(--bg);color:var(--ink)}
+h1,h2{color:var(--ink);letter-spacing:.2px}p{color:var(--mut)}a{color:var(--pri)}b{color:inherit}
+.card,.stat,details,.tag{background:var(--card)!important;border:1px solid var(--line)!important;color:var(--ink)}
+.card{box-shadow:0 14px 44px rgba(0,0,0,.4);border-radius:16px}.stat b{color:var(--pri)}
+input,select{background:#0d0d10;color:var(--ink);border:1px solid var(--line)}
+input:focus,select:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 3px rgba(245,166,35,.18)}
+button,.btn,.cta.p{background:linear-gradient(135deg,#ffd45e,#f5a623 55%,#e07a10)!important;color:#1b1305!important;border:0;font-weight:700;box-shadow:0 8px 22px rgba(245,166,35,.22);transition:transform .15s,box-shadow .15s}
+button:hover,.cta.p:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(245,166,35,.32)}
+button.ghost{background:none!important;color:var(--pri)!important;box-shadow:none}
+.cta.s,.ghostb{background:transparent!important;color:var(--ink)!important;border:1px solid var(--line)!important;box-shadow:none}
+.nav{background:rgba(9,9,11,.86)!important;backdrop-filter:blur(12px);border-bottom:1px solid var(--line)!important}.nav a{color:var(--ink)}
+.nav .btn{color:#1b1305!important}
+.hero2{background:radial-gradient(circle at 50% 0,#2b1f09,var(--bg) 72%)}.hero2 h1{background:linear-gradient(90deg,#fff,#ffd45e);-webkit-background-clip:text;background-clip:text;color:transparent}
+.alt{background:#0d0d10!important;border-color:var(--line)!important}
+.terms{background:#0d0d10;border-color:var(--line);color:var(--ink)}
+table td,table th{border-color:var(--line)}th{color:var(--mut)}
+footer{border-top:1px solid var(--line);margin-top:30px}footer a{margin:0 6px}
+.brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)!important;font-weight:800;font-size:21px;letter-spacing:.4px}.brand img{height:36px;width:auto}
+.shell{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+.side{background:#0b0b0e;border-right:1px solid var(--line);padding:22px 14px;display:flex;flex-direction:column;gap:18px;position:sticky;top:0;height:100vh}
+#dnav,#atabs{display:flex;flex-direction:column;gap:4px}
+#dnav button,#dnav a,#atabs button,.side .sidefoot a{background:none!important;box-shadow:none!important;color:var(--mut)!important;text-align:left;width:100%;margin:0;padding:11px 14px;border-radius:10px;font-weight:600;text-decoration:none;font-size:15px;display:block}
+#dnav button:hover,#atabs button:hover{background:#17171c!important;transform:none}
+#dnav button.on,#atabs button.on{background:rgba(245,166,35,.13)!important;color:var(--pri)!important}
+.sidefoot{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+.main{padding:34px 4vw;width:100%;max-width:1150px}
+.modal{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.9);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:16px}
+.mbox{background:var(--card);border:1px solid var(--pri);border-radius:20px;padding:34px 28px;max-width:430px;text-align:center;box-shadow:0 0 60px rgba(245,166,35,.18)}
+.mbox .cta{display:block;margin:8px 0}
+@media(max-width:800px){.shell{grid-template-columns:1fr}.side{position:static;height:auto}#dnav,#atabs{flex-direction:row;flex-wrap:wrap}.main{padding:20px 14px}}
 </style></head><body>
 
 <div id="home" class="hide">
- <div class="nav"><b style="font-size:20px;color:var(--pri)">Rnexa</b>
+ <div class="nav"><a href="#/" class="brand"><img src="/logo-mark.png" alt=""><span>Rnexa</span></a>
   <span class="links"><a href="#services">Services</a><a href="#aicaller">AI Caller</a><a href="#how">How it works</a><a href="#faq">FAQ</a><a href="#contact">Contact</a></span>
   <span><a class="ghostb" id="navLogin" href="#/login">Log in</a><a class="btn" id="navCta" href="#/signup">Sign up</a></span></div>
- <div class="hero2"><h1>Websites that bring customers. AI that follows up with them.</h1>
+ <div class="hero2"><img src="/logo-mark.png" alt="" style="height:92px;margin-bottom:12px"><h1>Websites that bring customers. AI that follows up with them.</h1>
   <p>Rnexa builds fast, clean and friendly websites and web apps for gyms, restaurants, car dealers, clinics, real estate and local businesses, and gives you an AI caller that talks to your leads for you.</p>
   <a class="cta p" href="#/signup">Try the AI Caller</a><a class="cta s" href="#contact">Get a website</a></div>
  <div class="sec" id="services"><h2>What we build</h2><p>Everything you need to go online, handled by one team.</p>
@@ -70,13 +103,14 @@ details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:
  <div class="sec" id="contact"><h2>Contact</h2><p>Tell us about your business and we will reply quickly.</p>
   <a class="cta p" data-wa href="#">Chat on WhatsApp</a><a class="cta s" data-email href="#">Email us</a></div>
  <footer><p><a href="#/terms">Terms &amp; Conditions</a> &middot; <a href="#/privacy">Privacy Policy</a> &middot; <a href="#/refund">Refund &amp; Cancellation</a> &middot; <a href="#/contact">Contact Us</a></p><b>Rnexa</b> &middot; Built by <span id="owner"></span> &middot; &copy; <span id="yr"></span> Rnexa. All rights reserved.</footer></div>
-<div id="legal" class="hide"><div class="nav"><b style="font-size:20px;color:var(--pri)">Rnexa</b><span><a href="#/">&larr; Home</a></span></div>
+<div id="legal" class="hide"><div class="nav"><a href="#/" class="brand"><img src="/logo-mark.png" alt=""><span>Rnexa</span></a><span><a href="#/">&larr; Home</a></span></div>
  <div class="wrap wide"><div class="card" id="legalBody"></div></div></div>
-<div id="admin" class="hide"><div class="bar"><b>Rnexa Admin</b><span><a href="#/app" style="margin-right:12px">Client view</a><button class="ghost" id="aout">Log out</button></span></div>
- <div class="wrap wide" style="margin-top:16px"><div id="atabs" style="margin-bottom:12px"></div><div class="card" id="abody" style="overflow:auto"></div></div></div>
+<div id="admin" class="hide shell"><aside class="side"><a href="#/" class="brand"><img src="/logo-mark.png" alt=""><span>Rnexa</span></a><small style="color:var(--pri);letter-spacing:3px">ADMIN</small><div id="atabs"></div>
+ <div class="sidefoot"><a href="#/app">Client view</a><button class="ghost" id="aout" style="text-align:left;padding:6px 0">Log out</button></div></aside>
+ <main class="main"><div class="card" id="abody" style="overflow:auto"></div></main></div>
 <!-- AUTH -->
 <div id="auth" class="wrap hide"><div class="card">
-  <h1>Rnexa AI Caller</h1><p id="authSub">Log in to your client account.</p>
+  <a href="#/" class="brand"><img src="/logo-mark.png" alt=""><span>Rnexa</span></a><h1 style="margin-top:14px">AI Caller</h1><p id="authSub">Log in to your client account.</p>
   <label>Email</label><input id="email" type="email" autocomplete="email">
   <label>Password</label><input id="pass" type="password" autocomplete="current-password" placeholder="Minimum 8 characters">
   <button id="authBtn">Log in</button>
@@ -93,7 +127,7 @@ details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:
   <label>City</label><input id="city">
   <h2 style="margin-top:20px">Terms &amp; Conditions and Privacy Policy</h2>
   <div class="terms" id="terms">
-    <b>Version 1.0 (draft - have a lawyer review before launch)</b><br><br>
+    <b>Version 1.0</b><br><br>
     <b>1. Service.</b> Rnexa provides an AI calling service that calls the leads you upload and returns a report with call results.<br>
     <b>2. Consent and legal compliance.</b> You confirm that every person you upload has agreed to be contacted, or that you otherwise have a lawful right to call them. You are responsible for following Indian telecom rules (including TRAI / DND regulations) and any other applicable law.<br>
     <b>3. AI disclosure.</b> Calls are made by an AI assistant, may be recorded and transcribed, and the AI will say it is an AI if asked.<br>
@@ -112,29 +146,39 @@ details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:
 </div></div>
 
 <!-- DASHBOARD -->
-<div id="dash" class="hide">
-  <div class="bar"><b>Rnexa AI Caller</b><span><a id="aLink" href="#/admin" style="display:none;margin-right:12px">Admin panel</a><b id="cr" style="margin-right:12px"></b><span id="who" style="color:var(--mut);font-size:14px"></span> <button class="ghost" id="out">Log out</button></span></div>
-  <div class="wrap wide" style="margin-top:20px">
-    <div class="card"><h1 id="hello"></h1><p>Upload your leads and let the AI call them. You get an Excel report with remarks.</p></div>
-    <div class="card"><h2>Buy call credits</h2><p>One credit = one AI call. Calls that do not connect are credited back.</p><div class="grid" id="buy"></div><div id="payMsg" class="msg"></div></div>
-    <div class="card"><h2>1. Upload your leads</h2>
-      <p>Excel or CSV with a <b>phone_number</b> column. Optional: customer_name, business_name, product_or_service.</p>
-      <input id="file" type="file" accept=".xlsx,.xls,.csv"><div id="prev"></div></div>
-    <div class="card"><h2>2. Start calling</h2><p id="est">Upload a file first.</p>
-      <button id="go" disabled style="width:auto">Start calling</button><div id="goMsg" class="msg"></div></div>
-    <div class="card"><h2>Support</h2><p>Need to change your details, delete your account, or get help? Send us a ticket.</p>
-      <select id="tsub"><option>Change my account details</option><option>Delete my account</option><option>Billing question</option><option>Other</option></select>
-      <label>Message</label><input id="tmsg"><button id="tgo" style="width:auto">Send ticket</button><div id="tout" class="msg"></div><div id="tlist"></div></div>
-    <div class="card"><h2>Your campaigns</h2><div id="camps"><p>No campaigns yet.</p></div></div>
-  </div>
+<div id="dash" class="hide shell">
+ <aside class="side"><a href="#/" class="brand"><img src="/logo-mark.png" alt=""><span>Rnexa</span></a>
+  <nav id="dnav"><button data-s="overview">Overview</button><button data-s="new">New campaign</button><button data-s="camps">Campaigns</button><button data-s="billing">Credits &amp; billing</button><button data-s="help">Help center</button><button data-s="settings">Settings</button><a id="aLink" href="#/admin" style="display:none">Admin panel</a></nav>
+  <div class="sidefoot"><b id="cr" style="color:var(--pri)"></b><small id="who" style="color:var(--mut);word-break:break-all"></small><button class="ghost" id="out" style="text-align:left;padding:6px 0">Log out</button></div>
+ </aside>
+ <main class="main">
+  <section data-sec="overview"><h1 id="hello"></h1><p>Upload your leads and let the AI call them. You get an Excel report with remarks.</p>
+   <div class="grid"><div class="stat"><b id="stC">-</b>Credits</div><div class="stat"><b id="stK">-</b>Campaigns</div><div class="stat"><b id="stL">-</b>Leads called</div></div>
+   <p style="margin-top:18px"><button data-go="new" style="width:auto">Start a campaign</button> <button class="ghost" data-go="billing">Buy credits</button></p></section>
+  <section data-sec="new" class="hide"><div class="card"><h2>1. Upload your leads</h2>
+   <p>Excel or CSV with a <b>phone_number</b> column. Optional: customer_name, business_name, product_or_service.</p><input id="file" type="file" accept=".xlsx,.xls,.csv"><div id="prev"></div></div>
+   <div class="card"><h2>2. Start calling</h2><p id="est">Upload a file first.</p><button id="go" disabled style="width:auto">Start calling</button><div id="goMsg" class="msg"></div></div></section>
+  <section data-sec="camps" class="hide"><div class="card"><h2>Your campaigns</h2><div id="camps"><p>No campaigns yet.</p></div></div></section>
+  <section data-sec="billing" class="hide"><div class="card"><h2>Buy call credits</h2><p>One credit = one AI call. Calls that do not connect are credited back.</p><div class="grid" id="buy"></div><div id="payMsg" class="msg"></div></div>
+   <div class="card"><h2>Payment history</h2><div id="plist"></div></div></section>
+  <section data-sec="help" class="hide"><div class="card"><h2>Help center</h2><input id="hs" placeholder="Search your question..."><div id="faq2" style="margin-top:12px"></div></div>
+   <div class="card"><h2>Still need help? Raise a ticket</h2><p>Change details, delete your account, billing, or anything else.</p>
+   <select id="tsub"><option>Change my account details</option><option>Delete my account</option><option>Billing question</option><option>Other</option></select>
+   <label>Message</label><input id="tmsg"><button id="tgo" style="width:auto">Send ticket</button><div id="tout" class="msg"></div><div id="tlist"></div></div></section>
+  <section data-sec="settings" class="hide"><div class="card"><h2>Company details</h2>
+   <label>Company name</label><input id="sc"><label>Your name</label><input id="sn"><label>Phone</label><input id="sp"><label>City</label><input id="sy">
+   <button id="ssave" style="width:auto">Save changes</button> <span id="smsg" class="msg"></span><p style="margin-top:12px">To change your login email or delete your account, raise a ticket in the Help center.</p></div>
+   <div class="card"><h2>Change password</h2><label>New password (8+ characters)</label><input id="spw" type="password"><button id="spwb" style="width:auto">Update password</button> <span id="spm" class="msg"></span></div></section>
+ </main>
 </div>
+<div id="susp" class="hide modal"><div class="mbox"><img src="/logo-mark.png" alt="" style="height:64px"><h1>Account suspended</h1>
+ <p><b id="suspName"></b> has paused access to your account. Please contact our team and we will help you right away.</p>
+ <a class="cta p" data-wa href="#">WhatsApp our team</a><a class="cta s" data-email href="#">Email our team</a><a class="cta s" id="callus" href="#">Call us</a>
+ <p><button class="ghost" id="suspOut">Log out</button></p></div></div>
+
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-// 1) Paste your Supabase values here (Project Settings > API). The anon key is safe to be public.
-const SITE={owner:"Sajid Hussain",business:"Rnexa",email:"ss@rnexa.in",phone:"+91 7358145522",whatsapp:"917358145522",address:"YOUR_BUSINESS_ADDRESS, City, State, PIN, India"}; // <- fill in your real details
-const SUPABASE_URL = "https://atrpmyhcunujohlpftbr.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF0cnBteWhjdW51am9obHBmdGJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMDk0MDYsImV4cCI6MjEwNTU4NTQwNn0.LZtt_t4M6_oxhemRzdMKekXBEYemSXWl37uAxKRqO9M";
 const TERMS_VERSION = "1.0";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
@@ -180,7 +224,7 @@ $("saveBtn").onclick=async()=>{
 
 $("out").onclick=async()=>{await sb.auth.signOut();location.hash="#/"};
 
-const upd="Last updated: October 2026. Draft - please get it reviewed by a lawyer.";
+const upd="Last updated: October 2026.";
 const PAGES={
 terms:()=>`<h1>Terms &amp; Conditions</h1><p>${upd}</p>
 <h2>1. Service</h2><p>${SITE.business} ("we") provides an AI calling service: you upload a list of leads, our AI calls them, and you download a report with the results. We also build websites and web apps.</p>
@@ -216,7 +260,7 @@ async function route(){
     if(!session){location.hash="#/login";return}
     const {data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
     if(!p||p.terms_version!==TERMS_VERSION){show("onb");return}
-    $("hello").textContent="Welcome, "+p.company_name;$("who").textContent=session.user.email;show("dash");loadCredits();checkAdmin();loadTickets();return}
+    $("hello").textContent="Welcome, "+p.company_name;$("who").textContent=session.user.email;show("dash");dashSec("overview");loadCredits();checkAdmin();loadTickets();loadCamps();return}
   const pg=PAGES[h.slice(2)];if(pg){$("legalBody").innerHTML=pg();show("legal");scrollTo(0,0);return}
   show("home");
 }
@@ -234,19 +278,19 @@ $("file").onchange=async e=>{const f=e.target.files[0];if(!f)return;
 let lastFile=null;
 const tok=async()=>(await sb.auth.getSession()).data.session.access_token;
 async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{Authorization:"Bearer "+await tok(),...(opt.headers||{})}});
-  if(!r.ok){let m="Error";try{m=(await r.json()).detail||m}catch(e){}throw new Error(m)}return r}
+  if(!r.ok){let m="Error";try{m=(await r.json()).detail||m}catch(e){}if(/suspended/i.test(m))showSusp();throw new Error(m)}return r}
 $("go").onclick=async()=>{const m=$("goMsg");m.className="msg";m.textContent="";$("go").disabled=true;
   try{const fd=new FormData();fd.append("file",lastFile);const c=await(await api("/api/campaigns",{method:"POST",body:fd})).json();
     m.className="msg ok";m.textContent="Calling started for "+c.total+" leads."+(c.limited?" (Only "+c.limit+" leads started - not enough credits.)":"");loadCamps();loadCredits()}
   catch(e){m.textContent=e.message}$("go").disabled=false};
 async function loadCamps(){if($("dash").classList.contains("hide"))return;
-  try{const L=await(await api("/api/campaigns")).json();if(!L.length)return;
+  try{const L=await(await api("/api/campaigns")).json();$("stK").textContent=L.length;$("stL").textContent=L.reduce((a,c)=>a+(c.done||0),0);if(!L.length)return;
   $("camps").innerHTML="<table><tr><th>File</th><th>Status</th><th>Progress</th><th></th></tr>"+L.map(c=>"<tr><td>"+esc(c.name)+"</td><td>"+esc(c.status)+"</td><td>"+c.done+" / "+c.total+
     '</td><td><button class="ghost" data-id="'+c.id+'">Download Excel</button></td></tr>').join("")+"</table>"}catch(e){}}
 $("camps").onclick=async e=>{const id=e.target.dataset.id;if(!id)return;
   const b=await(await api("/api/campaigns/"+id+"/download")).blob();const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="rnexa_results.xlsx";a.click()};
 setInterval(loadCamps,8000);
-async function loadCredits(){try{const m=await(await api("/api/me")).json();$("cr").textContent="Credits: "+m.credits}catch(e){}}
+async function loadCredits(){try{const m=await(await api("/api/me")).json();$("cr").textContent="Credits: "+m.credits;$("stC").textContent=m.credits}catch(e){}}
 $("buy").onclick=async e=>{const id=e.target.dataset.pack;if(!id)return;const m=$("payMsg");m.className="msg";m.textContent="";
  try{const j={"Content-Type":"application/json"};const o=await(await api("/api/orders",{method:"POST",headers:j,body:JSON.stringify({pack:id})})).json();
   new Razorpay({key:o.key_id,amount:o.amount,currency:"INR",order_id:o.order_id,name:"Rnexa",description:o.description,
@@ -270,7 +314,7 @@ const VIEW={
  async payments(){const L=await(await api("/api/admin/payments")).json();return "<table><tr><th>Date</th><th>Client</th><th>Pack</th><th>Amount</th><th>Status</th></tr>"+L.map(p=>"<tr><td>"+new Date(p.created_at).toLocaleString("en-IN")+"</td><td>"+esc(p.email||"")+"</td><td>"+esc(p.pack)+"</td><td>"+inr(p.amount_paise/100)+"</td><td>"+esc(p.status)+"</td></tr>").join("")+"</table>"},
  async account(){return '<h2>Change my admin login</h2><label>New email (a confirmation link is sent)</label><input id="ne" type="email"><label>New password (8+ characters)</label><input id="np" type="password"><button id="ago" style="width:auto">Update</button><div id="amsg" class="msg"></div>'}
 };
-async function adminTab(t){$("atabs").innerHTML=Object.keys(TABS).map(k=>'<button class="ghost" data-t="'+k+'" style="'+(k===t?"font-weight:800;border-bottom:2px solid var(--pri)":"")+'">'+TABS[k]+"</button>").join(" ");
+async function adminTab(t){$("atabs").innerHTML=Object.keys(TABS).map(k=>'<button data-t="'+k+'"'+(k===t?' class="on"':'')+'>'+TABS[k]+"</button>").join(" ");
   $("abody").innerHTML="Loading...";try{$("abody").innerHTML=await VIEW[t]()}catch(e){$("abody").innerHTML='<div class="msg">'+esc(e.message)+"</div>"}}
 $("atabs").onclick=e=>{if(e.target.dataset.t)adminTab(e.target.dataset.t)};
 $("abody").onclick=async e=>{const a=e.target.dataset.a,id=e.target.dataset.id;if(!a)return;const c=CL.find(x=>x.id===id);
@@ -287,5 +331,25 @@ $("abody").onclick=async e=>{const a=e.target.dataset.a,id=e.target.dataset.id;i
 document.addEventListener("click",async e=>{if(e.target.id!=="ago")return;const m=$("amsg");m.className="msg";m.textContent="";const u={};if($("ne").value)u.email=$("ne").value;if($("np").value.length>=8)u.password=$("np").value;
   if(!Object.keys(u).length){m.textContent="Enter a new email or a password of 8+ characters.";return}
   const {error}=await sb.auth.updateUser(u);if(error)m.textContent=error.message;else{m.className="msg ok";m.textContent="Updated. If you changed email, confirm it from your inbox. Remember to update ADMIN_EMAILS in Render."}});
+
+function showSusp(){$("suspName").textContent=SITE.business;$("callus").href="tel:"+SITE.phone.replace(/\s/g,"");$("susp").classList.remove("hide");document.body.style.overflow="hidden"}
+$("suspOut").onclick=async()=>{await sb.auth.signOut();location.reload()};
+function dashSec(n){document.querySelectorAll("[data-sec]").forEach(x=>x.classList.toggle("hide",x.dataset.sec!==n));document.querySelectorAll("#dnav button").forEach(b=>b.classList.toggle("on",b.dataset.s===n));
+  if(n==="billing")loadPays();if(n==="settings")loadSettings();if(n==="camps")loadCamps();if(n==="help")renderFaq()}
+$("dnav").onclick=e=>{if(e.target.dataset.s)dashSec(e.target.dataset.s)};
+document.addEventListener("click",e=>{const g=e.target.dataset&&e.target.dataset.go;if(g)dashSec(g)});
+async function loadPays(){try{const L=await(await api("/api/payments")).json();$("plist").innerHTML=L.length?"<table><tr><th>Date</th><th>Pack</th><th>Calls</th><th>Amount</th></tr>"+L.map(p=>"<tr><td>"+new Date(p.created_at).toLocaleDateString("en-IN")+"</td><td>"+esc(p.pack)+"</td><td>"+p.calls+"</td><td>"+inr(p.amount_paise/100)+"</td></tr>").join("")+"</table>":"<p>No payments yet.</p>"}catch(e){}}
+const FAQS=[["How do I start a campaign?","Open New campaign, upload an Excel or CSV with a phone_number column, then click Start calling."],["Which columns can my file have?","phone_number is required. Optional: customer_name, business_name, product_or_service."],["How do credits work?","One credit equals one AI call. Calls that do not connect are credited back automatically."],["How do I buy more credits?","Open Credits & billing and choose a pack."],["Where do I download my results?","Open Campaigns and click Download Excel next to your file."],["Can I change my company details?","Yes. Open Settings and edit them. For a new login email, raise a ticket."],["How do I delete my account?","Raise a ticket with the subject Delete my account. Our team will confirm and remove your data."],["I paid but credits did not arrive","Raise a ticket with your payment details. We will check and add the credits."],["Why did a call fail?","The number may be invalid, busy or not answered. Failed calls are credited back."],["Which language does the AI speak?","English for now."]];
+function renderFaq(){const q=$("hs").value.toLowerCase().trim(),L=FAQS.filter(f=>!q||(f[0]+" "+f[1]).toLowerCase().includes(q));
+  $("faq2").innerHTML=L.length?L.map(f=>"<details><summary>"+esc(f[0])+"</summary><p>"+esc(f[1])+"</p></details>").join(""):'<p>No answer found for "'+esc($("hs").value)+'".</p><button id="toTicket" style="width:auto">Raise a ticket with this question</button>'}
+$("hs").oninput=renderFaq;
+$("faq2").onclick=e=>{if(e.target.id==="toTicket"){$("tsub").value="Other";$("tmsg").value=$("hs").value;$("tmsg").focus()}};
+async function loadSettings(){const {data:{session}}=await sb.auth.getSession();const {data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
+  if(p){$("sc").value=p.company_name;$("sn").value=p.contact_name;$("sp").value=p.phone;$("sy").value=p.city||""}}
+$("ssave").onclick=async()=>{const m=$("smsg");m.className="msg";const {data:{session}}=await sb.auth.getSession();
+  const {error}=await sb.from("profiles").update({company_name:$("sc").value.trim(),contact_name:$("sn").value.trim(),phone:$("sp").value.trim(),city:$("sy").value.trim()||null}).eq("id",session.user.id);
+  if(error)m.textContent=error.message;else{m.className="msg ok";m.textContent="Saved."}};
+$("spwb").onclick=async()=>{const m=$("spm");m.className="msg";if($("spw").value.length<8){m.textContent="Use 8 or more characters.";return}
+  const {error}=await sb.auth.updateUser({password:$("spw").value});if(error)m.textContent=error.message;else{m.className="msg ok";m.textContent="Password updated.";$("spw").value=""}};
 route();
 </script></body></html>
