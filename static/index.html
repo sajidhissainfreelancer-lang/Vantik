@@ -283,7 +283,7 @@ $("file").onchange=async e=>{const f=e.target.files[0];if(!f)return;
 let lastFile=null;
 const tok=async()=>(await sb.auth.getSession()).data.session.access_token;
 async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{Authorization:"Bearer "+await tok(),...(opt.headers||{})}});
-  if(!r.ok){let m="Error";try{m=(await r.json()).detail||m}catch(e){}if(/suspended/i.test(m))showSusp();throw new Error(m)}return r}
+  if(!r.ok){let m="Error";try{m=(await r.json()).detail||m}catch(e){}if(/suspended/i.test(m))showSusp();if(r.status===401){await sb.auth.signOut({scope:"local"});location.hash="#/login";show("auth");$("authMsg").className="msg";$("authMsg").textContent="Your session expired. Please log in again."}throw new Error(m)}return r}
 $("go").onclick=async()=>{const m=$("goMsg");m.className="msg";m.textContent="";$("go").disabled=true;
   try{const fd=new FormData();fd.append("file",lastFile);const c=await(await api("/api/campaigns",{method:"POST",body:fd})).json();
     m.className="msg ok";m.textContent="Calling started for "+c.total+" leads."+(c.limited?" (Only "+c.limit+" leads started - not enough credits.)":"");loadCamps();loadCredits()}
