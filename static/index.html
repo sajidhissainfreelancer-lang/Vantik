@@ -65,6 +65,9 @@ footer{border-top:1px solid var(--line);margin-top:30px}footer a{margin:0 6px}
 .mbox{background:var(--card);border:1px solid var(--pri);border-radius:20px;padding:34px 28px;max-width:430px;text-align:center;box-shadow:0 0 60px rgba(245,166,35,.18)}
 .mbox .cta{display:block;margin:8px 0}
 @media(max-width:800px){.shell{grid-template-columns:1fr}.side{position:static;height:auto}#dnav,#atabs{flex-direction:row;flex-wrap:wrap}.main{padding:20px 14px}}
+textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:#0d0d10;color:var(--ink);font-family:inherit}
+textarea:focus{outline:none;border-color:var(--pri)}
+.callrow summary{display:flex;gap:10px;flex-wrap:wrap}.callrow pre{white-space:pre-wrap;font-family:inherit;color:var(--mut);line-height:1.5}
 </style></head><body>
 
 <div id="home" class="hide">
@@ -152,7 +155,7 @@ footer{border-top:1px solid var(--line);margin-top:30px}footer a{margin:0 6px}
 <!-- DASHBOARD -->
 <div id="dash" class="hide shell">
  <aside class="side"><a href="#/" class="brand"><img src="/logo-mark.png" alt=""><span>Rnexa</span></a>
-  <nav id="dnav"><button data-s="overview">Overview</button><button data-s="new">New campaign</button><button data-s="camps">Campaigns</button><button data-s="billing">Credits &amp; billing</button><button data-s="help">Help center</button><button data-s="settings">Settings</button><a id="aLink" href="#/admin" style="display:none">Admin panel</a></nav>
+  <nav id="dnav"><button data-s="overview">Overview</button><button data-s="reception">AI Receptionist</button><button data-s="new">New campaign</button><button data-s="camps">Campaigns</button><button data-s="billing">Credits &amp; billing</button><button data-s="help">Help center</button><button data-s="settings">Settings</button><a id="aLink" href="#/admin" style="display:none">Admin panel</a></nav>
   <div class="sidefoot"><b id="cr" style="color:var(--pri)"></b><small id="who" style="color:var(--mut);word-break:break-all"></small><button class="ghost" id="out" style="text-align:left;padding:6px 0">Log out</button></div>
  </aside>
  <main class="main">
@@ -162,6 +165,17 @@ footer{border-top:1px solid var(--line);margin-top:30px}footer a{margin:0 6px}
   <section data-sec="new" class="hide"><div class="card"><h2>1. Upload your leads</h2>
    <p>Excel or CSV with a <b>phone_number</b> column. Optional: customer_name, business_name, product_or_service.</p><input id="file" type="file" accept=".xlsx,.xls,.csv"><div id="prev"></div></div>
    <div class="card"><h2>2. Start calling</h2><p id="est">Upload a file first.</p><button id="go" disabled style="width:auto">Start calling</button><div id="goMsg" class="msg"></div></div></section>
+  <section data-sec="reception" class="hide">
+  <div class="card"><h2>Your AI Receptionist</h2><p>Your customers call your AI number. The AI answers, takes messages and bookings, and you see every call here.</p>
+   <div class="grid"><div class="stat"><b id="rc_min">-</b>Minutes left</div><div class="stat"><b id="rc_today">-</b>Calls today</div><div class="stat"><b id="rc_num" style="font-size:17px">Not set up</b>Your AI number</div></div><p id="rc_status" style="margin-top:12px"></p></div>
+  <div class="card"><h2>1. Tell the AI about your business</h2>
+   <label>Business name</label><input id="rb_name"><label>Opening hours</label><input id="rb_hours" placeholder="Mon to Sat, 9 AM to 7 PM"><label>Address</label><input id="rb_addr">
+   <label>Services, prices and common questions</label><textarea id="rb_info" rows="6" placeholder="Example: Consultation fee 300 rupees. We do scans and blood tests. Parking is available..."></textarea>
+   <label>Language</label><select id="rb_lang"><option>English</option><option>Tamil</option><option>Tamil and English</option></select>
+   <button id="rb_save" style="width:auto">Save business details</button> <span id="rb_msg" class="msg"></span></div>
+  <div class="card"><h2>2. Get your AI phone number</h2><p>Pay once and we set up your AI number in about a minute. Then set <b>call forwarding</b> on your business phone to that number (for example, forward when busy or unanswered). Ask your phone company for the forwarding code.</p>
+   <div class="grid" id="rc_buy"></div><div id="rc_pay" class="msg"></div></div>
+  <div class="card"><h2>Recent calls</h2><div id="rc_calls"><p>No calls yet.</p></div></div></section>
   <section data-sec="camps" class="hide"><div class="card"><h2>Your campaigns</h2><div id="camps"><p>No campaigns yet.</p></div></div></section>
   <section data-sec="billing" class="hide"><div class="card"><h2>Buy call credits</h2><p>One credit = one AI call. Calls that do not connect are credited back.</p><div class="grid" id="buy"></div><div id="payMsg" class="msg"></div></div>
    <div class="card"><h2>Payment history</h2><div id="plist"></div></div></section>
@@ -188,7 +202,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
 document.querySelectorAll("[data-email]").forEach(e=>{e.href="mailto:"+SITE.email});
 document.querySelectorAll("[data-wa]").forEach(e=>{e.href="https://wa.me/"+SITE.whatsapp});
-function renderPacks(L){
+function renderPacks(L){window.ALLP=L;L=L.filter(p=>(p.kind||"calls")==="calls");
 $("packs").innerHTML=L.map(p=>'<div class="card"><h2>'+p.name+'</h2><p style="font-size:26px;color:var(--ink);margin:0"><b>&#8377;'+p.price.toLocaleString("en-IN")+'</b></p><p>'+p.calls+' AI calls &middot; about &#8377;'+Math.round(p.price/p.calls)+' per call</p><a class="cta p" href="#/signup" style="margin:0">Get started</a></div>').join("");
 $("buy").innerHTML=L.map(p=>'<div class="stat"><b>'+p.calls+' calls</b>&#8377;'+p.price.toLocaleString("en-IN")+'<br><button data-pack="'+p.id+'" style="margin-top:8px">Buy</button></div>').join("")}
 fetch("/api/packs").then(r=>r.json()).then(renderPacks).catch(()=>{});
@@ -310,12 +324,13 @@ $("tgo").onclick=async()=>{const o=$("tout");o.className="msg";o.textContent="";
   try{await J("POST","/api/tickets",{subject:$("tsub").value,message:$("tmsg").value});$("tmsg").value="";o.className="msg ok";o.textContent="Ticket sent. We will reply soon.";loadTickets()}catch(e){o.textContent=e.message}};
 $("aout").onclick=async()=>{await sb.auth.signOut();location.hash="#/"};
 let CL=[];
-const TABS={overview:"Overview",clients:"Clients",tickets:"Tickets",pricing:"Pricing",payments:"Payments",account:"My account"};
+const TABS={lines:"AI Lines",overview:"Overview",clients:"Clients",tickets:"Tickets",pricing:"Pricing",payments:"Payments",account:"My account"};
 const VIEW={
  async overview(){const o=await(await api("/api/admin/overview")).json();return '<div class="grid">'+[["Clients",o.clients],["Calls made",o.calls],["Revenue",inr(o.revenue)],["Est. call cost",inr(o.est_cost)],["Est. profit",inr(o.est_profit)],["Credits held by clients",o.credits]].map(x=>'<div class="stat"><b>'+x[1]+'</b>'+x[0]+'</div>').join("")+'</div><p>Cost is an estimate: calls x the cost per call set in Render (COST_PER_CALL_INR).</p>'},
  async clients(){CL=await(await api("/api/admin/clients")).json();return "<table><tr><th>Email</th><th>Company</th><th>Phone</th><th>Credits</th><th>Status</th><th>Actions</th></tr>"+CL.map(c=>"<tr><td>"+esc(c.email||"")+"</td><td>"+esc(c.company_name)+"</td><td>"+esc(c.phone)+"</td><td>"+c.credits+"</td><td>"+(c.suspended?"Suspended":"Active")+'</td><td><button class="ghost" data-a="edit" data-id="'+c.id+'">Edit</button> <button class="ghost" data-a="cr" data-id="'+c.id+'">Credits</button> <button class="ghost" data-a="sus" data-id="'+c.id+'">'+(c.suspended?"Activate":"Suspend")+'</button> <button class="ghost" style="color:var(--err)" data-a="del" data-id="'+c.id+'">Delete</button></td></tr>').join("")+"</table>"},
  async tickets(){const L=await(await api("/api/admin/tickets")).json();return L.length?L.map(t=>'<div style="border-bottom:1px solid var(--line);padding:10px 0"><b>'+esc(t.subject)+'</b> <small>'+esc(t.email||"")+'</small><p>'+esc(t.message)+'</p><input id="r'+t.id+'" placeholder="Reply" value="'+esc(t.admin_reply||"")+'"><select id="s'+t.id+'">'+["open","in progress","done"].map(x=>"<option"+(x===t.status?" selected":"")+">"+x+"</option>").join("")+'</select> <button class="ghost" data-a="tk" data-id="'+t.id+'">Save</button></div>').join(""):"<p>No tickets yet.</p>"},
  async pricing(){const L=await(await api("/api/admin/packs")).json();return "<p>Change the price or number of calls. The website and checkout update straight away.</p><table><tr><th>Pack</th><th>Calls</th><th>Price (INR)</th><th>On sale</th><th></th></tr>"+L.map(p=>'<tr><td><input id="pn'+p.id+'" value="'+esc(p.name)+'"></td><td><input id="pc'+p.id+'" type="number" value="'+p.calls+'"></td><td><input id="pp'+p.id+'" type="number" value="'+p.price+'"></td><td><input id="pa'+p.id+'" type="checkbox" style="width:auto"'+(p.active?" checked":"")+'></td><td><button class="ghost" data-a="pk" data-id="'+p.id+'">Save</button></td></tr>').join("")+"</table>"},
+ async lines(){const L=await(await api("/api/admin/lines")).json();return L.length?"<table><tr><th>Client</th><th>Business</th><th>Number</th><th>Status</th><th>Paid until</th><th></th></tr>"+L.map(l=>"<tr><td>"+esc(l.email||"")+"</td><td>"+esc(l.company||"")+"</td><td>"+esc(l.phone_number||"-")+"</td><td>"+esc(l.status)+(l.error?'<br><small style="color:var(--err)">'+esc(l.error)+"</small>":"")+"</td><td>"+(l.paid_until?new Date(l.paid_until).toLocaleDateString("en-IN"):"-")+'</td><td><button class="ghost" data-a="lretry" data-id="'+l.user_id+'">Set up / retry</button> <button class="ghost" style="color:var(--err)" data-a="lrel" data-id="'+l.user_id+'">Release number</button></td></tr>').join("")+"</table><p>Each number costs you about $5 a month on Bolna. Release it when a client stops paying.</p>":"<p>No AI lines yet.</p>"},
  async payments(){const L=await(await api("/api/admin/payments")).json();return "<table><tr><th>Date</th><th>Client</th><th>Pack</th><th>Amount</th><th>Status</th></tr>"+L.map(p=>"<tr><td>"+new Date(p.created_at).toLocaleString("en-IN")+"</td><td>"+esc(p.email||"")+"</td><td>"+esc(p.pack)+"</td><td>"+inr(p.amount_paise/100)+"</td><td>"+esc(p.status)+"</td></tr>").join("")+"</table>"},
  async account(){return '<h2>Change my admin login</h2><label>New email (a confirmation link is sent)</label><input id="ne" type="email"><label>New password (8+ characters)</label><input id="np" type="password"><button id="ago" style="width:auto">Update</button><div id="amsg" class="msg"></div>'}
 };
@@ -329,6 +344,8 @@ $("abody").onclick=async e=>{const a=e.target.dataset.a,id=e.target.dataset.id;i
   else if(a==="del"){if(prompt('Type DELETE to permanently delete '+c.company_name+" and all their data:")==="DELETE"){await api("/api/admin/clients/"+id,{method:"DELETE"});adminTab("clients")}}
   else if(a==="edit"){$("abody").innerHTML='<h2>Edit '+esc(c.company_name)+'</h2><label>Company</label><input id="ec" value="'+esc(c.company_name)+'"><label>Contact name</label><input id="en" value="'+esc(c.contact_name)+'"><label>Phone</label><input id="ep" value="'+esc(c.phone)+'"><label>City</label><input id="ey" value="'+esc(c.city||"")+'"><button id="esave" data-id="'+id+'" style="width:auto">Save</button> <span class="msg" id="emsg"></span>';
     $("esave").onclick=async()=>{try{await J("PATCH","/api/admin/clients/"+id,{company_name:$("ec").value,contact_name:$("en").value,phone:$("ep").value,city:$("ey").value});adminTab("clients")}catch(er){$("emsg").textContent=er.message}}}
+  else if(a==="lretry"){await J("POST","/api/admin/lines/"+id+"/retry",{});e.target.textContent="Started";setTimeout(()=>adminTab("lines"),4000)}
+  else if(a==="lrel"){if(confirm("Delete this phone number from Bolna? The AI will stop answering.")){await J("POST","/api/admin/lines/"+id+"/release",{});adminTab("lines")}}
   else if(a==="tk"){await J("PATCH","/api/admin/tickets/"+id,{status:$("s"+id).value,admin_reply:$("r"+id).value});e.target.textContent="Saved"}
   else if(a==="pk"){await J("PUT","/api/admin/packs/"+id,{name:$("pn"+id).value,calls:+$("pc"+id).value,price:+$("pp"+id).value,active:$("pa"+id).checked});e.target.textContent="Saved"}
   }catch(er){alert(er.message)}
@@ -340,7 +357,7 @@ document.addEventListener("click",async e=>{if(e.target.id!=="ago")return;const 
 function showSusp(){$("suspName").textContent=SITE.business;$("callus").href="tel:"+SITE.phone.replace(/\s/g,"");$("susp").classList.remove("hide");document.body.style.overflow="hidden"}
 $("suspOut").onclick=async()=>{await sb.auth.signOut();location.reload()};
 function dashSec(n){document.querySelectorAll("[data-sec]").forEach(x=>x.classList.toggle("hide",x.dataset.sec!==n));document.querySelectorAll("#dnav button").forEach(b=>b.classList.toggle("on",b.dataset.s===n));
-  if(n==="billing")loadPays();if(n==="settings")loadSettings();if(n==="camps")loadCamps();if(n==="help")renderFaq()}
+  if(n==="reception")loadReception();if(n==="billing")loadPays();if(n==="settings")loadSettings();if(n==="camps")loadCamps();if(n==="help")renderFaq()}
 $("dnav").onclick=e=>{if(e.target.dataset.s)dashSec(e.target.dataset.s)};
 document.addEventListener("click",e=>{const g=e.target.dataset&&e.target.dataset.go;if(g)dashSec(g)});
 async function loadPays(){try{const L=await(await api("/api/payments")).json();$("plist").innerHTML=L.length?"<table><tr><th>Date</th><th>Pack</th><th>Calls</th><th>Amount</th></tr>"+L.map(p=>"<tr><td>"+new Date(p.created_at).toLocaleDateString("en-IN")+"</td><td>"+esc(p.pack)+"</td><td>"+p.calls+"</td><td>"+inr(p.amount_paise/100)+"</td></tr>").join("")+"</table>":"<p>No payments yet.</p>"}catch(e){}}
@@ -367,5 +384,24 @@ $("rpb").onclick=async()=>{const m=$("rpm"),a=$("rp1").value;m.className="msg";
   const {error}=await sb.auth.updateUser({password:a});if(error){m.textContent=error.message;return}
   m.className="msg ok";m.textContent="Password updated. Taking you to your dashboard...";
   setTimeout(()=>{recovering=false;history.replaceState(null,"","/");location.hash="#/app";route()},1200)};
+
+function pk(){return (window.ALLP||[]).filter(p=>["line","minutes"].includes(p.kind))}
+async function startPay(id,m,done){m.className="msg";m.textContent="";try{const j={"Content-Type":"application/json"};const o=await(await api("/api/orders",{method:"POST",headers:j,body:JSON.stringify({pack:id})})).json();
+ new Razorpay({key:o.key_id,amount:o.amount,currency:"INR",order_id:o.order_id,name:"Rnexa",description:o.description,
+  handler:async r=>{try{await api("/api/payments/verify",{method:"POST",headers:j,body:JSON.stringify(r)});m.className="msg ok";m.textContent="Payment successful. Setting things up...";if(done)done()}catch(er){m.textContent=er.message}}}).open()}catch(er){m.textContent=er.message}}
+const STAT={none:"Save your business details, then buy your AI line.",pending:"Waiting for set up. This usually takes a minute.",provisioning:"Setting up your AI number now...",active:"Your AI receptionist is live. Set call forwarding from your business phone to the number above.",failed:"We could not finish setting up your number yet. Our team has been told and will fix it. You do not need to pay again.",paused:"Your AI is paused because your minutes ran out. Buy minutes to switch it back on.",cancelled:"This line was cancelled."};
+async function loadReception(){
+  if(!window.ALLP){try{window.ALLP=await(await fetch("/api/packs")).json()}catch(e){}}
+  let d;try{d=await(await api("/api/line")).json()}catch(e){return}
+  const b=d.business||{},f=[["rb_name","name"],["rb_hours","hours"],["rb_addr","address"],["rb_info","info"]];
+  f.forEach(x=>{if(document.activeElement!==$(x[0]))$(x[0]).value=b[x[1]]||""});if(b.language&&document.activeElement!==$("rb_lang"))$("rb_lang").value=b.language;
+  $("rc_min").textContent=d.minutes;$("rc_today").textContent=d.calls_today;
+  const st=d.line?d.line.status:"none";$("rc_num").textContent=(d.line&&d.line.phone_number)||"Not set up";$("rc_status").textContent=STAT[st]||"";
+  $("rc_buy").innerHTML=pk().map(p=>'<div class="stat"><b>'+esc(p.name)+'</b>'+inr(p.price)+'<br><button data-pk="'+p.id+'" style="margin-top:8px">Buy</button></div>').join("")||"<p>Packs are not available yet.</p>";
+  try{const C=await(await api("/api/calls")).json();$("rc_calls").innerHTML=C.length?C.map(c=>'<details class="callrow"><summary><b>'+new Date(c.created_at).toLocaleString("en-IN")+"</b><span>"+esc(c.from_number||"Unknown caller")+"</span><span>"+c.minutes+" min</span></summary><p>"+esc(c.summary||"No summary")+"</p><pre>"+esc(c.transcript||"")+"</pre>"+(c.recording_url?'<a href="'+esc(c.recording_url)+'" target="_blank" rel="noopener">Play recording</a>':"")+"</details>").join(""):"<p>No calls yet.</p>"}catch(e){}
+  if(["pending","provisioning"].includes(st)&&!$("dash").classList.contains("hide")&&!document.querySelector('[data-sec="reception"]').classList.contains("hide"))setTimeout(loadReception,6000)}
+$("rc_buy").onclick=e=>{if(e.target.dataset.pk)startPay(e.target.dataset.pk,$("rc_pay"),()=>{loadReception();loadCredits()})};
+$("rb_save").onclick=async()=>{const m=$("rb_msg");m.className="msg";m.textContent="";
+  try{await J("POST","/api/line",{name:$("rb_name").value,hours:$("rb_hours").value,address:$("rb_addr").value,info:$("rb_info").value,language:$("rb_lang").value});m.className="msg ok";m.textContent="Saved."}catch(e){m.textContent=e.message}};
 route();
 </script></body></html>

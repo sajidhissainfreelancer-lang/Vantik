@@ -1,5 +1,7 @@
 """Rnexa backend: website + API (credits, Razorpay payments, Bolna calling). Secrets only in environment variables."""
-import hashlib, hmac, io, json, os, threading
+import hashlib, hmac, io, json, math, os, smtplib, threading
+from datetime import datetime, timedelta, timezone
+from email.message import EmailMessage
 from typing import Optional
 import pandas as pd, requests
 from fastapi import FastAPI, UploadFile, File, Header, HTTPException, Request
@@ -19,7 +21,7 @@ COST_PER_CALL = float(os.getenv("COST_PER_CALL_INR", "8"))   # your estimated co
 DEFAULT_PACKS = [  # used only if the packs table is empty; real prices are edited in the admin panel
     {"id": "starter", "name": "Starter", "calls": 50, "price": 1000},
     {"id": "growth", "name": "Growth", "calls": 100, "price": 1800},
-    {"id": "business", "name": "Business", "calls": 500, "price": 8000},
+    {"id": "business", "name": "Business", "calls": 500, "price": 8000},  # kind defaults to "calls"
 ]
 H = {"apikey": SKEY, "Content-Type": "application/json", "Prefer": "return=representation"}
 if not SKEY.startswith("sb_"):
@@ -173,7 +175,16 @@ def credit_order(order_id, payment_id):
     rows = db("PATCH", "payments", {"razorpay_order_id": f"eq.{order_id}", "status": "eq.created"},
               {"status": "paid", "razorpay_payment_id": payment_id})
     if rows:
-        rpc("add_credits", {"p_user": rows[0]["user_id"], "p_n": rows[0]["calls"]})
+        r0, kind = rows[0], rows[0].get("kind") or "calls"
+        if kind == "calls":
+            rpc("add_credits", {"p_user": r0["user_id"], "p_n": r0["calls"]})
+        else:
+            rpc("add_minutes", {"p_user": r0["user_id"], "p_n": r0["calls"]})
+            if kind == "line":
+                db("PATCH", "lines", {"user_id": f"eq.{r0['user_id']}"}, {"paid_until": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()})
+                threading.Thread(target=provision, args=(r0["user_id"],), daemon=True).start()
+            else:
+                threading.Thread(target=relink, args=(r0["user_id"],), daemon=True).start()
     return bool(rows)
 
 
@@ -183,13 +194,16 @@ def create_order(b: OrderIn, authorization: str = Header(None)):
     p = next((x for x in load_packs() if x["id"] == b.pack), None)
     if not p or not RZP_ID:
         raise HTTPException(400, "This pack is not available")
+    kind = p.get("kind", "calls")
+    if kind == "line" and not db("GET", "lines", {"user_id": f"eq.{uid}", "select": "id"}):
+        raise HTTPException(400, "Please save your business details first")
     r = requests.post("https://api.razorpay.com/v1/orders", auth=(RZP_ID, RZP_SECRET), timeout=30,
                       json={"amount": p["price"] * 100, "currency": "INR", "receipt": f"rx{uid[:8]}"})
     if not r.ok:
         raise HTTPException(502, "Could not start the payment. Please try again.")
     o = r.json()
     db("POST", "payments", json={"user_id": uid, "razorpay_order_id": o["id"], "pack": p["id"],
-                                 "calls": p["calls"], "amount_paise": o["amount"]})
+                                 "calls": p["calls"], "amount_paise": o["amount"], "kind": kind})
     return {"order_id": o["id"], "amount": o["amount"], "key_id": RZP_ID, "description": f'{p["name"]} - {p["calls"]} calls'}
 
 
@@ -348,6 +362,245 @@ def admin_tickets(authorization: str = Header(None)):
 def admin_edit_ticket(tid: str, b: TicketEdit, authorization: str = Header(None)):
     current_admin(authorization)
     db("PATCH", "tickets", {"id": f"eq.{tid}"}, {"status": b.status, "admin_reply": b.admin_reply})
+    return {"ok": True}
+
+
+# ---------- inbound AI receptionist ----------
+BOLNA = "https://api.bolna.ai"
+TEMPLATE_AGENT = os.getenv("BOLNA_TEMPLATE_AGENT_ID", "")
+HOOK_KEY = os.getenv("BOLNA_WEBHOOK_KEY", "")
+SITE_URL = os.getenv("SITE_URL", "https://rnexa.in")
+AUTO = os.getenv("AUTO_PROVISION", "on").lower() == "on"      # "off" = you approve every line yourself in the admin panel
+MAX_LINES_PER_DAY = int(os.getenv("MAX_LINES_PER_DAY", "3"))   # safety limit on automatic number purchases
+LOW_MIN = int(os.getenv("LOW_MINUTES", "20"))
+NUM_PROVIDER = os.getenv("NUMBER_PROVIDER", "vobiz")
+IST = timezone(timedelta(hours=5, minutes=30))
+
+
+def bh():
+    return {"Authorization": f"Bearer {os.environ['BOLNA_API_KEY']}", "Content-Type": "application/json"}
+
+
+def send_mail(to, subject, body):
+    host = os.getenv("SMTP_HOST")
+    if not host or not to:
+        return
+    msg = EmailMessage()
+    msg["From"], msg["To"], msg["Subject"] = os.getenv("MAIL_FROM", "Rnexa <ss@rnexa.in>"), to, subject
+    msg.set_content(body)
+    try:
+        with smtplib.SMTP(host, int(os.getenv("SMTP_PORT", "587")), timeout=20) as s:
+            s.starttls()
+            s.login(os.environ["SMTP_USER"], os.environ["SMTP_PASS"])
+            s.send_message(msg)
+    except Exception as e:
+        print("mail error:", e)
+
+
+def email_of(uid):
+    r = db("GET", "account_status", {"user_id": f"eq.{uid}"})
+    return r[0]["email"] if r else None
+
+
+def build_prompt(b):
+    return f"""You are Riya, the friendly phone receptionist of {b.get('name')}. People call you with questions. Answer calmly, like a helpful person.
+
+Business details:
+- Opening hours: {b.get('hours')}
+- Address: {b.get('address')}
+- Services, prices and common questions: {b.get('info') or 'Not provided'}
+
+How to talk:
+- Use short sentences and simple words. Ask one question at a time.
+- Language: {b.get('language', 'English')}. Reply in the same language the caller uses.
+- Answer only from the business details above. Never make up prices, offers or facts.
+- If you do not know, say: "I will pass this to our team and they will call you back." Then take the caller's name and number.
+- To book an appointment, ask the caller's name, the day and time they prefer, and the reason. Then say the team will confirm.
+- If the caller asks for a person, take their name and number and promise a callback.
+- If asked, honestly say you are an AI assistant.
+- In an emergency, tell the caller to call 108 or go to the nearest hospital.
+- End politely once the caller is satisfied."""
+
+
+def clone_agent(b):
+    r = requests.get(f"{BOLNA}/v2/agent/{TEMPLATE_AGENT}", headers=bh(), timeout=30)
+    r.raise_for_status()
+    t = r.json()
+    cfg, pr = t.get("agent_config"), t.get("agent_prompts")
+    if not cfg or not pr:
+        raise RuntimeError("Template agent has an unexpected format")
+    cfg["agent_name"] = f"Rnexa - {b.get('name', '')}"[:60]
+    cfg["agent_welcome_message"] = f"Vanakkam! Welcome to {b.get('name')}. This call may be recorded. How can I help you today?"
+    cfg["webhook_url"] = f"{SITE_URL}/api/bolna-webhook?key={HOOK_KEY}"
+    pr["task_1"]["system_prompt"] = build_prompt(b)
+    r = requests.post(f"{BOLNA}/v2/agent", headers=bh(), json={"agent_config": cfg, "agent_prompts": pr}, timeout=30)
+    if not r.ok:
+        raise RuntimeError(f"Create agent failed ({r.status_code}): {r.text[:150]}")
+    return r.json()["agent_id"]
+
+
+def find_number():
+    r = requests.get(f"{BOLNA}/phone-numbers/search", headers=bh(), params={"country": "IN", "provider": NUM_PROVIDER}, timeout=30)
+    if not r.ok:
+        raise RuntimeError(f"Number search failed ({r.status_code}): {r.text[:150]}")
+    d = r.json()
+    items = d if isinstance(d, list) else (d.get("numbers") or d.get("data") or [])
+    for it in items:
+        n = it if isinstance(it, str) else (it.get("phone_number") or it.get("number"))
+        if n:
+            return n
+    raise RuntimeError("No phone numbers available right now")
+
+
+def link(agent_id, number_id):
+    r = requests.post(f"{BOLNA}/inbound/setup", headers=bh(), json={"agent_id": agent_id, "phone_number_id": number_id}, timeout=30)
+    if not r.ok:
+        raise RuntimeError(f"Linking number failed ({r.status_code}): {r.text[:150]}")
+
+
+def provision(uid, force=False):
+    """Create the client's agent, buy a number, link them. Safe to run again after a failure."""
+    rows = db("GET", "lines", {"user_id": f"eq.{uid}"})
+    if not rows or rows[0]["status"] in ("active", "provisioning"):
+        return
+    line = rows[0]
+    if not AUTO and not force:
+        db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"status": "pending", "error": "Waiting for admin approval"})
+        return
+    if not line["phone_number_id"] and not force:
+        start = datetime.now(IST).replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+        if len(db("GET", "lines", {"provisioned_at": f"gte.{start}", "select": "id"})) >= MAX_LINES_PER_DAY:
+            db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"status": "pending", "error": "Daily limit reached - waiting for admin"})
+            return
+    db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"status": "provisioning", "error": None})
+    try:
+        agent = line["agent_id"] or clone_agent(line["business"])
+        db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"agent_id": agent})
+        pid, num = line["phone_number_id"], line["phone_number"]
+        if not pid:
+            num = find_number()
+            r = requests.post(f"{BOLNA}/phone-numbers/buy", headers=bh(), json={"country": "IN", "phone_number": num, "provider": NUM_PROVIDER}, timeout=45)
+            if not r.ok:
+                raise RuntimeError(f"Buying number failed ({r.status_code}): {r.text[:150]}")
+            pid, num = r.json()["id"], r.json().get("phone_number", num)
+            db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"phone_number_id": pid, "phone_number": num, "provisioned_at": datetime.now(timezone.utc).isoformat()})
+        link(agent, pid)
+        db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"status": "active", "error": None})
+        send_mail(email_of(uid), "Your Rnexa AI phone number is ready", f"Your AI receptionist number is {num}.\nSet call forwarding from your business phone to this number, then test it by calling.\n\nRnexa")
+    except Exception as e:
+        db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"status": "failed", "error": str(e)[:300]})
+
+
+def relink(uid):
+    """Switch a paused line back on after the client buys minutes."""
+    rows = db("GET", "lines", {"user_id": f"eq.{uid}", "status": "eq.paused"})
+    if rows and rpc("get_minutes", {"p_user": uid}) > 0:
+        try:
+            link(rows[0]["agent_id"], rows[0]["phone_number_id"])
+            db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"status": "active"})
+        except Exception as e:
+            db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"error": str(e)[:300]})
+
+
+@app.post("/api/bolna-webhook")
+async def bolna_webhook(request: Request, key: str = ""):
+    if not HOOK_KEY or not hmac.compare_digest(key, HOOK_KEY):
+        raise HTTPException(403, "Forbidden")
+    ev = await request.json()
+    if ev.get("status") != "completed":
+        return {"ok": True}
+    lines = db("GET", "lines", {"agent_id": f"eq.{ev.get('agent_id')}"})
+    eid = ev.get("id")
+    if not lines or not eid or db("GET", "calls", {"execution_id": f"eq.{eid}", "select": "execution_id"}):
+        return {"ok": True}
+    line = lines[0]
+    uid = line["user_id"]
+    dur = int(float(ev.get("conversation_duration") or 0))
+    mins = max(1, math.ceil(dur / 60)) if dur > 0 else 0
+    td = ev.get("telephony_data") or {}
+    ext = ev.get("extracted_data") or {}
+    summary = ext.get("General", {}).get("Call Summary", {}).get("subjective") if isinstance(ext.get("General"), dict) else None
+    db("POST", "calls", json={"execution_id": eid, "user_id": uid, "line_id": line["id"], "from_number": td.get("from_number"),
+                              "status": "completed", "duration_sec": dur, "minutes": mins, "transcript": ev.get("transcript"),
+                              "summary": summary or ev.get("summary"), "extracted": ext, "recording_url": td.get("recording_url")})
+    if mins:
+        left = rpc("use_minutes", {"p_user": uid, "p_n": mins})
+        if left is not None and left <= LOW_MIN < left + mins:
+            send_mail(email_of(uid), "Your Rnexa minutes are running low",
+                      f"You have {left} minutes left on your AI receptionist.\nBuy more at {SITE_URL}/#/app so your customers keep getting answers.\n\nRnexa")
+        if left == 0:
+            try:
+                requests.post(f"{BOLNA}/inbound/unlink", headers=bh(), json={"phone_number_id": line["phone_number_id"]}, timeout=20)
+                db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"status": "paused"})
+                send_mail(email_of(uid), "Your Rnexa AI receptionist is paused", f"Your minutes have run out, so the AI stopped answering calls.\nBuy minutes at {SITE_URL}/#/app to switch it back on.\n\nRnexa")
+            except Exception as e:
+                print("unlink error:", e)
+    return {"ok": True}
+
+
+class BizIn(BaseModel):
+    name: str
+    hours: str
+    address: str
+    info: str = ""
+    language: str = "English"
+
+
+@app.get("/api/line")
+def my_line(authorization: str = Header(None)):
+    uid = current_user(authorization)
+    rows = db("GET", "lines", {"user_id": f"eq.{uid}"})
+    line = rows[0] if rows else None
+    start = datetime.now(IST).replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+    n = len(db("GET", "calls", {"user_id": f"eq.{uid}", "created_at": f"gte.{start}", "select": "execution_id"}))
+    return {"business": line["business"] if line else None, "minutes": rpc("get_minutes", {"p_user": uid}), "calls_today": n,
+            "line": {k: line[k] for k in ("status", "phone_number", "paid_until")} if line else None}
+
+
+@app.post("/api/line")
+def save_business(b: BizIn, authorization: str = Header(None)):
+    uid = current_user(authorization)
+    biz = {"name": b.name.strip()[:80], "hours": b.hours.strip()[:120], "address": b.address.strip()[:200],
+           "info": b.info.strip()[:3000], "language": b.language}
+    if not biz["name"]:
+        raise HTTPException(400, "Business name is required")
+    if db("GET", "lines", {"user_id": f"eq.{uid}", "select": "id"}):
+        db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"business": biz})
+    else:
+        db("POST", "lines", json={"user_id": uid, "business": biz})
+    return {"ok": True}
+
+
+@app.get("/api/calls")
+def my_calls(authorization: str = Header(None)):
+    uid = current_user(authorization)
+    return db("GET", "calls", {"user_id": f"eq.{uid}", "order": "created_at.desc", "limit": "50"})
+
+
+@app.get("/api/admin/lines")
+def admin_lines(authorization: str = Header(None)):
+    current_admin(authorization)
+    em = {x["user_id"]: x["email"] for x in db("GET", "account_status")}
+    return [{**l, "email": em.get(l["user_id"]), "company": (l["business"] or {}).get("name")} for l in db("GET", "lines", {"order": "created_at.desc"})]
+
+
+@app.post("/api/admin/lines/{uid}/retry")
+def admin_retry_line(uid: str, authorization: str = Header(None)):
+    current_admin(authorization)
+    db("PATCH", "lines", {"user_id": f"eq.{uid}", "status": "in.(failed,pending)"}, {"status": "pending"})
+    threading.Thread(target=provision, args=(uid, True), daemon=True).start()
+    return {"ok": True}
+
+
+@app.post("/api/admin/lines/{uid}/release")
+def admin_release_line(uid: str, authorization: str = Header(None)):
+    current_admin(authorization)
+    rows = db("GET", "lines", {"user_id": f"eq.{uid}"})
+    if rows and rows[0]["phone_number_id"]:
+        r = requests.delete(f"{BOLNA}/phone-numbers/{rows[0]['phone_number_id']}", headers=bh(), timeout=30)
+        if not r.ok:
+            raise HTTPException(502, f"Bolna could not delete the number: {r.text[:120]}")
+    db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"status": "cancelled", "phone_number_id": None})
     return {"ok": True}
 
 
