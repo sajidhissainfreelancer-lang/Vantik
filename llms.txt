@@ -1,0 +1,17 @@
+# Rnexa
+
+> Rnexa is a Chennai-based company that builds websites and web apps for local businesses and runs an AI receptionist phone service. Businesses get an AI phone number, forward missed calls to it, and see every call (summary, text conversation, recording link) in a dashboard.
+
+## What we offer
+- Business websites and web apps that run in any browser
+- Domain name help and setup
+- Rnexa AI Receptionist: an AI that answers customer calls using the business's own details
+- Prepaid minutes for AI calls, with invoices and low-balance emails
+
+## Contact
+- Email: ss@rnexa.in
+- Phone / WhatsApp: +91 7358145522
+- Address: 162/80 Nethaji Nagar 5th Street, Tondiarpet, Chennai, Tamil Nadu 600081, India
+
+## Pages
+- Home: https://rnexa.in/

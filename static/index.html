@@ -1,7 +1,14 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" href="/favicon.png"><script src="/config.js"></script><title>Rnexa - Websites &amp; AI Calling for your business</title>
+<link rel="icon" href="/favicon.png"><script src="/config.js"></script><title>Rnexa | AI Receptionist and Websites for Local Businesses in Chennai</title>
+<meta name="description" content="Rnexa builds fast websites and runs an AI receptionist that answers your missed calls, takes bookings and shows every call in your dashboard.">
+<link rel="canonical" href="https://rnexa.in/"><meta name="theme-color" content="#192307"><link rel="apple-touch-icon" href="/logo-mark.png">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Rnexa"><meta property="og:title" content="Rnexa | AI Receptionist and Websites for Local Businesses">
+<meta property="og:description" content="An AI receptionist that answers your missed calls, plus fast websites for local businesses."><meta property="og:url" content="https://rnexa.in/">
+<meta property="og:image" content="https://rnexa.in/og-image.png"><meta property="og:image:alt" content="Rnexa logo with the text Websites and AI receptionist for local businesses">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://rnexa.in/og-image.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://rnexa.in/#org", "name": "Rnexa", "url": "https://rnexa.in/", "logo": "https://rnexa.in/logo.png", "email": "ss@rnexa.in", "telephone": "+91 7358145522"}, {"@type": "ProfessionalService", "@id": "https://rnexa.in/#business", "name": "Rnexa", "url": "https://rnexa.in/", "image": "https://rnexa.in/og-image.png", "telephone": "+91 7358145522", "email": "ss@rnexa.in", "description": "Websites, web apps and an AI receptionist phone service for local businesses.", "founder": {"@type": "Person", "name": "Sajid Hussain"}, "address": {"@type": "PostalAddress", "streetAddress": "162/80 Nethaji Nagar 5th Street, Tondiarpet", "addressLocality": "Chennai", "addressRegion": "Tamil Nadu", "postalCode": "600081", "addressCountry": "IN"}, "areaServed": "IN"}, {"@type": "WebSite", "@id": "https://rnexa.in/#site", "url": "https://rnexa.in/", "name": "Rnexa"}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How does the AI receptionist work?", "acceptedAnswer": {"@type": "Answer", "text": "You get an AI phone number. When you do not answer, your phone forwards the call to it, and the AI answers your customer using the details you gave us."}}, {"@type": "Question", "name": "What do I see after each call?", "acceptedAnswer": {"@type": "Answer", "text": "A summary, the full conversation as text, the caller's number and a recording link, all in your dashboard."}}, {"@type": "Question", "name": "Which phone companies work for call forwarding?", "acceptedAnswer": {"@type": "Answer", "text": "Call forwarding works with most Indian SIMs, including Airtel, Jio, Vi and BSNL. Your dashboard shows the steps for each."}}, {"@type": "Question", "name": "Does the AI speak Tamil?", "acceptedAnswer": {"@type": "Answer", "text": "English is supported today. Tamil depends on the voice setup, so contact us to test it for your business."}}, {"@type": "Question", "name": "What does it cost?", "acceptedAnswer": {"@type": "Answer", "text": "You pay a monthly fee for your AI number and then pay per minute of calls. Prices are shown in the pricing section of this page."}}]}]}</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{--bg:#f4f6fb;--card:#fff;--ink:#16202e;--mut:#5d6b80;--pri:#2457e6;--line:#dfe5ef;--err:#c62828}
@@ -68,15 +75,49 @@ footer{border-top:1px solid var(--line);margin-top:30px}footer a{margin:0 6px}
 textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:8px;font-size:15px;background:#0d0d10;color:var(--ink);font-family:inherit}
 textarea:focus{outline:none;border-color:var(--pri)}
 .callrow summary{display:flex;gap:10px;flex-wrap:wrap}.callrow pre{white-space:pre-wrap;font-family:inherit;color:var(--mut);line-height:1.5}
+
+:root{--bg:#f4f6ee;--card:#fff;--ink:#192307;--mut:#5b6648;--pri:#506022;--pri2:#77814B;--deep:#192307;--line:#dde2cc;--err:#b3261e}
+body{color:var(--ink);background-color:#f4f6ee;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Ccircle cx='24' cy='24' r='1.6' fill='%2377814B' fill-opacity='.4'/%3E%3Cpath d='M0 0l48 48M48 0L0 48' stroke='%2377814B' stroke-opacity='.07'/%3E%3C/svg%3E")}
+h1,h2{color:var(--deep)}p{color:var(--mut)}a{color:var(--pri)}
+.card,.stat,details,.tag{background:#fff!important;border:1px solid var(--line)!important;color:var(--ink);box-shadow:0 10px 28px rgba(25,35,7,.10)}
+.card{border-radius:16px}.stat b{color:var(--pri)}.tag{box-shadow:0 4px 12px rgba(25,35,7,.08)}
+input,select,textarea{background:#fff;color:var(--ink);border:1px solid var(--line);box-shadow:0 2px 6px rgba(25,35,7,.05)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 3px rgba(80,96,34,.18)}
+button,.btn,.cta.p{background:var(--pri)!important;color:#fff!important;border:0;border-radius:10px;font-weight:700;box-shadow:0 8px 18px rgba(25,35,7,.22)!important}
+button:hover,.cta.p:hover{background:var(--pri2)!important;transform:translateY(-1px)}
+button.ghost{background:none!important;color:var(--pri)!important;box-shadow:none!important}
+.cta.s,.ghostb{background:#fff!important;color:var(--pri)!important;border:1px solid var(--line)!important;box-shadow:0 6px 14px rgba(25,35,7,.10)!important}
+.chip{background:#fff!important;color:var(--pri)!important;border:1px solid var(--line)!important;box-shadow:0 3px 8px rgba(25,35,7,.08)!important;width:auto;margin:4px 6px 4px 0;padding:8px 12px;font-size:13px}
+.nav{background:rgba(255,255,255,.94)!important;border-bottom:1px solid var(--line)!important;box-shadow:0 6px 20px rgba(25,35,7,.10)}.nav a{color:var(--deep)}.nav .btn{color:#fff!important}
+.hero2{background:linear-gradient(135deg,#192307 0%,#506022 100%)}.hero2 h1{background:none;-webkit-text-fill-color:#fff;color:#fff}.hero2 p{color:#e6ebd2}
+.hero2 .cta.p{background:#fff!important;color:var(--deep)!important}.hero2 .cta.s{background:transparent!important;color:#fff!important;border-color:rgba(255,255,255,.5)!important}
+.alt{background:rgba(255,255,255,.7)!important;border-color:var(--line)!important}
+.terms{background:#fafbf6;color:var(--ink);border-color:var(--line)}
+th{color:var(--mut)}table td,table th{border-color:var(--line)}
+footer{background:#192307;color:#cfd8b0;margin-top:30px;border:0}footer a{color:#fff}footer b{color:#fff}
+.brand{color:var(--deep)!important}
+.side{background:#192307;border-right:0;box-shadow:6px 0 24px rgba(25,35,7,.22)}.side .brand{color:#fff!important}
+#dnav button,#dnav a,#atabs button,.side .sidefoot a{color:#cfd8b0!important}
+#dnav button:hover,#atabs button:hover{background:rgba(255,255,255,.08)!important}
+#dnav button.on,#atabs button.on{background:rgba(119,129,75,.5)!important;color:#fff!important}
+.side small,.side #who{color:#aab58a!important}#cr{color:#e3ebc4!important}.side button.ghost{color:#e3ebc4!important}
+.modal{background:rgba(25,35,7,.8)}.mbox{background:#fff;border:1px solid var(--pri2);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.msg.ok,.ok{color:#3d5a14}.ferr{color:var(--err);font-size:12px;display:block;margin-top:3px}
+.spin{width:38px;height:38px;border:4px solid var(--line);border-top-color:var(--pri);border-radius:50%;animation:sp 1s linear infinite;margin:18px auto}@keyframes sp{to{transform:rotate(360deg)}}
+#gload{position:fixed;inset:0;z-index:100000;background:#f4f6ee;display:flex;align-items:center;justify-content:center}
+#net{position:fixed;top:0;left:0;right:0;z-index:100002;background:var(--err);color:#fff;text-align:center;padding:9px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:100001;display:flex;flex-direction:column;gap:8px;align-items:center}
+.t{padding:12px 18px;border-radius:12px;background:#192307;color:#fff;box-shadow:0 10px 26px rgba(0,0,0,.3)}.t.ok{background:#506022}.t.err{background:#b3261e}.t.warn{background:#8a6d1a}
+.empty{text-align:center;padding:18px;border:1px dashed var(--line);border-radius:12px;background:#fafbf6}
 </style></head><body>
 
 <div id="home" class="hide">
- <div class="nav"><a href="#/" class="brand"><img src="/logo-mark.png" alt=""><span>Rnexa</span></a>
+ <div class="nav"><a href="#/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a>
   <span class="links"><a href="#services">Services</a><a href="#aicaller">AI Caller</a><a href="#how">How it works</a><a href="#faq">FAQ</a><a href="#contact">Contact</a></span>
   <span><a class="ghostb" id="navLogin" href="#/login">Log in</a><a class="btn" id="navCta" href="#/signup">Sign up</a></span></div>
- <div class="hero2"><img src="/logo-mark.png" alt="" style="height:92px;margin-bottom:12px"><h1>Websites that bring customers. AI that follows up with them.</h1>
-  <p>Rnexa builds fast, clean and friendly websites and web apps for gyms, restaurants, car dealers, clinics, real estate and local businesses, and gives you an AI caller that talks to your leads for you.</p>
-  <a class="cta p" href="#/signup">Try the AI Caller</a><a class="cta s" href="#contact">Get a website</a></div>
+ <div class="hero2"><img src="/logo-mark.png" alt="Rnexa logo" style="height:92px;margin-bottom:12px"><h1>Websites that bring customers. An AI receptionist that answers them.</h1>
+  <p>Rnexa builds fast, clean and friendly websites and web apps for local businesses, and gives you an AI receptionist that answers the calls you miss, takes bookings and shows you every conversation.</p>
+  <a class="cta p" href="#/signup">Get your AI receptionist</a><a class="cta s" href="#contact">Get a website</a></div>
  <div class="sec" id="services"><h2>What we build</h2><p>Everything you need to go online, handled by one team.</p>
   <div class="g3">
    <div class="card"><div class="ico">🌐</div><h2>Business websites</h2><p>Fast, clean, mobile-friendly websites made for your industry.</p></div>
@@ -84,40 +125,41 @@ textarea:focus{outline:none;border-color:var(--pri)}
    <div class="card"><div class="ico">🔎</div><h2>Domain help</h2><p>Our team helps you pick a better domain name and sets it up for you.</p></div>
    <div class="card"><div class="ico">🔒</div><h2>Secure data</h2><p>Your customer and business data is stored in a secure database.</p></div>
   </div></div>
- <div class="alt"><div class="sec" id="aicaller"><h2>Rnexa AI Caller</h2>
-  <p>Upload your leads. The AI calls them in a natural, friendly conversation and hands you back an Excel with a remark for every lead.</p>
-  <div class="g3">
-   <div class="card"><div class="ico">📞</div><h2>Sales follow-ups</h2><p>Find out who is still interested and who wants a callback.</p></div>
-   <div class="card"><div class="ico">🎧</div><h2>Customer support</h2><p>Check in with customers and collect their needs.</p></div>
-   <div class="card"><div class="ico">🛎️</div><h2>Reception</h2><p>Confirm visits and bookings without a calling team.</p></div>
-  </div></div></div>
+ <div class="alt"><div class="sec" id="aicaller"><h2>Rnexa AI Receptionist</h2>
+  <p>Never lose a customer because you could not pick up. The AI answers with your own business details.</p>
+  <div class="g3"><div class="card"><div class="ico">📞</div><h2>Answers every call</h2><p>Forward missed calls to your AI number. It answers politely, day and night.</p></div>
+  <div class="card"><div class="ico">🗓️</div><h2>Books and takes messages</h2><p>It collects the caller's name, need and preferred time, so you can call back.</p></div>
+  <div class="card"><div class="ico">📝</div><h2>You see every call</h2><p>Summary, full conversation text and a recording link, in your dashboard.</p></div></div></div></div>
  <div class="sec" id="how"><h2>How it works</h2>
-  <div class="g3"><div class="card"><h2>1. Create your account</h2><p>Sign up and add your company details.</p></div>
-  <div class="card"><h2>2. Upload your leads</h2><p>Upload an Excel or CSV with phone numbers.</p></div>
-  <div class="card"><h2>3. Download results</h2><p>Get your Excel back with interest level, needs, and callback time.</p></div></div>
+  <div class="g3"><div class="card"><h2>1. Create your account</h2><p>Sign up and tell us about your business and services.</p></div>
+  <div class="card"><h2>2. Get your AI number</h2><p>Pay for your line and we set up your AI number in minutes.</p></div>
+  <div class="card"><h2>3. Forward missed calls</h2><p>Set call forwarding on your phone. Our guide covers Airtel, Jio, Vi and BSNL.</p></div></div>
   <p style="margin-top:16px"><a class="cta p" href="#/signup">Create free account</a></p></div>
- <div class="alt"><div class="sec" id="faq"><h2>Questions</h2>
-  <details><summary>What do I get back?</summary><p>Your original Excel plus new columns: call status, interest level, requirement, callback time, next step, summary and a short remark.</p></details>
-  <details><summary>Do the calls sound like a real person?</summary><p>The AI speaks naturally, answers questions and handles objections. It always says it is an AI assistant if asked.</p></details>
-  <details><summary>Can I call anyone?</summary><p>No. You must have consent or a lawful right to contact every lead, and follow TRAI / DND rules. You accept this when you sign up.</p></details>
-  <details><summary>Which language does it speak?</summary><p>English for now. More languages can be added.</p></details>
-  <details><summary>What does it cost?</summary><p>Contact us and we will share a plan that fits the number of calls you need.</p></details></div></div>
+ <div class="alt"><div class="sec" id="faq"><h2>Questions</h2><details><summary>How does the AI receptionist work?</summary><p>You get an AI phone number. When you do not answer, your phone forwards the call to it, and the AI answers your customer using the details you gave us.</p></details><details><summary>What do I see after each call?</summary><p>A summary, the full conversation as text, the caller's number and a recording link, all in your dashboard.</p></details><details><summary>Which phone companies work for call forwarding?</summary><p>Call forwarding works with most Indian SIMs, including Airtel, Jio, Vi and BSNL. Your dashboard shows the steps for each.</p></details><details><summary>Does the AI speak Tamil?</summary><p>English is supported today. Tamil depends on the voice setup, so contact us to test it for your business.</p></details><details><summary>What does it cost?</summary><p>You pay a monthly fee for your AI number and then pay per minute of calls. Prices are shown in the pricing section of this page.</p></details></div></div>
  <div class="sec" id="pricing"><h2>Pricing</h2><p>Buy call credits. One credit = one AI call. Prices in INR, including all features.</p><div class="g3" id="packs"></div></div>
  <div class="sec" id="contact"><h2>Contact</h2><p>Tell us about your business and we will reply quickly.</p>
   <a class="cta p" data-wa href="#">Chat on WhatsApp</a><a class="cta s" data-email href="#">Email us</a></div>
  <footer><p><a href="#/terms">Terms &amp; Conditions</a> &middot; <a href="#/privacy">Privacy Policy</a> &middot; <a href="#/refund">Refund &amp; Cancellation</a> &middot; <a href="#/contact">Contact Us</a></p><b>Rnexa</b> &middot; Built by <span id="owner"></span> &middot; &copy; <span id="yr"></span> Rnexa. All rights reserved.</footer></div>
-<div id="reset" class="hide wrap"><div class="card"><a href="#/" class="brand"><img src="/logo-mark.png" alt=""><span>Rnexa</span></a>
+<div id="reset" class="hide wrap"><div class="card"><a href="#/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a>
  <h1 style="margin-top:14px">Set a new password</h1><p>Choose a new password for your account.</p>
  <label>New password (8+ characters)</label><input id="rp1" type="password" autocomplete="new-password"><label>Confirm new password</label><input id="rp2" type="password" autocomplete="new-password">
  <button id="rpb">Save new password</button><div id="rpm" class="msg"></div></div></div>
-<div id="legal" class="hide"><div class="nav"><a href="#/" class="brand"><img src="/logo-mark.png" alt=""><span>Rnexa</span></a><span><a href="#/">&larr; Home</a></span></div>
+<div id="legal" class="hide"><div class="nav"><a href="#/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a><span><a href="#/">&larr; Home</a></span></div>
  <div class="wrap wide"><div class="card" id="legalBody"></div></div></div>
-<div id="admin" class="hide shell"><aside class="side"><a href="#/" class="brand"><img src="/logo-mark.png" alt=""><span>Rnexa</span></a><small style="color:var(--pri);letter-spacing:3px">ADMIN</small><div id="atabs"></div>
+<div id="admin" class="hide shell"><aside class="side"><a href="#/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a><small style="color:var(--pri);letter-spacing:3px">ADMIN</small><div id="atabs"></div>
  <div class="sidefoot"><a href="#/app">Client view</a><button class="ghost" id="aout" style="text-align:left;padding:6px 0">Log out</button></div></aside>
  <main class="main"><div class="card" id="abody" style="overflow:auto"></div></main></div>
+<div id="gload"><div class="spin"></div></div>
+<div id="net" class="hide">You are offline. Please check your internet connection.</div>
+<div id="toast"></div>
+<div id="nf" class="hide wrap"><div class="card" style="text-align:center"><img src="/logo-mark.png" alt="Rnexa logo" style="height:56px"><h2>404 - Page not found</h2><p>The page you are looking for does not exist or has moved.</p><a class="cta p" href="#/">Back to home</a></div></div>
+<div id="denied" class="hide wrap"><div class="card" style="text-align:center"><img src="/logo-mark.png" alt="Rnexa logo" style="height:56px"><h2>Permission denied</h2><p>Your account does not have access to this page.</p><a class="cta p" href="#/app">Go to my dashboard</a></div></div>
+<div id="tour" class="hide modal"><div class="mbox" style="text-align:left"><small id="tourN"></small><h2 id="tourT"></h2><p id="tourP"></p>
+ <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px"><button class="ghost" id="tourSkip">Skip tour</button><span><button class="ghost" id="tourBack">Back</button> <button id="tourNext" style="width:auto">Next</button></span></div></div></div>
+<button id="tourBtn" style="display:none;position:fixed;right:18px;bottom:18px;z-index:50;width:auto">Show tour</button>
 <!-- AUTH -->
 <div id="auth" class="wrap hide"><div class="card">
-  <a href="#/" class="brand"><img src="/logo-mark.png" alt=""><span>Rnexa</span></a><h1 style="margin-top:14px">AI Caller</h1><p id="authSub">Log in to your client account.</p>
+  <a href="#/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a><h1 style="margin-top:14px">AI Caller</h1><p id="authSub">Log in to your client account.</p>
   <label>Email</label><input id="email" type="email" autocomplete="email">
   <label>Password</label><input id="pass" type="password" autocomplete="current-password" placeholder="Minimum 8 characters">
   <button id="authBtn">Log in</button>
@@ -129,24 +171,12 @@ textarea:focus{outline:none;border-color:var(--pri)}
 <div id="onb" class="wrap wide hide"><div class="card">
   <h1>Tell us about your company</h1><p>Step 2 of 2. Fill the details and accept our terms to continue.</p>
   <div class="row"><div><label>Company name *</label><input id="company"></div><div><label>Your name *</label><input id="cname"></div></div>
-  <div class="row"><div><label>Phone *</label><input id="phone" type="tel" placeholder="+91..."></div>
-  <div><label>Industry</label><select id="industry"><option value="">Select</option><option>Real estate</option><option>Education / coaching</option><option>Clinic / healthcare</option><option>Insurance / finance</option><option>Gym / fitness</option><option>Retail / other</option></select></div></div>
-  <label>City</label><input id="city">
+  <div class="row"><div><label>Mobile number *</label><input id="phone" type="tel"></div><div><label>Industry *</label><select id="industry"><option value="">Select</option><option>Clinic / hospital</option><option>Salon / spa</option><option>Education / coaching</option><option>Real estate</option><option>Restaurant / food</option><option>Retail / shop</option><option>Gym / fitness</option><option>Automobile / service</option><option>Insurance / finance</option><option>Other</option></select></div></div>
+  <div class="row"><div><label>City</label><input id="city"></div><div><label>Company PAN (optional)</label><input id="pan" maxlength="10"></div></div>
+  <div class="row"><div><label>GST number (optional)</label><input id="gstin" maxlength="15"></div><div><label>Billing address (for invoices)</label><input id="baddr"></div></div>
+  <p style="font-size:12px">PAN and GST are used only on your invoices.</p>
   <h2 style="margin-top:20px">Terms &amp; Conditions and Privacy Policy</h2>
-  <div class="terms" id="terms">
-    <b>Version 1.0</b><br><br>
-    <b>1. Service.</b> Rnexa provides an AI calling service that calls the leads you upload and returns a report with call results.<br>
-    <b>2. Consent and legal compliance.</b> You confirm that every person you upload has agreed to be contacted, or that you otherwise have a lawful right to call them. You are responsible for following Indian telecom rules (including TRAI / DND regulations) and any other applicable law.<br>
-    <b>3. AI disclosure.</b> Calls are made by an AI assistant, may be recorded and transcribed, and the AI will say it is an AI if asked.<br>
-    <b>4. Your data.</b> You own your lead data. Rnexa uses it only to provide the service, stores it securely, and does not sell it. Call recordings and transcripts are processed by our voice and AI providers to deliver the service.<br>
-    <b>5. Accuracy.</b> Call remarks are generated by AI and may contain errors. Please review important results.<br>
-    <b>6. Prohibited use.</b> No fraud, harassment, misleading offers, illegal products, or calls to people who asked not to be contacted.<br>
-    <b>7. Payments.</b> Pricing, credits and refunds are as agreed in writing or shown at purchase. Unused call credits are non-transferable.<br>
-    <b>8. Liability.</b> The service is provided "as is". To the extent allowed by law, Rnexa is not liable for indirect losses or lost business.<br>
-    <b>9. Privacy.</b> We collect your account and company details to run your account and support you. Contact us at your Rnexa support email to access or delete your data.<br>
-    <b>10. Changes and termination.</b> We may update these terms; continued use means acceptance. We may suspend accounts that break these terms.<br><br>
-    <b>End of terms.</b>
-  </div>
+  <div class="terms" id="terms"></div>
   <p id="scrollHint" style="font-size:12px">Scroll to the end of the terms to enable the checkbox.</p>
   <label style="font-weight:400"><input id="agree" type="checkbox" disabled style="width:auto"> I have read and accept the Terms &amp; Conditions and Privacy Policy.</label>
   <button id="saveBtn" disabled>Save and continue</button><div id="onbMsg" class="msg"></div>
@@ -154,7 +184,7 @@ textarea:focus{outline:none;border-color:var(--pri)}
 
 <!-- DASHBOARD -->
 <div id="dash" class="hide shell">
- <aside class="side"><a href="#/" class="brand"><img src="/logo-mark.png" alt=""><span>Rnexa</span></a>
+ <aside class="side"><a href="#/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a>
   <nav id="dnav"><button data-s="overview">Overview</button><button data-s="reception">AI Receptionist</button><button data-s="new">New campaign</button><button data-s="camps">Campaigns</button><button data-s="billing">Credits &amp; billing</button><button data-s="help">Help center</button><button data-s="settings">Settings</button><a id="aLink" href="#/admin" style="display:none">Admin panel</a></nav>
   <div class="sidefoot"><b id="cr" style="color:var(--pri)"></b><small id="who" style="color:var(--mut);word-break:break-all"></small><button class="ghost" id="out" style="text-align:left;padding:6px 0">Log out</button></div>
  </aside>
@@ -170,11 +200,14 @@ textarea:focus{outline:none;border-color:var(--pri)}
    <div class="grid"><div class="stat"><b id="rc_min">-</b>Minutes left</div><div class="stat"><b id="rc_today">-</b>Calls today</div><div class="stat"><b id="rc_num" style="font-size:17px">Not set up</b>Your AI number</div></div><p id="rc_status" style="margin-top:12px"></p></div>
   <div class="card"><h2>1. Tell the AI about your business</h2>
    <label>Business name</label><input id="rb_name"><label>Opening hours</label><input id="rb_hours" placeholder="Mon to Sat, 9 AM to 7 PM"><label>Address</label><input id="rb_addr">
-   <label>Services, prices and common questions</label><textarea id="rb_info" rows="6" placeholder="Example: Consultation fee 300 rupees. We do scans and blood tests. Parking is available..."></textarea>
+   <label>Industry</label><select id="rb_ind"><option value="">Select</option><option>Clinic / hospital</option><option>Salon / spa</option><option>Education / coaching</option><option>Real estate</option><option>Restaurant / food</option><option>Retail / shop</option><option>Gym / fitness</option><option>Automobile / service</option><option>Insurance / finance</option><option>Other</option></select>
+   <label>Services, prices and common questions</label><p style="margin:2px 0 6px">Need ideas? Tap a sample, then edit the parts in [brackets]:</p><div id="sugg"></div><textarea id="rb_info" rows="6" placeholder="Example: Consultation fee 300 rupees. We do scans and blood tests. Parking is available..."></textarea>
    <label>Language</label><select id="rb_lang"><option>English</option><option>Tamil</option><option>Tamil and English</option></select>
    <button id="rb_save" style="width:auto">Save business details</button> <span id="rb_msg" class="msg"></span></div>
   <div class="card"><h2>2. Get your AI phone number</h2><p>Pay once and we set up your AI number in about a minute. Then set <b>call forwarding</b> on your business phone to that number (for example, forward when busy or unanswered). Ask your phone company for the forwarding code.</p>
    <div class="grid" id="rc_buy"></div><div id="rc_pay" class="msg"></div></div>
+  <div class="card"><h2>3. Forward missed calls to your AI number</h2><div class="stat" id="fw_num" style="margin-bottom:10px"></div>
+   <label>Your phone company</label><select id="fw_op"><option>Airtel</option><option>Jio</option><option>Vi (Vodafone Idea)</option><option>BSNL</option><option>Other / landline</option></select><div id="fw_body"></div></div>
   <div class="card"><h2>Recent calls</h2><div id="rc_calls"><p>No calls yet.</p></div></div></section>
   <section data-sec="camps" class="hide"><div class="card"><h2>Your campaigns</h2><div id="camps"><p>No campaigns yet.</p></div></div></section>
   <section data-sec="billing" class="hide"><div class="card"><h2>Buy call credits</h2><p>One credit = one AI call. Calls that do not connect are credited back.</p><div class="grid" id="buy"></div><div id="payMsg" class="msg"></div></div>
@@ -184,31 +217,29 @@ textarea:focus{outline:none;border-color:var(--pri)}
    <select id="tsub"><option>Change my account details</option><option>Delete my account</option><option>Billing question</option><option>Other</option></select>
    <label>Message</label><input id="tmsg"><button id="tgo" style="width:auto">Send ticket</button><div id="tout" class="msg"></div><div id="tlist"></div></div></section>
   <section data-sec="settings" class="hide"><div class="card"><h2>Company details</h2>
-   <label>Company name</label><input id="sc"><label>Your name</label><input id="sn"><label>Phone</label><input id="sp"><label>City</label><input id="sy">
+   <label>Company name</label><input id="sc"><label>Your name</label><input id="sn"><label>Phone</label><input id="sp"><label>City</label><input id="sy"><label>Company PAN (optional)</label><input id="spn" maxlength="10"><label>GST number (optional)</label><input id="sgs" maxlength="15"><label>Billing address</label><input id="sba">
    <button id="ssave" style="width:auto">Save changes</button> <span id="smsg" class="msg"></span><p style="margin-top:12px">To change your login email or delete your account, raise a ticket in the Help center.</p></div>
    <div class="card"><h2>Change password</h2><label>New password (8+ characters)</label><input id="spw" type="password"><button id="spwb" style="width:auto">Update password</button> <span id="spm" class="msg"></span></div></section>
  </main>
 </div>
-<div id="susp" class="hide modal"><div class="mbox"><img src="/logo-mark.png" alt="" style="height:64px"><h1>Account suspended</h1>
+<div id="susp" class="hide modal"><div class="mbox"><img src="/logo-mark.png" alt="Rnexa logo" style="height:64px"><h1>Account suspended</h1>
  <p><b id="suspName"></b> has paused access to your account. Please contact our team and we will help you right away.</p>
  <a class="cta p" data-wa href="#">WhatsApp our team</a><a class="cta s" data-email href="#">Email our team</a><a class="cta s" id="callus" href="#">Call us</a>
  <p><button class="ghost" id="suspOut">Log out</button></p></div></div>
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-const TERMS_VERSION = "1.0";
+const TERMS_VERSION = "2.0";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
 document.querySelectorAll("[data-email]").forEach(e=>{e.href="mailto:"+SITE.email});
 document.querySelectorAll("[data-wa]").forEach(e=>{e.href="https://wa.me/"+SITE.whatsapp});
-function renderPacks(L){window.ALLP=L;L=L.filter(p=>(p.kind||"calls")==="calls");
-$("packs").innerHTML=L.map(p=>'<div class="card"><h2>'+p.name+'</h2><p style="font-size:26px;color:var(--ink);margin:0"><b>&#8377;'+p.price.toLocaleString("en-IN")+'</b></p><p>'+p.calls+' AI calls &middot; about &#8377;'+Math.round(p.price/p.calls)+' per call</p><a class="cta p" href="#/signup" style="margin:0">Get started</a></div>').join("");
-$("buy").innerHTML=L.map(p=>'<div class="stat"><b>'+p.calls+' calls</b>&#8377;'+p.price.toLocaleString("en-IN")+'<br><button data-pack="'+p.id+'" style="margin-top:8px">Buy</button></div>').join("")}
+function renderPacks(L){window.ALLP=L;const A=L.filter(p=>["line","minutes"].includes(p.kind)),C=L.filter(p=>(p.kind||"calls")==="calls");
+$("packs").innerHTML=A.map(p=>'<div class="card"><h2>'+p.name+'</h2><p style="font-size:26px;color:var(--ink);margin:0"><b>&#8377;'+p.price.toLocaleString("en-IN")+'</b></p><p>'+p.calls+' minutes &middot; about &#8377;'+Math.round(p.price/p.calls)+' per minute</p><a class="cta p" href="#/signup" style="margin:0">Get started</a></div>').join("");
+$("buy").innerHTML=C.map(p=>'<div class="stat"><b>'+p.calls+' calls</b>&#8377;'+p.price.toLocaleString("en-IN")+'<br><button data-pack="'+p.id+'" style="margin-top:8px">Buy</button></div>').join("")}
 fetch("/api/packs").then(r=>r.json()).then(renderPacks).catch(()=>{});
 $("owner").textContent=SITE.owner;$("yr").textContent=new Date().getFullYear();
 let signup = false;
-function show(v){["home","auth","onb","dash","legal","admin","reset"].forEach(x=>$(x).classList.toggle("hide",x!==v))}
+function show(v){$("gload").style.display="none";$("tourBtn").style.display=v==="dash"?"":"none";["home","auth","onb","dash","legal","admin","reset","nf","denied"].forEach(x=>$(x).classList.toggle("hide",x!==v))}
 
 function setMode(v){signup=v;$("fpBtn").style.display=signup?"none":"";$("authBtn").textContent=signup?"Create account":"Log in";
   $("authSub").textContent=signup?"Step 1 of 2. Create your account.":"Log in to your client account.";
@@ -217,7 +248,7 @@ $("swBtn").onclick=()=>{location.hash=signup?"#/login":"#/signup"};
 
 $("authBtn").onclick=async()=>{
   const email=$("email").value.trim(),password=$("pass").value,m=$("authMsg");m.className="msg";m.textContent="";
-  if(!email||password.length<8){m.textContent="Enter a valid email and a password of 8+ characters.";return}
+  if(!check([["email",R.email,"Enter a valid email address"],["pass",R.pw,"Use 8 or more characters"]]))return;
   $("authBtn").disabled=true;
   const {data,error}=signup?await sb.auth.signUp({email,password}):await sb.auth.signInWithPassword({email,password});
   $("authBtn").disabled=false;
@@ -232,62 +263,75 @@ $("agree").onchange=()=>$("saveBtn").disabled=!$("agree").checked;
 
 $("saveBtn").onclick=async()=>{
   const {data:{user}}=await sb.auth.getUser(),m=$("onbMsg");m.textContent="";
+  if(!check([["company",R.req,"Enter your company name"],["cname",R.req,"Enter your name"],["phone",R.phone,"Enter a valid 10-digit mobile number"],["industry",R.req,"Choose your industry"],["pan",R.pan,"PAN looks wrong (example format: ABCDE1234F)"],["gstin",R.gst,"GST number looks wrong (15 characters)"]]))return;
   const row={id:user.id,company_name:$("company").value.trim(),contact_name:$("cname").value.trim(),phone:$("phone").value.trim(),
-    industry:$("industry").value||null,city:$("city").value.trim()||null,terms_version:TERMS_VERSION,terms_accepted_at:new Date().toISOString()};
-  if(!row.company_name||!row.contact_name||!row.phone){m.textContent="Please fill company name, your name and phone.";return}
+    industry:$("industry").value,city:$("city").value.trim()||null,pan:$("pan").value.trim().toUpperCase()||null,gstin:$("gstin").value.trim().toUpperCase()||null,
+    billing_address:$("baddr").value.trim()||null,terms_version:TERMS_VERSION,terms_accepted_at:new Date().toISOString()};
   const {error}=await sb.from("profiles").upsert(row);
   if(error){m.textContent=error.message;return}
-  route();
+  toast("Welcome to Rnexa","ok");route();
 };
 
 $("out").onclick=async()=>{await sb.auth.signOut();location.hash="#/"};
 
 const upd="Last updated: October 2026.";
+const sec=(t,p)=>`<h2>${t}</h2><p>${p}</p>`;
 const PAGES={
-terms:()=>`<h1>Terms &amp; Conditions</h1><p>${upd}</p>
-<h2>1. Service</h2><p>${SITE.business} ("we") provides an AI calling service: you upload a list of leads, our AI calls them, and you download a report with the results. We also build websites and web apps.</p>
-<h2>2. Your account</h2><p>You must give correct company details and keep your password safe. You are responsible for all activity in your account.</p>
-<h2>3. Consent and legal compliance</h2><p>You confirm that every person you upload has agreed to be contacted or that you otherwise have a lawful right to call them. You must follow Indian telecom rules, including TRAI and DND regulations, and any other applicable law.</p>
-<h2>4. AI disclosure and recording</h2><p>Calls are made by an AI assistant and may be recorded and transcribed. The AI says it is an AI if asked.</p>
-<h2>5. Credits and payment</h2><p>Calls are paid using prepaid credits. Prices are shown on our website in INR. Payments are processed securely by Razorpay. Credits are for your account only and cannot be transferred.</p>
-<h2>6. Prohibited use</h2><p>No fraud, harassment, misleading offers, illegal products, or calls to people who asked not to be contacted. We may suspend accounts that break these terms.</p>
-<h2>7. Accuracy</h2><p>Call remarks are generated by AI and may contain errors. Please review important results.</p>
-<h2>8. Liability</h2><p>The service is provided "as is". To the extent allowed by law, we are not liable for indirect losses or lost business.</p>
-<h2>9. Changes and contact</h2><p>We may update these terms. Questions: ${SITE.email}.</p>`,
-privacy:()=>`<h1>Privacy Policy</h1><p>${upd}</p>
-<h2>What we collect</h2><p>Your name, email, phone, company details; the lead lists you upload (names, phone numbers and other columns you include); and call recordings, transcripts and results created by the service.</p>
-<h2>How we use it</h2><p>To run your account, make the calls you request, produce your report, process payments, give support, and keep the service secure. We do not sell your data.</p>
-<h2>Who processes it</h2><p>We use trusted providers: a secure database (Supabase), voice and telephony providers (Bolna and its partners), AI language models, hosting (Render) and Razorpay for payments. They process data only to provide the service.</p>
-<h2>Your uploaded leads</h2><p>You own your lead data and are responsible for having the right to contact those people.</p>
-<h2>Storage and security</h2><p>Data is stored in access-controlled databases; each client can see only their own data. You can ask us to delete your account and data at any time.</p>
-<h2>Contact</h2><p>${SITE.email}, ${SITE.phone}</p>`,
-refund:()=>`<h1>Refund &amp; Cancellation Policy</h1><p>${upd}</p>
-<h2>Credits</h2><p>Credits are digital and are used when calls are made. Used credits are not refundable.</p>
-<h2>Unused credits</h2><p>If you have not used any credits from a purchase, you can request a full refund within 7 days of payment by emailing ${SITE.email}.</p>
-<h2>Failed or duplicate payments</h2><p>If money is debited but credits are not added, or you are charged twice, contact us. We will fix it or refund the amount.</p>
-<h2>Calls that did not connect</h2><p>Calls that were not answered or failed to connect can be credited back at our discretion.</p>
-<h2>Refund timeline</h2><p>Approved refunds go back to the original payment method in 5 to 7 working days.</p>
-<h2>Cancellation</h2><p>You can stop using the service at any time. Website projects are covered by the written agreement for that project.</p>`,
+terms:()=>`<h1>Terms &amp; Conditions</h1><p>${upd} By creating an account you agree to these terms.</p>`
++sec("1. About Rnexa","Rnexa builds websites and web apps and runs an AI phone service for businesses. These terms cover your use of the Rnexa client portal and the AI services in it.")
++sec("2. Your account","You must give correct company details and keep your password private. You are responsible for everything done through your account. Tell us at once if you think someone else is using it.")
++sec("3. AI Receptionist","We give your business an AI phone number. When your customers call it, or when you forward missed calls to it, an AI assistant answers using the business details you provide. The AI can make mistakes, so please check your instructions and call summaries regularly. Calls are recorded and written down so you can review them. You must tell callers the call is recorded, and our AI says this at the start of each call.")
++sec("4. Call forwarding","Setting up call forwarding on your own phone is your responsibility. Your phone company may charge for forwarded calls. Rnexa is not responsible for charges from your phone company, or for calls that are not forwarded because of your phone settings or network.")
++sec("5. Outbound calling","If you use our AI to call people, you must have their consent or a lawful right to call them, and you must follow TRAI and DND rules and any other Indian law. Do not use the service to cheat, threaten or mislead anyone.")
++sec("6. Minutes, credits and payment","AI calls use prepaid minutes, and each call is rounded up to the next full minute. The AI phone line has a monthly fee shown with the price. When your minutes finish, the AI stops answering until you buy more. Prices are in Indian rupees and are shown before you pay. Payments are handled by Razorpay.")
++sec("7. Invoices","After each payment you can download an invoice from Credits &amp; billing. We use the company name, PAN, GST number and billing address you saved, so please keep them correct. Rnexa is currently not registered for GST, so no GST is charged on our invoices.")
++sec("8. Emails we send you","We send emails only about your account and service: (a) confirm your email address; (b) reset your password or confirm a changed email; (c) tell you when your AI phone number is ready; (d) warn you when you have 20 minutes or fewer left; (e) tell you when your AI is paused because your minutes ended; (f) replies to your support tickets; (g) important notices about these terms or your account. We do not send advertising emails without your permission.")
++sec("9. Rules of use","You may not use the service for anything illegal, harmful or misleading, to call people who asked not to be called, or to share other people's private data without the right to do so. We may suspend or close an account that breaks these terms. A suspended account can contact us to sort things out.")
++sec("10. Your data","You own your business details, lead lists and call content. We use them only to run the service for you, as explained in our Privacy Policy.")
++sec("11. Our responsibility","We work hard to keep the service running, but we cannot promise it will never stop or never make mistakes. To the extent the law allows, Rnexa is not responsible for lost business or indirect losses.")
++sec("12. Changes","We may update these terms. If a change is important, we will ask you to accept the new version when you next sign in.")
++sec("13. Contact",`Questions about these terms: ${SITE.email} or ${SITE.phone}.`),
+privacy:()=>`<h1>Privacy Policy</h1><p>${upd}</p>`
++sec("What we collect","Account details (email, name, phone); company details (company name, industry, city, billing address, and PAN or GST number if you add them); the business information you give the AI; lead lists you upload; call data (caller phone number, recording, written transcript, summary and call length); payment records (Razorpay keeps your card details, we do not); and your support messages.")
++sec("Why we use it","To run your account and the AI phone service, answer and make calls for you, show your call history, take payments and create invoices, send the service emails listed in our Terms, give support, and keep the service safe.")
++sec("PAN and GST","These are optional and are used only to print on your invoices. They are not shown to anyone else.")
++sec("Who helps us process data","We use trusted services to run Rnexa: Supabase (database and sign-in), Render (hosting), Bolna and its telephony partners (calls, voice and recordings), AI language models (to understand and answer callers), Razorpay (payments) and our email service. They handle data only to provide the service.")
++sec("People who call your AI number","Callers are told the call is recorded. Their phone number and conversation are shown to you in your dashboard. You are responsible for using this information properly.")
++sec("Keeping data safe","Each client can see only their own data. Passwords are handled by our sign-in service. No system is perfect, so tell us quickly if you notice anything wrong.")
++sec("How long we keep it","We keep your data while your account is active. If you ask us to delete your account, we remove your account and call history, except records we must keep for accounts and tax.")
++sec("Your choices","You can edit your details in Settings. To delete your account or get a copy of your data, raise a ticket in the Help center or write to us.")
++sec("Contact",`${SITE.email} &middot; ${SITE.phone} &middot; ${SITE.address}`),
+refund:()=>`<h1>Refund &amp; Cancellation Policy</h1><p>${upd}</p>`
++sec("Minutes and credits","Minutes and call credits are used as calls happen. Minutes that have been used are not refundable.")
++sec("AI phone line","The monthly line fee covers your AI phone number. If we cannot set up your number after you pay, you can choose a full refund or ask us to keep trying until it works.")
++sec("Unused minutes","If you have not used any minutes from a purchase, you can ask for a full refund within 7 days of payment.")
++sec("Wrong or double payments","If money was taken but nothing was added to your account, or you were charged twice, write to us with your payment details and we will correct it or refund you.")
++sec("Calls that did not connect","Outbound calls that did not connect are given back as credit automatically.")
++sec("How refunds are paid","Approved refunds go back to the original payment method, normally in 5 to 7 working days.")
++sec("Cancelling","You can stop using the service at any time. To cancel your AI phone line, raise a ticket. Cancelling stops future renewals and we release your number.")
++sec("Website projects","Website and web app projects follow the written agreement for that project.")
++sec("Contact",`${SITE.email} &middot; ${SITE.phone}`),
 contact:()=>`<h1>Contact Us</h1><h2>${SITE.business}</h2><p>Owner: ${SITE.owner}</p><p>Email: <a href="mailto:${SITE.email}">${SITE.email}</a></p><p>Phone: ${SITE.phone}</p><p>WhatsApp: <a href="https://wa.me/${SITE.whatsapp}">Chat now</a></p><p>Address: ${SITE.address}</p>`};
 async function route(){
   const h=location.hash,{data:{session}}=await sb.auth.getSession();
   if(recovering||(session&&location.search.includes("reset=1"))){show("reset");return}
   $("navLogin").style.display=session?"none":"";$("navCta").textContent=session?"My dashboard":"Sign up";$("navCta").href=session?"#/app":"#/signup";
   if(h==="#/login"||h==="#/signup"){ if(session){location.hash="#/app";return} setMode(h==="#/signup");show("auth");return}
-  if(h==="#/admin"){if(!session){location.hash="#/login";return}show("admin");adminTab("overview");return}
+  if(h==="#/admin"){if(!session){location.hash="#/login";return}const w=await who();if(!w.is_admin){show("denied");return}show("admin");adminTab("overview");return}
   if(h==="#/app"){
     if(!session){location.hash="#/login";return}
     const {data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
     if(!p||p.terms_version!==TERMS_VERSION){show("onb");return}
-    $("hello").textContent="Welcome, "+p.company_name;$("who").textContent=session.user.email;show("dash");dashSec("overview");loadCredits();checkAdmin();loadTickets();loadCamps();return}
+    $("hello").textContent="Welcome, "+p.company_name;$("who").textContent=session.user.email;show("dash");dashSec("overview");tourMaybe();loadCredits();checkAdmin();loadTickets();loadCamps();return}
   const pg=PAGES[h.slice(2)];if(pg){$("legalBody").innerHTML=pg();show("legal");scrollTo(0,0);return}
+  if(h.startsWith("#/")&&h!=="#/"){show("nf");return}
   show("home");
 }
 window.onhashchange=route;
 sb.auth.onAuthStateChange((ev)=>{if(ev==="SIGNED_IN"&&["","#/login","#/signup"].includes(location.hash)&&location.hash)location.hash="#/app"});
 const esc=v=>String(v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 $("file").onchange=async e=>{const f=e.target.files[0];if(!f)return;
-  const wb=XLSX.read(await f.arrayBuffer());const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""});
+  await loadScript(XLSXSRC);const wb=XLSX.read(await f.arrayBuffer());const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""});
   if(!rows.length||!("phone_number" in rows[0])){$("prev").innerHTML='<div class="msg">Your file needs a column named phone_number.</div>';$("est").textContent="Upload a file first.";lastFile=null;$("go").disabled=true;return}
   const cols=Object.keys(rows[0]);
   $("prev").innerHTML='<p>Preview (first 5 rows):</p><div style="overflow:auto"><table><tr>'+cols.map(c=>"<th>"+esc(c)+"</th>").join("")+"</tr>"+
@@ -296,8 +340,8 @@ $("file").onchange=async e=>{const f=e.target.files[0];if(!f)return;
 };
 let lastFile=null;
 const tok=async()=>(await sb.auth.getSession()).data.session.access_token;
-async function api(path,opt={}){const r=await fetch(path,{...opt,headers:{Authorization:"Bearer "+await tok(),...(opt.headers||{})}});
-  if(!r.ok){let m="Error";try{m=(await r.json()).detail||m}catch(e){}if(/suspended/i.test(m))showSusp();if(r.status===401){await sb.auth.signOut({scope:"local"});location.hash="#/login";show("auth");$("authMsg").className="msg";$("authMsg").textContent="Your session expired. Please log in again."}throw new Error(m)}return r}
+async function api(path,opt={}){const slow=setTimeout(()=>toast("Your connection is slow. Still trying...","warn"),6000);let r;try{r=await fetch(path,{...opt,headers:{Authorization:"Bearer "+await tok(),...(opt.headers||{})}})}catch(e){toast("Network problem. Please check your internet.","err");throw new Error("Network problem")}finally{clearTimeout(slow)}
+  if(!r.ok){let m="Error";try{m=(await r.json()).detail||m}catch(e){}if(/suspended/i.test(m))showSusp();if(r.status===401){await sb.auth.signOut({scope:"local"});location.hash="#/login";show("auth");$("authMsg").className="msg";$("authMsg").textContent="Your session expired. Please log in again.";toast("Session expired. Please log in again.","warn")}throw new Error(m)}return r}
 $("go").onclick=async()=>{const m=$("goMsg");m.className="msg";m.textContent="";$("go").disabled=true;
   try{const fd=new FormData();fd.append("file",lastFile);const c=await(await api("/api/campaigns",{method:"POST",body:fd})).json();
     m.className="msg ok";m.textContent="Calling started for "+c.total+" leads."+(c.limited?" (Only "+c.limit+" leads started - not enough credits.)":"");loadCamps();loadCredits()}
@@ -312,13 +356,14 @@ setInterval(loadCamps,8000);
 async function loadCredits(){try{const m=await(await api("/api/me")).json();$("cr").textContent="Credits: "+m.credits;$("stC").textContent=m.credits}catch(e){}}
 $("buy").onclick=async e=>{const id=e.target.dataset.pack;if(!id)return;const m=$("payMsg");m.className="msg";m.textContent="";
  try{const j={"Content-Type":"application/json"};const o=await(await api("/api/orders",{method:"POST",headers:j,body:JSON.stringify({pack:id})})).json();
-  new Razorpay({key:o.key_id,amount:o.amount,currency:"INR",order_id:o.order_id,name:"Rnexa",description:o.description,
-   handler:async r=>{try{await api("/api/payments/verify",{method:"POST",headers:j,body:JSON.stringify(r)});m.className="msg ok";m.textContent="Payment successful. Credits added.";loadCredits()}catch(er){m.textContent=er.message}}}).open()}
+  await loadScript(RZP);new Razorpay({key:o.key_id,amount:o.amount,currency:"INR",order_id:o.order_id,name:"Rnexa",description:o.description,
+   handler:async r=>{try{await api("/api/payments/verify",{method:"POST",headers:j,body:JSON.stringify(r)});m.className="msg ok";m.textContent="Payment successful. Credits added.";toast("Payment successful","ok");loadCredits()}catch(er){m.textContent=er.message}}}).open()}
  catch(er){m.textContent=er.message}};
 
 const J=async(m,p,b)=>await(await api(p,{method:m,headers:{"Content-Type":"application/json"},body:JSON.stringify(b)})).json();
 const inr=n=>"\u20b9"+Number(n).toLocaleString("en-IN");
-async function checkAdmin(){try{await api("/api/admin/me");$("aLink").style.display=""}catch(e){}}
+async function who(){try{return await(await api("/api/whoami")).json()}catch(e){return{}}}
+async function checkAdmin(){const w=await who();if(w.is_admin)$("aLink").style.display=""}
 async function loadTickets(){try{const L=await(await api("/api/tickets")).json();$("tlist").innerHTML=L.length?"<table><tr><th>Subject</th><th>Status</th><th>Reply</th></tr>"+L.map(t=>"<tr><td>"+esc(t.subject)+"</td><td>"+esc(t.status)+"</td><td>"+esc(t.admin_reply||"")+"</td></tr>").join("")+"</table>":""}catch(e){}}
 $("tgo").onclick=async()=>{const o=$("tout");o.className="msg";o.textContent="";if(!$("tmsg").value.trim()){o.textContent="Please type a message.";return}
   try{await J("POST","/api/tickets",{subject:$("tsub").value,message:$("tmsg").value});$("tmsg").value="";o.className="msg ok";o.textContent="Ticket sent. We will reply soon.";loadTickets()}catch(e){o.textContent=e.message}};
@@ -360,17 +405,17 @@ function dashSec(n){document.querySelectorAll("[data-sec]").forEach(x=>x.classLi
   if(n==="reception")loadReception();if(n==="billing")loadPays();if(n==="settings")loadSettings();if(n==="camps")loadCamps();if(n==="help")renderFaq()}
 $("dnav").onclick=e=>{if(e.target.dataset.s)dashSec(e.target.dataset.s)};
 document.addEventListener("click",e=>{const g=e.target.dataset&&e.target.dataset.go;if(g)dashSec(g)});
-async function loadPays(){try{const L=await(await api("/api/payments")).json();$("plist").innerHTML=L.length?"<table><tr><th>Date</th><th>Pack</th><th>Calls</th><th>Amount</th></tr>"+L.map(p=>"<tr><td>"+new Date(p.created_at).toLocaleDateString("en-IN")+"</td><td>"+esc(p.pack)+"</td><td>"+p.calls+"</td><td>"+inr(p.amount_paise/100)+"</td></tr>").join("")+"</table>":"<p>No payments yet.</p>"}catch(e){}}
-const FAQS=[["How do I start a campaign?","Open New campaign, upload an Excel or CSV with a phone_number column, then click Start calling."],["Which columns can my file have?","phone_number is required. Optional: customer_name, business_name, product_or_service."],["How do credits work?","One credit equals one AI call. Calls that do not connect are credited back automatically."],["How do I buy more credits?","Open Credits & billing and choose a pack."],["Where do I download my results?","Open Campaigns and click Download Excel next to your file."],["Can I change my company details?","Yes. Open Settings and edit them. For a new login email, raise a ticket."],["How do I delete my account?","Raise a ticket with the subject Delete my account. Our team will confirm and remove your data."],["I paid but credits did not arrive","Raise a ticket with your payment details. We will check and add the credits."],["Why did a call fail?","The number may be invalid, busy or not answered. Failed calls are credited back."],["Which language does the AI speak?","English for now."]];
+async function loadPays(){$("plist").innerHTML='<div class="spin"></div>';try{const L=await(await api("/api/payments")).json();$("plist").innerHTML=L.length?"<table><tr><th>Date</th><th>Pack</th><th>Calls</th><th>Amount</th><th></th></tr>"+L.map(p=>"<tr><td>"+new Date(p.created_at).toLocaleDateString("en-IN")+"</td><td>"+esc(p.pack)+"</td><td>"+p.calls+"</td><td>"+inr(p.amount_paise/100)+'</td><td><button class="ghost" data-inv="'+p.id+'">Invoice</button></td></tr>').join("")+"</table>":"<p>No payments yet.</p>"}catch(e){}}
+const FAQS=[["How do I start a campaign?","Open New campaign, upload an Excel or CSV with a phone_number column, then click Start calling."],["Which columns can my file have?","phone_number is required. Optional: customer_name, business_name, product_or_service."],["How do credits work?","One credit equals one AI call. Calls that do not connect are credited back automatically."],["How do I buy more credits?","Open Credits & billing and choose a pack."],["Where do I download my results?","Open Campaigns and click Download Excel next to your file."],["Can I change my company details?","Yes. Open Settings and edit them. For a new login email, raise a ticket."],["How do I delete my account?","Raise a ticket with the subject Delete my account. Our team will confirm and remove your data."],["I paid but credits did not arrive","Raise a ticket with your payment details. We will check and add the credits."],["Why did a call fail?","The number may be invalid, busy or not answered. Failed calls are credited back."],["Which language does the AI speak?","English is supported today. Tamil depends on the voice setup, so ask us to test it."],["When will I get a low-minutes email?","We email you when you have 20 minutes or fewer left, and again if your AI is paused at 0 minutes."],["How do I forward missed calls?","Open AI Receptionist, go to step 3, choose your phone company and dial the code shown."],["Where are my invoices?","Open Credits & billing, then Payment history, and click Invoice next to a payment."]];
 function renderFaq(){const q=$("hs").value.toLowerCase().trim(),L=FAQS.filter(f=>!q||(f[0]+" "+f[1]).toLowerCase().includes(q));
-  $("faq2").innerHTML=L.length?L.map(f=>"<details><summary>"+esc(f[0])+"</summary><p>"+esc(f[1])+"</p></details>").join(""):'<p>No answer found for "'+esc($("hs").value)+'".</p><button id="toTicket" style="width:auto">Raise a ticket with this question</button>'}
+  $("faq2").innerHTML=L.length?L.map(f=>"<details><summary>"+esc(f[0])+"</summary><p>"+esc(f[1])+"</p></details>").join(""):'<div class="empty"><b>No results found</b><p>We could not find an answer for "'+esc($("hs").value)+'". Send us your question and our team will reply.</p><button id="toTicket" style="width:auto">Raise a ticket with this question</button></div>'}
 $("hs").oninput=renderFaq;
 $("faq2").onclick=e=>{if(e.target.id==="toTicket"){$("tsub").value="Other";$("tmsg").value=$("hs").value;$("tmsg").focus()}};
 async function loadSettings(){const {data:{session}}=await sb.auth.getSession();const {data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
-  if(p){$("sc").value=p.company_name;$("sn").value=p.contact_name;$("sp").value=p.phone;$("sy").value=p.city||""}}
+  if(p){$("sc").value=p.company_name;$("sn").value=p.contact_name;$("sp").value=p.phone;$("sy").value=p.city||"";$("spn").value=p.pan||"";$("sgs").value=p.gstin||"";$("sba").value=p.billing_address||""}}
 $("ssave").onclick=async()=>{const m=$("smsg");m.className="msg";const {data:{session}}=await sb.auth.getSession();
-  const {error}=await sb.from("profiles").update({company_name:$("sc").value.trim(),contact_name:$("sn").value.trim(),phone:$("sp").value.trim(),city:$("sy").value.trim()||null}).eq("id",session.user.id);
-  if(error)m.textContent=error.message;else{m.className="msg ok";m.textContent="Saved."}};
+  if(!check([["sc",R.req,"Enter your company name"],["sp",R.phone,"Enter a valid 10-digit mobile number"],["spn",R.pan,"PAN looks wrong"],["sgs",R.gst,"GST number looks wrong"]]))return;const {error}=await sb.from("profiles").update({company_name:$("sc").value.trim(),contact_name:$("sn").value.trim(),phone:$("sp").value.trim(),city:$("sy").value.trim()||null,pan:$("spn").value.trim().toUpperCase()||null,gstin:$("sgs").value.trim().toUpperCase()||null,billing_address:$("sba").value.trim()||null}).eq("id",session.user.id);
+  if(error)m.textContent=error.message;else{m.className="msg ok";m.textContent="Saved.";toast("Saved","ok")}};
 $("spwb").onclick=async()=>{const m=$("spm");m.className="msg";if($("spw").value.length<8){m.textContent="Use 8 or more characters.";return}
   const {error}=await sb.auth.updateUser({password:$("spw").value});if(error)m.textContent=error.message;else{m.className="msg ok";m.textContent="Password updated.";$("spw").value=""}};
 let recovering=false;
@@ -387,21 +432,53 @@ $("rpb").onclick=async()=>{const m=$("rpm"),a=$("rp1").value;m.className="msg";
 
 function pk(){return (window.ALLP||[]).filter(p=>["line","minutes"].includes(p.kind))}
 async function startPay(id,m,done){m.className="msg";m.textContent="";try{const j={"Content-Type":"application/json"};const o=await(await api("/api/orders",{method:"POST",headers:j,body:JSON.stringify({pack:id})})).json();
- new Razorpay({key:o.key_id,amount:o.amount,currency:"INR",order_id:o.order_id,name:"Rnexa",description:o.description,
+ await loadScript(RZP);new Razorpay({key:o.key_id,amount:o.amount,currency:"INR",order_id:o.order_id,name:"Rnexa",description:o.description,
   handler:async r=>{try{await api("/api/payments/verify",{method:"POST",headers:j,body:JSON.stringify(r)});m.className="msg ok";m.textContent="Payment successful. Setting things up...";if(done)done()}catch(er){m.textContent=er.message}}}).open()}catch(er){m.textContent=er.message}}
 const STAT={none:"Save your business details, then buy your AI line.",pending:"Waiting for set up. This usually takes a minute.",provisioning:"Setting up your AI number now...",active:"Your AI receptionist is live. Set call forwarding from your business phone to the number above.",failed:"We could not finish setting up your number yet. Our team has been told and will fix it. You do not need to pay again.",paused:"Your AI is paused because your minutes ran out. Buy minutes to switch it back on.",cancelled:"This line was cancelled."};
 async function loadReception(){
   if(!window.ALLP){try{window.ALLP=await(await fetch("/api/packs")).json()}catch(e){}}
   let d;try{d=await(await api("/api/line")).json()}catch(e){return}
   const b=d.business||{},f=[["rb_name","name"],["rb_hours","hours"],["rb_addr","address"],["rb_info","info"]];
-  f.forEach(x=>{if(document.activeElement!==$(x[0]))$(x[0]).value=b[x[1]]||""});if(b.language&&document.activeElement!==$("rb_lang"))$("rb_lang").value=b.language;
+  f.forEach(x=>{if(document.activeElement!==$(x[0]))$(x[0]).value=b[x[1]]||""});if(b.language&&document.activeElement!==$("rb_lang"))$("rb_lang").value=b.language;if(b.industry)$("rb_ind").value=b.industry;
   $("rc_min").textContent=d.minutes;$("rc_today").textContent=d.calls_today;
-  const st=d.line?d.line.status:"none";$("rc_num").textContent=(d.line&&d.line.phone_number)||"Not set up";$("rc_status").textContent=STAT[st]||"";
+  const st=d.line?d.line.status:"none";$("rc_num").textContent=(d.line&&d.line.phone_number)||"Not set up";renderFw(d.line&&d.line.phone_number);$("rc_status").textContent=STAT[st]||"";
   $("rc_buy").innerHTML=pk().map(p=>'<div class="stat"><b>'+esc(p.name)+'</b>'+inr(p.price)+'<br><button data-pk="'+p.id+'" style="margin-top:8px">Buy</button></div>').join("")||"<p>Packs are not available yet.</p>";
   try{const C=await(await api("/api/calls")).json();$("rc_calls").innerHTML=C.length?C.map(c=>'<details class="callrow"><summary><b>'+new Date(c.created_at).toLocaleString("en-IN")+"</b><span>"+esc(c.from_number||"Unknown caller")+"</span><span>"+c.minutes+" min</span></summary><p>"+esc(c.summary||"No summary")+"</p><pre>"+esc(c.transcript||"")+"</pre>"+(c.recording_url?'<a href="'+esc(c.recording_url)+'" target="_blank" rel="noopener">Play recording</a>':"")+"</details>").join(""):"<p>No calls yet.</p>"}catch(e){}
   if(["pending","provisioning"].includes(st)&&!$("dash").classList.contains("hide")&&!document.querySelector('[data-sec="reception"]').classList.contains("hide"))setTimeout(loadReception,6000)}
 $("rc_buy").onclick=e=>{if(e.target.dataset.pk)startPay(e.target.dataset.pk,$("rc_pay"),()=>{loadReception();loadCredits()})};
-$("rb_save").onclick=async()=>{const m=$("rb_msg");m.className="msg";m.textContent="";
-  try{await J("POST","/api/line",{name:$("rb_name").value,hours:$("rb_hours").value,address:$("rb_addr").value,info:$("rb_info").value,language:$("rb_lang").value});m.className="msg ok";m.textContent="Saved."}catch(e){m.textContent=e.message}};
+$("rb_save").onclick=async()=>{const m=$("rb_msg");m.className="msg";m.textContent="";if(!check([["rb_name",R.req,"Enter your business name"],["rb_hours",R.req,"Enter your opening hours"],["rb_addr",R.req,"Enter your address"]]))return;
+  try{await J("POST","/api/line",{name:$("rb_name").value,hours:$("rb_hours").value,address:$("rb_addr").value,info:$("rb_info").value,language:$("rb_lang").value,industry:$("rb_ind").value});m.className="msg ok";m.textContent="Saved.";toast("Saved","ok")}catch(e){m.textContent=e.message}};
+
+const RZP="https://checkout.razorpay.com/v1/checkout.js",XLSXSRC="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",_ls={};
+function loadScript(src){return _ls[src]||(_ls[src]=new Promise((ok,no)=>{const x=document.createElement("script");x.src=src;x.onload=ok;x.onerror=()=>no(new Error("Could not load a required file. Check your internet."));document.head.appendChild(x)}))}
+function toast(m,t){const d=document.createElement("div");d.className="t "+(t||"");d.textContent=m;$("toast").appendChild(d);setTimeout(()=>d.remove(),4500)}
+function ferr(id,msg){const el=$(id);el.style.borderColor=msg?"var(--err)":"";let n=el.nextElementSibling;if(!n||!n.classList.contains("ferr")){n=document.createElement("small");n.className="ferr";el.insertAdjacentElement("afterend",n)}n.textContent=msg||""}
+function check(rules){let ok=true,first=null;rules.forEach(r=>{const bad=!r[1]($(r[0]).value.trim());ferr(r[0],bad?r[2]:"");if(bad){ok=false;first=first||r[0]}});if(first)$(first).focus();return ok}
+const R={req:v=>v.length>0,email:v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),pw:v=>v.length>=8,phone:v=>/^(\+?91)?[6-9]\d{9}$/.test(v.replace(/[\s-]/g,"")),pan:v=>!v||/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(v.toUpperCase()),gst:v=>!v||/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][A-Z0-9]Z[A-Z0-9]$/.test(v.toUpperCase())};
+function netUi(){$("net").classList.toggle("hide",navigator.onLine)}
+addEventListener("offline",netUi);addEventListener("online",()=>{netUi();toast("You are back online","ok")});netUi();
+$("terms").innerHTML=PAGES.terms().replace("<h1>","<h2>").replace("</h1>","</h2>");
+const TOUR=[["Welcome to Rnexa","This short tour shows you where everything is. It takes less than a minute.","overview"],["Overview","See your minutes left and how many calls you got today.","overview"],["AI Receptionist","Tell the AI about your business, tap a sample to get started, and get your AI phone number.","reception"],["Forward your calls","Set call forwarding on your business phone so missed calls go to your AI number. The guide is in AI Receptionist, step 3.","reception"],["Credits and invoices","Buy minutes when you run low and download your invoices. We email you when you have 20 minutes left.","billing"],["Help center","Search for answers or send us a ticket to change your details or delete your account.","help"],["Settings","Update your company details, PAN, GST and password. Use the Show tour button any time to see this again.","settings"]];
+let tI=0;
+function tourShow(i){tI=i;const t=TOUR[i];$("tourN").textContent="Step "+(i+1)+" of "+TOUR.length;$("tourT").textContent=t[0];$("tourP").textContent=t[1];dashSec(t[2]);$("tourBack").style.visibility=i?"visible":"hidden";$("tourNext").textContent=i===TOUR.length-1?"Finish":"Next"}
+function tourOpen(){$("tour").classList.remove("hide");tourShow(0)}
+function tourEnd(){$("tour").classList.add("hide");try{localStorage.setItem("rnexa_tour","1")}catch(e){}dashSec("overview")}
+$("tourNext").onclick=()=>tI<TOUR.length-1?tourShow(tI+1):tourEnd();$("tourBack").onclick=()=>tourShow(tI-1);$("tourSkip").onclick=tourEnd;$("tourBtn").onclick=tourOpen;
+function tourMaybe(){let d;try{d=localStorage.getItem("rnexa_tour")}catch(e){}if(!d&&$("tour").classList.contains("hide"))setTimeout(tourOpen,700)}
+const SUG=[["Book appointments","We take appointments Monday to Saturday. To book, ask the caller's name, preferred day and time, and the reason. Services and fees: [list your services and prices]. Tell the caller our team will confirm the booking by call or WhatsApp."],
+["Answer customer questions","Answer common questions politely. Services and prices: [list them]. Delivery, warranty or other policy: [write it]. If the caller is upset or the problem is serious, take their name and number and promise a callback within [time]."],
+["Handle sales enquiries","Explain our products or services in simple words: [list them with prices]. Find out what the caller needs and their budget. Take their name, number and best time to call, and say our sales team will contact them."],
+["Missed-call assistant","We could not answer the call, so the AI answers. Say the team is busy right now. Ask what the caller needs, take name and number, and say we will call back within [time]. If asked, share timings and address: [timings, address]."],
+["Orders and delivery updates","Help callers with their orders. Ask for the order number or phone number. Delivery rules: [write them]. If you cannot find the order, take the details and promise a callback. Do not promise refunds; our team decides."]];
+$("sugg").innerHTML=SUG.map((x,i)=>'<button class="chip" data-s="'+i+'">'+x[0]+"</button>").join("");
+$("sugg").onclick=e=>{const i=e.target.dataset.s;if(i===undefined)return;const t=$("rb_info");t.value=(t.value.trim()?t.value.trim()+"\n\n":"")+SUG[i][1];t.focus()};
+let FWNUM="";
+function renderFw(n){if(n)FWNUM=n;const num=FWNUM,op=$("fw_op").value,c=num||"YOUR-AI-NUMBER";
+  $("fw_num").innerHTML=num?"Your AI number: <b>"+esc(num)+"</b>":"Your AI number will appear here after set up.";
+  const rows=[["When you do not answer (best)","**61*"+c+"**20#"],["When your line is busy","**67*"+c+"#"],["When your phone is off or has no network","**62*"+c+"#"],["For every call","**21*"+c+"#"],["Turn all forwarding off","##002#"]];
+  const note={"Airtel":"These standard codes usually work on Airtel. You will see a message such as call forwarding activated.","Jio":"Standard codes do not work on every Jio SIM. If one fails, open the Phone app, go to Settings, then Calls, then Call forwarding, or use the MyJio app.","Vi (Vodafone Idea)":"These standard codes usually work on Vi. You will see a confirmation message.","BSNL":"These standard codes usually work on BSNL. If not, contact BSNL customer care.","Other / landline":"For a landline or another operator, ask your provider to set call forwarding on no answer to your AI number."}[op];
+  $("fw_body").innerHTML="<p>"+esc(note)+"</p><table>"+rows.map(r=>"<tr><td>"+r[0]+"</td><td><b>"+esc(r[1])+"</b></td></tr>").join("")+"</table><p>Dial the code on the phone that receives your customer calls, then press call. Test it by asking a friend to call while you do not answer. Your phone company may charge for forwarded calls.</p>"}
+$("fw_op").onchange=()=>renderFw();renderFw();
+$("plist").onclick=async e=>{const id=e.target.dataset.inv;if(!id)return;const w=window.open("","_blank");try{const h=await(await api("/api/invoice/"+id)).text();w.document.write(h);w.document.close()}catch(er){if(w)w.close();toast(er.message,"err")}};
 route();
 </script></body></html>

@@ -5,7 +5,9 @@ from email.message import EmailMessage
 from typing import Optional
 import pandas as pd, requests
 from fastapi import FastAPI, UploadFile, File, Header, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, Response
+from starlette.middleware.gzip import GZipMiddleware
+import html as _html
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from core import Bolna, process_row, FAIL
@@ -27,6 +29,7 @@ H = {"apikey": SKEY, "Content-Type": "application/json", "Prefer": "return=repre
 if not SKEY.startswith("sb_"):
     H["Authorization"] = f"Bearer {SKEY}"
 app = FastAPI()
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 
 def _check(r, what):
@@ -237,7 +240,7 @@ async def razorpay_webhook(request: Request):
 def my_payments(authorization: str = Header(None)):
     uid = current_user(authorization)
     return db("GET", "payments", {"user_id": f"eq.{uid}", "status": "eq.paid", "order": "created_at.desc", "limit": "50",
-                                  "select": "pack,calls,amount_paise,created_at"})
+                                  "select": "id,pack,calls,amount_paise,created_at,kind"})
 
 
 # ---------- support tickets ----------
@@ -406,6 +409,7 @@ def build_prompt(b):
     return f"""You are Riya, the friendly phone receptionist of {b.get('name')}. People call you with questions. Answer calmly, like a helpful person.
 
 Business details:
+- Industry: {b.get('industry') or 'Not specified'}
 - Opening hours: {b.get('hours')}
 - Address: {b.get('address')}
 - Services, prices and common questions: {b.get('info') or 'Not provided'}
@@ -544,6 +548,7 @@ class BizIn(BaseModel):
     address: str
     info: str = ""
     language: str = "English"
+    industry: str = ""
 
 
 @app.get("/api/line")
@@ -561,7 +566,7 @@ def my_line(authorization: str = Header(None)):
 def save_business(b: BizIn, authorization: str = Header(None)):
     uid = current_user(authorization)
     biz = {"name": b.name.strip()[:80], "hours": b.hours.strip()[:120], "address": b.address.strip()[:200],
-           "info": b.info.strip()[:3000], "language": b.language}
+           "info": b.info.strip()[:3000], "language": b.language, "industry": b.industry.strip()[:60]}
     if not biz["name"]:
         raise HTTPException(400, "Business name is required")
     if db("GET", "lines", {"user_id": f"eq.{uid}", "select": "id"}):
@@ -602,6 +607,45 @@ def admin_release_line(uid: str, authorization: str = Header(None)):
             raise HTTPException(502, f"Bolna could not delete the number: {r.text[:120]}")
     db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"status": "cancelled", "phone_number_id": None})
     return {"ok": True}
+
+
+@app.get("/api/whoami")
+def whoami(authorization: str = Header(None)):
+    u = auth_user(authorization)
+    return {"email": u.get("email"), "is_admin": (u.get("email") or "").lower() in ADMINS and bool(u.get("email_confirmed_at"))}
+
+
+@app.get("/api/invoice/{pid}")
+def invoice(pid: str, authorization: str = Header(None)):
+    uid = current_user(authorization)
+    rows = db("GET", "payments", {"id": f"eq.{pid}", "user_id": f"eq.{uid}", "status": "eq.paid"})
+    if not rows:
+        raise HTTPException(404, "Invoice not found")
+    p, prof = rows[0], db("GET", "profiles", {"id": f"eq.{uid}"})[0]
+    pk = db("GET", "packs", {"id": f"eq.{p['pack']}"})
+    item = pk[0]["name"] if pk else p["pack"]
+    e = _html.escape
+    when = datetime.fromisoformat(p["created_at"].replace("Z", "+00:00")).astimezone(IST)
+    amt = f"{p['amount_paise'] / 100:,.2f}"
+    seller = [os.getenv("SELLER_NAME", "Rnexa"), os.getenv("SELLER_OWNER", "Sajid Hussain"),
+              os.getenv("SELLER_ADDRESS", "162/80 Nethaji Nagar 5th Street, Tondiarpet, Chennai, Tamil Nadu 600081, India"),
+              os.getenv("SELLER_EMAIL", "ss@rnexa.in"), os.getenv("SELLER_PHONE", "+91 7358145522")]
+    buyer = "<br>".join(e(x) for x in [prof.get("company_name"), prof.get("contact_name"), prof.get("billing_address"), prof.get("city")] if x)
+    ids = "".join(f"<br>{k}: {e(v)}" for k, v in (("PAN", prof.get("pan")), ("GSTIN", prof.get("gstin"))) if v)
+    page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Invoice RNX-{when:%Y%m}-{p['id'][:6].upper()}</title>
+<style>body{{font-family:Segoe UI,Arial,sans-serif;color:#192307;max-width:760px;margin:30px auto;padding:0 20px}}h1{{color:#506022;margin:0}}
+table{{width:100%;border-collapse:collapse;margin:22px 0}}th,td{{border-bottom:1px solid #dde2cc;padding:10px;text-align:left}}.r{{text-align:right}}
+.box{{display:flex;justify-content:space-between;gap:20px;margin-top:20px}}small{{color:#5b6648}}button{{background:#506022;color:#fff;border:0;padding:10px 18px;border-radius:8px;cursor:pointer}}
+@media print{{button{{display:none}}}}</style></head><body>
+<div style="display:flex;justify-content:space-between;align-items:center"><h1>Rnexa</h1><button onclick="window.print()">Print / Save as PDF</button></div>
+<p><b>INVOICE</b> RNX-{when:%Y%m}-{p['id'][:6].upper()}<br>Date: {when:%d %b %Y}</p>
+<div class="box"><div><small>From</small><br><b>{e(seller[0])}</b><br>{e(seller[1])}<br>{e(seller[2])}<br>{e(seller[3])} &middot; {e(seller[4])}<br>GSTIN: Not registered</div>
+<div><small>Billed to</small><br>{buyer}{ids}</div></div>
+<table><tr><th>Description</th><th class="r">Qty</th><th class="r">Amount (INR)</th></tr>
+<tr><td>{e(item)}</td><td class="r">1</td><td class="r">{amt}</td></tr>
+<tr><td colspan="2" class="r"><b>Total paid</b></td><td class="r"><b>{amt}</b></td></tr></table>
+<p><small>GST: not applicable, the seller is not registered under GST. Paid online through Razorpay (payment {e(p.get('razorpay_payment_id') or '')}). This is a computer-generated invoice and needs no signature.</small></p></body></html>"""
+    return Response(content=page, media_type="text/html")
 
 
 app.mount("/", StaticFiles(directory="static", html=True), name="site")
