@@ -1,11 +1,12 @@
 """Rnexa backend: website + API (credits, Razorpay payments, Bolna calling). Secrets only in environment variables."""
-import hashlib, hmac, io, json, math, os, smtplib, threading
+import hashlib, hmac, io, json, math, os, re, smtplib, threading
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from typing import Optional
 import pandas as pd, requests
 from fastapi import FastAPI, UploadFile, File, Header, HTTPException, Request
-from fastapi.responses import StreamingResponse, Response
+from fastapi.responses import StreamingResponse, Response, HTMLResponse, JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.gzip import GZipMiddleware
 import html as _html
 from fastapi.staticfiles import StaticFiles
@@ -646,6 +647,49 @@ table{{width:100%;border-collapse:collapse;margin:22px 0}}th,td{{border-bottom:1
 <tr><td colspan="2" class="r"><b>Total paid</b></td><td class="r"><b>{amt}</b></td></tr></table>
 <p><small>GST: not applicable, the seller is not registered under GST. Paid online through Razorpay (payment {e(p.get('razorpay_payment_id') or '')}). This is a computer-generated invoice and needs no signature.</small></p></body></html>"""
     return Response(content=page, media_type="text/html")
+
+
+# ---------- clean URLs, per-page search tags, 404 ----------
+SEO = {"/": ["Rnexa | AI Receptionist and Websites for Local Businesses in Chennai", "Rnexa builds fast websites and runs an AI receptionist that answers your missed calls, takes bookings and shows every call in your dashboard."], "/login": ["Log in | Rnexa", "Log in to your Rnexa dashboard to manage your AI receptionist, call history, minutes and invoices."], "/signup": ["Create your account | Rnexa", "Create a Rnexa account to set up your AI receptionist, get an AI phone number and see every call in your dashboard."], "/reset": ["Set a new password | Rnexa", "Choose a new password for your Rnexa account."], "/terms": ["Terms & Conditions | Rnexa", "Read the Rnexa terms for the AI receptionist service: accounts, call forwarding, minutes, invoices and the emails we send."], "/privacy": ["Privacy Policy | Rnexa", "How Rnexa collects, uses and protects your business details, call data and payment records."], "/refund": ["Refund & Cancellation Policy | Rnexa", "Rnexa refund and cancellation rules for minutes, AI phone lines and wrong or double payments."], "/contact": ["Contact Rnexa | Tondiarpet, Chennai", "Contact Rnexa by email, phone or WhatsApp, or visit us at Tondiarpet, Chennai."], "/app": ["Dashboard | Rnexa", "Your Rnexa client dashboard."], "/admin": ["Admin | Rnexa", "Rnexa admin panel."], "404": ["Page not found | Rnexa", "This page does not exist."]}
+PRIVATE = {"/login", "/reset", "/app", "/admin"}
+LEGAL = {"/terms", "/privacy", "/refund", "/contact"}
+try:
+    INDEX = open("static/index.html", encoding="utf-8").read()
+    NOTFOUND = open("notfound.html", encoding="utf-8").read()
+except OSError:
+    INDEX = NOTFOUND = ""
+
+
+def page_for(key):
+    title, desc = SEO[key]
+    url = "https://rnexa.in" + key
+    h = re.sub(r"<title>.*?</title>", lambda _: f"<title>{_html.escape(title)}</title>", INDEX, count=1, flags=re.S)
+    h = re.sub(r'(<meta name="description" content=")[^"]*', lambda x: x.group(1) + _html.escape(desc, True), h, count=1)
+    h = h.replace('<link rel="canonical" href="https://rnexa.in/">', f'<link rel="canonical" href="{url}">')
+    h = re.sub(r'(<meta property="og:title" content=")[^"]*', lambda x: x.group(1) + _html.escape(title, True), h, count=1)
+    h = re.sub(r'(<meta property="og:description" content=")[^"]*', lambda x: x.group(1) + _html.escape(desc, True), h, count=1)
+    h = h.replace('<meta property="og:url" content="https://rnexa.in/">', f'<meta property="og:url" content="{url}">')
+    graph = [{"@type": "Organization", "name": "Rnexa", "url": "https://rnexa.in/", "logo": "https://rnexa.in/logo.png"}]
+    if key in LEGAL:
+        graph.append({"@type": "BreadcrumbList", "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://rnexa.in/"},
+            {"@type": "ListItem", "position": 2, "name": title.split(" | ")[0], "item": url}]})
+    ld = '<script type="application/ld+json">' + json.dumps({"@context": "https://schema.org", "@graph": graph}) + "</script>"
+    h = re.sub(r'<script type="application/ld\+json">.*?</script>', lambda _: ld, h, count=1, flags=re.S)
+    if key in PRIVATE:
+        h = h.replace("<link rel=\"canonical\"", '<meta name="robots" content="noindex,nofollow"><link rel="canonical"', 1)
+    return h
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_error(request: Request, exc: StarletteHTTPException):
+    path = request.url.path.rstrip("/") or "/"
+    if exc.status_code == 404 and request.method == "GET" and not path.startswith("/api/") and INDEX:
+        key = "/" + path.split("/")[1] if path != "/" else "/"
+        if key in SEO and key != "404" and (path == key or key in ("/app", "/admin")):
+            return HTMLResponse(page_for(key))
+        return HTMLResponse(NOTFOUND, status_code=404)
+    return JSONResponse({"detail": exc.detail}, status_code=exc.status_code, headers=getattr(exc, "headers", None))
 
 
 app.mount("/", StaticFiles(directory="static", html=True), name="site")

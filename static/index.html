@@ -109,15 +109,40 @@ footer{background:#192307;color:#cfd8b0;margin-top:30px;border:0}footer a{color:
 #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:100001;display:flex;flex-direction:column;gap:8px;align-items:center}
 .t{padding:12px 18px;border-radius:12px;background:#192307;color:#fff;box-shadow:0 10px 26px rgba(0,0,0,.3)}.t.ok{background:#506022}.t.err{background:#b3261e}.t.warn{background:#8a6d1a}
 .empty{text-align:center;padding:18px;border:1px dashed var(--line);border-radius:12px;background:#fafbf6}
+
+html::before{content:"";position:fixed;inset:-10%;z-index:-2;pointer-events:none;will-change:transform;background:radial-gradient(45% 40% at 12% 12%,rgba(119,129,75,.28),transparent 70%),radial-gradient(40% 38% at 88% 82%,rgba(80,96,34,.22),transparent 70%),radial-gradient(30% 28% at 70% 15%,rgba(119,129,75,.16),transparent 70%);animation:blob 26s ease-in-out infinite alternate}
+body{background-image:none!important;background-color:#f4f6ee}
+body::before,body::after{content:"";position:fixed;z-index:-1;pointer-events:none;will-change:transform}
+body::before{inset:-48px;background-image:radial-gradient(circle,rgba(80,96,34,.40) 1.6px,transparent 2.2px),radial-gradient(circle,rgba(119,129,75,.30) 1px,transparent 1.6px);background-size:48px 48px;background-position:0 0,24px 24px;animation:pd1 38s linear infinite}
+body::after{inset:-120px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath d='M30 24v12M24 30h12' stroke='%2377814B' stroke-opacity='.45' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='90' cy='84' r='5' fill='none' stroke='%2377814B' stroke-opacity='.4' stroke-width='2'/%3E%3Cpath d='M82 24q8-12 16 0q-8 12-16 0z' fill='none' stroke='%23506022' stroke-opacity='.3' stroke-width='1.6'/%3E%3Cpath d='M20 96l14-14M26 100l14-14' stroke='%2377814B' stroke-opacity='.3' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");background-size:120px 120px;animation:pd2 70s linear infinite}
+@keyframes pd1{to{transform:translate3d(48px,48px,0)}}@keyframes pd2{to{transform:translate3d(-120px,120px,0)}}@keyframes blob{to{transform:translate3d(4%,3%,0) scale(1.07)}}
+@media (prefers-reduced-motion:reduce){html::before,body::before,body::after{animation:none}}
+@media (max-width:600px){body::after{display:none}}
+button:not(.ghost):not(.chip):not([data-s]):not([data-t]),a.cta.p,.nav a.btn{position:relative;isolation:isolate;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+ padding:13px 38px 13px 28px;border:2px solid var(--pri)!important;border-radius:100px;font-weight:700;background:transparent!important;color:var(--pri)!important;
+ box-shadow:0 0 0 0 rgba(80,96,34,.25),0 6px 14px rgba(25,35,7,.12)!important;transition:color .6s cubic-bezier(.23,1,.32,1),border-radius .6s cubic-bezier(.23,1,.32,1),box-shadow .6s cubic-bezier(.23,1,.32,1),transform .3s}
+button:not(.ghost):not(.chip):not([data-s]):not([data-t])::before,a.cta.p::before,.nav a.btn::before{content:"";position:absolute;z-index:-1;top:50%;left:50%;width:20px;height:20px;border-radius:50%;background:var(--pri);opacity:0;transform:translate(-50%,-50%) scale(0);transition:transform .8s cubic-bezier(.23,1,.32,1),opacity .4s}
+button:not(.ghost):not(.chip):not([data-s]):not([data-t])::after,a.cta.p::after,.nav a.btn::after{content:"\2192";position:absolute;right:14px;opacity:0;transform:translateX(-16px);transition:all .6s cubic-bezier(.23,1,.32,1)}
+button:not(.ghost):not(.chip):not([data-s]):not([data-t]):not(:disabled):hover,a.cta.p:hover,.nav a.btn:hover{color:#fff!important;border-radius:12px;background:transparent!important;box-shadow:0 0 0 10px rgba(80,96,34,0),0 8px 18px rgba(25,35,7,.2)!important;transform:none}
+button:not(.ghost):not(.chip):not([data-s]):not([data-t]):not(:disabled):hover::before,a.cta.p:hover::before,.nav a.btn:hover::before{opacity:1;transform:translate(-50%,-50%) scale(30)}
+button:not(.ghost):not(.chip):not([data-s]):not([data-t]):not(:disabled):hover::after,a.cta.p:hover::after,.nav a.btn:hover::after{opacity:1;transform:translateX(0)}
+button:not(.ghost):not(.chip):not([data-s]):not([data-t]):not(:disabled):active,a.cta.p:active{scale:.96}
+button:disabled{opacity:.5;cursor:not-allowed}
+.hero2 a.cta.p{color:#fff!important;border-color:#fff!important}.hero2 a.cta.p::before{background:#fff}.hero2 a.cta.p:hover{color:var(--deep)!important}
+#tourMask{position:fixed;inset:0;z-index:99990;background:rgba(25,35,7,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+#tourHi{position:fixed;z-index:99991;border-radius:12px;border:2px solid #fff;box-shadow:0 0 0 4px rgba(255,255,255,.25),0 0 30px rgba(255,255,255,.45);pointer-events:none;transition:all .35s cubic-bezier(.23,1,.32,1)}
+#tourCard{position:fixed;z-index:99992;width:min(340px,calc(100vw - 24px));background:#fff;border-radius:16px;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.35);transition:left .35s cubic-bezier(.23,1,.32,1),top .35s cubic-bezier(.23,1,.32,1)}
+#tourBtn{z-index:99995!important}
+.crumbs{font-size:13px;color:var(--mut);margin-bottom:10px}.crumbs a{text-decoration:none}
 </style></head><body>
 
 <div id="home" class="hide">
- <div class="nav"><a href="#/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a>
+ <div class="nav"><a href="/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a>
   <span class="links"><a href="#services">Services</a><a href="#aicaller">AI Caller</a><a href="#how">How it works</a><a href="#faq">FAQ</a><a href="#contact">Contact</a></span>
-  <span><a class="ghostb" id="navLogin" href="#/login">Log in</a><a class="btn" id="navCta" href="#/signup">Sign up</a></span></div>
+  <span><a class="ghostb" id="navLogin" href="/login">Log in</a><a class="btn" id="navCta" href="/signup">Sign up</a></span></div>
  <div class="hero2"><img src="/logo-mark.png" alt="Rnexa logo" style="height:92px;margin-bottom:12px"><h1>Websites that bring customers. An AI receptionist that answers them.</h1>
   <p>Rnexa builds fast, clean and friendly websites and web apps for local businesses, and gives you an AI receptionist that answers the calls you miss, takes bookings and shows you every conversation.</p>
-  <a class="cta p" href="#/signup">Get your AI receptionist</a><a class="cta s" href="#contact">Get a website</a></div>
+  <a class="cta p" href="/signup">Get your AI receptionist</a><a class="cta s" href="#contact">Get a website</a></div>
  <div class="sec" id="services"><h2>What we build</h2><p>Everything you need to go online, handled by one team.</p>
   <div class="g3">
    <div class="card"><div class="ico">🌐</div><h2>Business websites</h2><p>Fast, clean, mobile-friendly websites made for your industry.</p></div>
@@ -134,32 +159,32 @@ footer{background:#192307;color:#cfd8b0;margin-top:30px;border:0}footer a{color:
   <div class="g3"><div class="card"><h2>1. Create your account</h2><p>Sign up and tell us about your business and services.</p></div>
   <div class="card"><h2>2. Get your AI number</h2><p>Pay for your line and we set up your AI number in minutes.</p></div>
   <div class="card"><h2>3. Forward missed calls</h2><p>Set call forwarding on your phone. Our guide covers Airtel, Jio, Vi and BSNL.</p></div></div>
-  <p style="margin-top:16px"><a class="cta p" href="#/signup">Create free account</a></p></div>
+  <p style="margin-top:16px"><a class="cta p" href="/signup">Create free account</a></p></div>
  <div class="alt"><div class="sec" id="faq"><h2>Questions</h2><details><summary>How does the AI receptionist work?</summary><p>You get an AI phone number. When you do not answer, your phone forwards the call to it, and the AI answers your customer using the details you gave us.</p></details><details><summary>What do I see after each call?</summary><p>A summary, the full conversation as text, the caller's number and a recording link, all in your dashboard.</p></details><details><summary>Which phone companies work for call forwarding?</summary><p>Call forwarding works with most Indian SIMs, including Airtel, Jio, Vi and BSNL. Your dashboard shows the steps for each.</p></details><details><summary>Does the AI speak Tamil?</summary><p>English is supported today. Tamil depends on the voice setup, so contact us to test it for your business.</p></details><details><summary>What does it cost?</summary><p>You pay a monthly fee for your AI number and then pay per minute of calls. Prices are shown in the pricing section of this page.</p></details></div></div>
  <div class="sec" id="pricing"><h2>Pricing</h2><p>Buy call credits. One credit = one AI call. Prices in INR, including all features.</p><div class="g3" id="packs"></div></div>
  <div class="sec" id="contact"><h2>Contact</h2><p>Tell us about your business and we will reply quickly.</p>
   <a class="cta p" data-wa href="#">Chat on WhatsApp</a><a class="cta s" data-email href="#">Email us</a></div>
- <footer><p><a href="#/terms">Terms &amp; Conditions</a> &middot; <a href="#/privacy">Privacy Policy</a> &middot; <a href="#/refund">Refund &amp; Cancellation</a> &middot; <a href="#/contact">Contact Us</a></p><b>Rnexa</b> &middot; Built by <span id="owner"></span> &middot; &copy; <span id="yr"></span> Rnexa. All rights reserved.</footer></div>
-<div id="reset" class="hide wrap"><div class="card"><a href="#/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a>
- <h1 style="margin-top:14px">Set a new password</h1><p>Choose a new password for your account.</p>
+ <footer><p><a href="/terms">Terms &amp; Conditions</a> &middot; <a href="/privacy">Privacy Policy</a> &middot; <a href="/refund">Refund &amp; Cancellation</a> &middot; <a href="/contact">Contact Us</a></p><b>Rnexa</b> &middot; Built by <span id="owner"></span> &middot; &copy; <span id="yr"></span> Rnexa. All rights reserved.</footer></div>
+<div id="reset" class="hide wrap"><div class="card"><a href="/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a>
+ <h2 data-h1 style="margin-top:14px">Set a new password</h2><p>Choose a new password for your account.</p>
  <label>New password (8+ characters)</label><input id="rp1" type="password" autocomplete="new-password"><label>Confirm new password</label><input id="rp2" type="password" autocomplete="new-password">
  <button id="rpb">Save new password</button><div id="rpm" class="msg"></div></div></div>
-<div id="legal" class="hide"><div class="nav"><a href="#/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a><span><a href="#/">&larr; Home</a></span></div>
+<div id="legal" class="hide"><div class="nav"><a href="/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a><span><a href="/">&larr; Home</a></span></div>
  <div class="wrap wide"><div class="card" id="legalBody"></div></div></div>
-<div id="admin" class="hide shell"><aside class="side"><a href="#/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a><small style="color:var(--pri);letter-spacing:3px">ADMIN</small><div id="atabs"></div>
- <div class="sidefoot"><a href="#/app">Client view</a><button class="ghost" id="aout" style="text-align:left;padding:6px 0">Log out</button></div></aside>
+<div id="admin" class="hide shell"><aside class="side"><a href="/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a><small style="color:var(--pri);letter-spacing:3px">ADMIN</small><div id="atabs"></div>
+ <div class="sidefoot"><a href="/app">Client view</a><button class="ghost" id="aout" style="text-align:left;padding:6px 0">Log out</button></div></aside>
  <main class="main"><div class="card" id="abody" style="overflow:auto"></div></main></div>
 <div id="gload"><div class="spin"></div></div>
 <div id="net" class="hide">You are offline. Please check your internet connection.</div>
 <div id="toast"></div>
-<div id="nf" class="hide wrap"><div class="card" style="text-align:center"><img src="/logo-mark.png" alt="Rnexa logo" style="height:56px"><h2>404 - Page not found</h2><p>The page you are looking for does not exist or has moved.</p><a class="cta p" href="#/">Back to home</a></div></div>
-<div id="denied" class="hide wrap"><div class="card" style="text-align:center"><img src="/logo-mark.png" alt="Rnexa logo" style="height:56px"><h2>Permission denied</h2><p>Your account does not have access to this page.</p><a class="cta p" href="#/app">Go to my dashboard</a></div></div>
-<div id="tour" class="hide modal"><div class="mbox" style="text-align:left"><small id="tourN"></small><h2 id="tourT"></h2><p id="tourP"></p>
- <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px"><button class="ghost" id="tourSkip">Skip tour</button><span><button class="ghost" id="tourBack">Back</button> <button id="tourNext" style="width:auto">Next</button></span></div></div></div>
+<div id="nf" class="hide wrap"><div class="card" style="text-align:center"><img src="/logo-mark.png" alt="Rnexa logo" style="height:56px"><h2>404 - Page not found</h2><p>The page you are looking for does not exist or has moved.</p><a class="cta p" href="/">Back to home</a></div></div>
+<div id="denied" class="hide wrap"><div class="card" style="text-align:center"><img src="/logo-mark.png" alt="Rnexa logo" style="height:56px"><h2>Permission denied</h2><p>Your account does not have access to this page.</p><a class="cta p" href="/app">Go to my dashboard</a></div></div>
+<div id="tour" class="hide"><div id="tourMask"></div><div id="tourHi"></div>
+ <div id="tourCard"><small id="tourN"></small><h2 id="tourT"></h2><p id="tourP"></p><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="ghost" id="tourBack">Back</button><button id="tourNext" style="width:auto;margin:0">Next</button></div></div></div>
 <button id="tourBtn" style="display:none;position:fixed;right:18px;bottom:18px;z-index:50;width:auto">Show tour</button>
 <!-- AUTH -->
 <div id="auth" class="wrap hide"><div class="card">
-  <a href="#/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a><h1 style="margin-top:14px">AI Caller</h1><p id="authSub">Log in to your client account.</p>
+  <a href="/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a><h2 data-h1 id="authH" style="margin-top:14px">Log in</h2><p id="authSub">Log in to your client account.</p>
   <label>Email</label><input id="email" type="email" autocomplete="email">
   <label>Password</label><input id="pass" type="password" autocomplete="current-password" placeholder="Minimum 8 characters">
   <button id="authBtn">Log in</button>
@@ -169,7 +194,7 @@ footer{background:#192307;color:#cfd8b0;margin-top:30px;border:0}footer a{color:
 
 <!-- ONBOARDING -->
 <div id="onb" class="wrap wide hide"><div class="card">
-  <h1>Tell us about your company</h1><p>Step 2 of 2. Fill the details and accept our terms to continue.</p>
+  <h2 data-h1>Tell us about your company</h2><p>Step 2 of 2. Fill the details and accept our terms to continue.</p>
   <div class="row"><div><label>Company name *</label><input id="company"></div><div><label>Your name *</label><input id="cname"></div></div>
   <div class="row"><div><label>Mobile number *</label><input id="phone" type="tel"></div><div><label>Industry *</label><select id="industry"><option value="">Select</option><option>Clinic / hospital</option><option>Salon / spa</option><option>Education / coaching</option><option>Real estate</option><option>Restaurant / food</option><option>Retail / shop</option><option>Gym / fitness</option><option>Automobile / service</option><option>Insurance / finance</option><option>Other</option></select></div></div>
   <div class="row"><div><label>City</label><input id="city"></div><div><label>Company PAN (optional)</label><input id="pan" maxlength="10"></div></div>
@@ -184,12 +209,12 @@ footer{background:#192307;color:#cfd8b0;margin-top:30px;border:0}footer a{color:
 
 <!-- DASHBOARD -->
 <div id="dash" class="hide shell">
- <aside class="side"><a href="#/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a>
-  <nav id="dnav"><button data-s="overview">Overview</button><button data-s="reception">AI Receptionist</button><button data-s="new">New campaign</button><button data-s="camps">Campaigns</button><button data-s="billing">Credits &amp; billing</button><button data-s="help">Help center</button><button data-s="settings">Settings</button><a id="aLink" href="#/admin" style="display:none">Admin panel</a></nav>
+ <aside class="side"><a href="/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a>
+  <nav id="dnav"><button data-s="overview">Overview</button><button data-s="reception">AI Receptionist</button><button data-s="new">New campaign</button><button data-s="camps">Campaigns</button><button data-s="billing">Credits &amp; billing</button><button data-s="help">Help center</button><button data-s="settings">Settings</button><a id="aLink" href="/admin" style="display:none">Admin panel</a></nav>
   <div class="sidefoot"><b id="cr" style="color:var(--pri)"></b><small id="who" style="color:var(--mut);word-break:break-all"></small><button class="ghost" id="out" style="text-align:left;padding:6px 0">Log out</button></div>
  </aside>
  <main class="main">
-  <section data-sec="overview"><h1 id="hello"></h1><p>Upload your leads and let the AI call them. You get an Excel report with remarks.</p>
+  <section data-sec="overview"><h2 data-h1 id="hello"></h2><p>Upload your leads and let the AI call them. You get an Excel report with remarks.</p>
    <div class="grid"><div class="stat"><b id="stC">-</b>Credits</div><div class="stat"><b id="stK">-</b>Campaigns</div><div class="stat"><b id="stL">-</b>Leads called</div></div>
    <p style="margin-top:18px"><button data-go="new" style="width:auto">Start a campaign</button> <button class="ghost" data-go="billing">Buy credits</button></p></section>
   <section data-sec="new" class="hide"><div class="card"><h2>1. Upload your leads</h2>
@@ -222,7 +247,7 @@ footer{background:#192307;color:#cfd8b0;margin-top:30px;border:0}footer a{color:
    <div class="card"><h2>Change password</h2><label>New password (8+ characters)</label><input id="spw" type="password"><button id="spwb" style="width:auto">Update password</button> <span id="spm" class="msg"></span></div></section>
  </main>
 </div>
-<div id="susp" class="hide modal"><div class="mbox"><img src="/logo-mark.png" alt="Rnexa logo" style="height:64px"><h1>Account suspended</h1>
+<div id="susp" class="hide modal"><div class="mbox"><img src="/logo-mark.png" alt="Rnexa logo" style="height:64px"><h2 data-h1>Account suspended</h2>
  <p><b id="suspName"></b> has paused access to your account. Please contact our team and we will help you right away.</p>
  <a class="cta p" data-wa href="#">WhatsApp our team</a><a class="cta s" data-email href="#">Email our team</a><a class="cta s" id="callus" href="#">Call us</a>
  <p><button class="ghost" id="suspOut">Log out</button></p></div></div>
@@ -234,17 +259,17 @@ const $ = id => document.getElementById(id);
 document.querySelectorAll("[data-email]").forEach(e=>{e.href="mailto:"+SITE.email});
 document.querySelectorAll("[data-wa]").forEach(e=>{e.href="https://wa.me/"+SITE.whatsapp});
 function renderPacks(L){window.ALLP=L;const A=L.filter(p=>["line","minutes"].includes(p.kind)),C=L.filter(p=>(p.kind||"calls")==="calls");
-$("packs").innerHTML=A.map(p=>'<div class="card"><h2>'+p.name+'</h2><p style="font-size:26px;color:var(--ink);margin:0"><b>&#8377;'+p.price.toLocaleString("en-IN")+'</b></p><p>'+p.calls+' minutes &middot; about &#8377;'+Math.round(p.price/p.calls)+' per minute</p><a class="cta p" href="#/signup" style="margin:0">Get started</a></div>').join("");
+$("packs").innerHTML=A.map(p=>'<div class="card"><h2>'+p.name+'</h2><p style="font-size:26px;color:var(--ink);margin:0"><b>&#8377;'+p.price.toLocaleString("en-IN")+'</b></p><p>'+p.calls+' minutes &middot; about &#8377;'+Math.round(p.price/p.calls)+' per minute</p><a class="cta p" href="/signup" style="margin:0">Get started</a></div>').join("");
 $("buy").innerHTML=C.map(p=>'<div class="stat"><b>'+p.calls+' calls</b>&#8377;'+p.price.toLocaleString("en-IN")+'<br><button data-pack="'+p.id+'" style="margin-top:8px">Buy</button></div>').join("")}
 fetch("/api/packs").then(r=>r.json()).then(renderPacks).catch(()=>{});
 $("owner").textContent=SITE.owner;$("yr").textContent=new Date().getFullYear();
 let signup = false;
-function show(v){$("gload").style.display="none";$("tourBtn").style.display=v==="dash"?"":"none";["home","auth","onb","dash","legal","admin","reset","nf","denied"].forEach(x=>$(x).classList.toggle("hide",x!==v))}
+function show(v){$("gload").style.display="none";$("tourBtn").style.display=v==="dash"?"":"none";["home","auth","onb","dash","legal","admin","reset","nf","denied"].forEach(x=>$(x).classList.toggle("hide",x!==v));normalizeH1(v);seo()}
 
 function setMode(v){signup=v;$("fpBtn").style.display=signup?"none":"";$("authBtn").textContent=signup?"Create account":"Log in";
   $("authSub").textContent=signup?"Step 1 of 2. Create your account.":"Log in to your client account.";
   $("swText").textContent=signup?"Already have an account?":"New here?";$("swBtn").textContent=signup?"Log in":"Create account";$("authMsg").textContent=""}
-$("swBtn").onclick=()=>{location.hash=signup?"#/login":"#/signup"};
+$("swBtn").onclick=()=>{go(signup?"/login":"/signup")};
 
 $("authBtn").onclick=async()=>{
   const email=$("email").value.trim(),password=$("pass").value,m=$("authMsg");m.className="msg";m.textContent="";
@@ -254,7 +279,7 @@ $("authBtn").onclick=async()=>{
   $("authBtn").disabled=false;
   if(error){m.textContent=error.message;return}
   if(signup&&!data.session){m.className="msg ok";m.textContent="Check your email and click the confirmation link, then log in.";return}
-  location.hash="#/app";route();
+  go("/app");
 };
 
 const t=$("terms");
@@ -272,7 +297,7 @@ $("saveBtn").onclick=async()=>{
   toast("Welcome to Rnexa","ok");route();
 };
 
-$("out").onclick=async()=>{await sb.auth.signOut();location.hash="#/"};
+$("out").onclick=async()=>{await sb.auth.signOut();go("/")};
 
 const upd="Last updated: October 2026.";
 const sec=(t,p)=>`<h2>${t}</h2><p>${p}</p>`;
@@ -313,22 +338,22 @@ refund:()=>`<h1>Refund &amp; Cancellation Policy</h1><p>${upd}</p>`
 +sec("Contact",`${SITE.email} &middot; ${SITE.phone}`),
 contact:()=>`<h1>Contact Us</h1><h2>${SITE.business}</h2><p>Owner: ${SITE.owner}</p><p>Email: <a href="mailto:${SITE.email}">${SITE.email}</a></p><p>Phone: ${SITE.phone}</p><p>WhatsApp: <a href="https://wa.me/${SITE.whatsapp}">Chat now</a></p><p>Address: ${SITE.address}</p>`};
 async function route(){
-  const h=location.hash,{data:{session}}=await sb.auth.getSession();
+  const h=hashOf(),{data:{session}}=await sb.auth.getSession();
   if(recovering||(session&&location.search.includes("reset=1"))){show("reset");return}
-  $("navLogin").style.display=session?"none":"";$("navCta").textContent=session?"My dashboard":"Sign up";$("navCta").href=session?"#/app":"#/signup";
-  if(h==="#/login"||h==="#/signup"){ if(session){location.hash="#/app";return} setMode(h==="#/signup");show("auth");return}
-  if(h==="#/admin"){if(!session){location.hash="#/login";return}const w=await who();if(!w.is_admin){show("denied");return}show("admin");adminTab("overview");return}
+  $("navLogin").style.display=session?"none":"";$("navCta").textContent=session?"My dashboard":"Sign up";$("navCta").href=session?"/app":"/signup";
+  if(h==="#/login"||h==="#/signup"){ if(session){go("/app");return} setMode(h==="#/signup");$("authH").textContent=h==="#/signup"?"Create your account":"Log in";show("auth");return}
+  if(h==="#/admin"){if(!session){go("/login");return}const w=await who();if(!w.is_admin){show("denied");return}show("admin");adminTab(TABS[location.pathname.split("/")[2]]?location.pathname.split("/")[2]:"overview");return}
   if(h==="#/app"){
-    if(!session){location.hash="#/login";return}
+    if(!session){go("/login");return}
     const {data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
     if(!p||p.terms_version!==TERMS_VERSION){show("onb");return}
-    $("hello").textContent="Welcome, "+p.company_name;$("who").textContent=session.user.email;show("dash");dashSec("overview");tourMaybe();loadCredits();checkAdmin();loadTickets();loadCamps();return}
-  const pg=PAGES[h.slice(2)];if(pg){$("legalBody").innerHTML=pg();show("legal");scrollTo(0,0);return}
+    $("hello").textContent="Welcome, "+p.company_name;$("who").textContent=session.user.email;show("dash");dashSec(SLUGKEY[location.pathname.split("/")[2]||"overview"]||"overview");tourMaybe();loadCredits();checkAdmin();loadTickets();loadCamps();return}
+  const pg=PAGES[h.slice(2)];if(pg){$("legalBody").innerHTML='<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> &rsaquo; <span>'+SEO["/"+h.slice(2)][0].split(" | ")[0].replace("&","&amp;")+"</span></nav>"+pg();show("legal");scrollTo(0,0);return}
   if(h.startsWith("#/")&&h!=="#/"){show("nf");return}
   show("home");
 }
-window.onhashchange=route;
-sb.auth.onAuthStateChange((ev)=>{if(ev==="SIGNED_IN"&&["","#/login","#/signup"].includes(location.hash)&&location.hash)location.hash="#/app"});
+addEventListener("popstate",route);
+sb.auth.onAuthStateChange(ev=>{if(ev==="SIGNED_IN"&&["/login","/signup"].includes(location.pathname))go("/app")});
 const esc=v=>String(v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 $("file").onchange=async e=>{const f=e.target.files[0];if(!f)return;
   await loadScript(XLSXSRC);const wb=XLSX.read(await f.arrayBuffer());const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""});
@@ -341,7 +366,7 @@ $("file").onchange=async e=>{const f=e.target.files[0];if(!f)return;
 let lastFile=null;
 const tok=async()=>(await sb.auth.getSession()).data.session.access_token;
 async function api(path,opt={}){const slow=setTimeout(()=>toast("Your connection is slow. Still trying...","warn"),6000);let r;try{r=await fetch(path,{...opt,headers:{Authorization:"Bearer "+await tok(),...(opt.headers||{})}})}catch(e){toast("Network problem. Please check your internet.","err");throw new Error("Network problem")}finally{clearTimeout(slow)}
-  if(!r.ok){let m="Error";try{m=(await r.json()).detail||m}catch(e){}if(/suspended/i.test(m))showSusp();if(r.status===401){await sb.auth.signOut({scope:"local"});location.hash="#/login";show("auth");$("authMsg").className="msg";$("authMsg").textContent="Your session expired. Please log in again.";toast("Session expired. Please log in again.","warn")}throw new Error(m)}return r}
+  if(!r.ok){let m="Error";try{m=(await r.json()).detail||m}catch(e){}if(/suspended/i.test(m))showSusp();if(r.status===401){await sb.auth.signOut({scope:"local"});go("/login");show("auth");$("authMsg").className="msg";$("authMsg").textContent="Your session expired. Please log in again.";toast("Session expired. Please log in again.","warn")}throw new Error(m)}return r}
 $("go").onclick=async()=>{const m=$("goMsg");m.className="msg";m.textContent="";$("go").disabled=true;
   try{const fd=new FormData();fd.append("file",lastFile);const c=await(await api("/api/campaigns",{method:"POST",body:fd})).json();
     m.className="msg ok";m.textContent="Calling started for "+c.total+" leads."+(c.limited?" (Only "+c.limit+" leads started - not enough credits.)":"");loadCamps();loadCredits()}
@@ -367,7 +392,7 @@ async function checkAdmin(){const w=await who();if(w.is_admin)$("aLink").style.d
 async function loadTickets(){try{const L=await(await api("/api/tickets")).json();$("tlist").innerHTML=L.length?"<table><tr><th>Subject</th><th>Status</th><th>Reply</th></tr>"+L.map(t=>"<tr><td>"+esc(t.subject)+"</td><td>"+esc(t.status)+"</td><td>"+esc(t.admin_reply||"")+"</td></tr>").join("")+"</table>":""}catch(e){}}
 $("tgo").onclick=async()=>{const o=$("tout");o.className="msg";o.textContent="";if(!$("tmsg").value.trim()){o.textContent="Please type a message.";return}
   try{await J("POST","/api/tickets",{subject:$("tsub").value,message:$("tmsg").value});$("tmsg").value="";o.className="msg ok";o.textContent="Ticket sent. We will reply soon.";loadTickets()}catch(e){o.textContent=e.message}};
-$("aout").onclick=async()=>{await sb.auth.signOut();location.hash="#/"};
+$("aout").onclick=async()=>{await sb.auth.signOut();go("/")};
 let CL=[];
 const TABS={lines:"AI Lines",overview:"Overview",clients:"Clients",tickets:"Tickets",pricing:"Pricing",payments:"Payments",account:"My account"};
 const VIEW={
@@ -379,7 +404,7 @@ const VIEW={
  async payments(){const L=await(await api("/api/admin/payments")).json();return "<table><tr><th>Date</th><th>Client</th><th>Pack</th><th>Amount</th><th>Status</th></tr>"+L.map(p=>"<tr><td>"+new Date(p.created_at).toLocaleString("en-IN")+"</td><td>"+esc(p.email||"")+"</td><td>"+esc(p.pack)+"</td><td>"+inr(p.amount_paise/100)+"</td><td>"+esc(p.status)+"</td></tr>").join("")+"</table>"},
  async account(){return '<h2>Change my admin login</h2><label>New email (a confirmation link is sent)</label><input id="ne" type="email"><label>New password (8+ characters)</label><input id="np" type="password"><button id="ago" style="width:auto">Update</button><div id="amsg" class="msg"></div>'}
 };
-async function adminTab(t){$("atabs").innerHTML=Object.keys(TABS).map(k=>'<button data-t="'+k+'"'+(k===t?' class="on"':'')+'>'+TABS[k]+"</button>").join(" ");
+async function adminTab(t){urlSet("/admin/"+t);$("atabs").innerHTML=Object.keys(TABS).map(k=>'<button data-t="'+k+'"'+(k===t?' class="on"':'')+'>'+TABS[k]+"</button>").join(" ");
   $("abody").innerHTML="Loading...";try{$("abody").innerHTML=await VIEW[t]()}catch(e){$("abody").innerHTML='<div class="msg">'+esc(e.message)+"</div>"}}
 $("atabs").onclick=e=>{if(e.target.dataset.t)adminTab(e.target.dataset.t)};
 $("abody").onclick=async e=>{const a=e.target.dataset.a,id=e.target.dataset.id;if(!a)return;const c=CL.find(x=>x.id===id);
@@ -401,7 +426,7 @@ document.addEventListener("click",async e=>{if(e.target.id!=="ago")return;const 
 
 function showSusp(){$("suspName").textContent=SITE.business;$("callus").href="tel:"+SITE.phone.replace(/\s/g,"");$("susp").classList.remove("hide");document.body.style.overflow="hidden"}
 $("suspOut").onclick=async()=>{await sb.auth.signOut();location.reload()};
-function dashSec(n){document.querySelectorAll("[data-sec]").forEach(x=>x.classList.toggle("hide",x.dataset.sec!==n));document.querySelectorAll("#dnav button").forEach(b=>b.classList.toggle("on",b.dataset.s===n));
+function dashSec(n){urlSet("/app/"+(n==="camps"?"campaigns":n));document.querySelectorAll("[data-sec]").forEach(x=>x.classList.toggle("hide",x.dataset.sec!==n));document.querySelectorAll("#dnav button").forEach(b=>b.classList.toggle("on",b.dataset.s===n));
   if(n==="reception")loadReception();if(n==="billing")loadPays();if(n==="settings")loadSettings();if(n==="camps")loadCamps();if(n==="help")renderFaq()}
 $("dnav").onclick=e=>{if(e.target.dataset.s)dashSec(e.target.dataset.s)};
 document.addEventListener("click",e=>{const g=e.target.dataset&&e.target.dataset.go;if(g)dashSec(g)});
@@ -418,6 +443,21 @@ $("ssave").onclick=async()=>{const m=$("smsg");m.className="msg";const {data:{se
   if(error)m.textContent=error.message;else{m.className="msg ok";m.textContent="Saved.";toast("Saved","ok")}};
 $("spwb").onclick=async()=>{const m=$("spm");m.className="msg";if($("spw").value.length<8){m.textContent="Use 8 or more characters.";return}
   const {error}=await sb.auth.updateUser({password:$("spw").value});if(error)m.textContent=error.message;else{m.className="msg ok";m.textContent="Password updated.";$("spw").value=""}};
+
+const SEO={"/": ["Rnexa | AI Receptionist and Websites for Local Businesses in Chennai", "Rnexa builds fast websites and runs an AI receptionist that answers your missed calls, takes bookings and shows every call in your dashboard."], "/login": ["Log in | Rnexa", "Log in to your Rnexa dashboard to manage your AI receptionist, call history, minutes and invoices."], "/signup": ["Create your account | Rnexa", "Create a Rnexa account to set up your AI receptionist, get an AI phone number and see every call in your dashboard."], "/reset": ["Set a new password | Rnexa", "Choose a new password for your Rnexa account."], "/terms": ["Terms & Conditions | Rnexa", "Read the Rnexa terms for the AI receptionist service: accounts, call forwarding, minutes, invoices and the emails we send."], "/privacy": ["Privacy Policy | Rnexa", "How Rnexa collects, uses and protects your business details, call data and payment records."], "/refund": ["Refund & Cancellation Policy | Rnexa", "Rnexa refund and cancellation rules for minutes, AI phone lines and wrong or double payments."], "/contact": ["Contact Rnexa | Tondiarpet, Chennai", "Contact Rnexa by email, phone or WhatsApp, or visit us at Tondiarpet, Chennai."], "/app": ["Dashboard | Rnexa", "Your Rnexa client dashboard."], "/admin": ["Admin | Rnexa", "Rnexa admin panel."], "404": ["Page not found | Rnexa", "This page does not exist."]},SLUGKEY={overview:"overview",reception:"reception",new:"new",campaigns:"camps",billing:"billing",help:"help",settings:"settings"};
+function hashOf(){const p=location.pathname.replace(/\/+$/,"")||"/";return "#/"+(p.split("/")[1]||"")}
+function urlSet(p){if(location.pathname!==p)history.replaceState(null,"",p+location.search)}
+function go(p){if(location.pathname!==p.split("?")[0])history.pushState(null,"",p);route();scrollTo(0,0)}
+document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("a[href^='/']");if(!a||a.target||e.metaKey||e.ctrlKey||e.shiftKey||e.button)return;
+  const p=a.getAttribute("href");if(p.startsWith("//")||p.startsWith("/api/")||/\.\w{2,4}$/.test(p))return;e.preventDefault();go(p)});
+function swapTag(el,tag){const n=document.createElement(tag);for(const a of el.attributes)n.setAttribute(a.name,a.value);n.innerHTML=el.innerHTML;el.replaceWith(n);return n}
+function normalizeH1(v){const c=$(v);document.querySelectorAll("h1").forEach(h=>{if(!c.contains(h))swapTag(h,"h2").setAttribute("data-h1","")});
+  if(!c.querySelector("h1")){const t=c.querySelector("[data-h1]")||c.querySelector("h2");if(t)swapTag(t,"h1")}
+  const hs=c.querySelectorAll("h1");for(let i=1;i<hs.length;i++)swapTag(hs[i],"h2")}
+function meta(sel,attr,val,make){let e=document.querySelector(sel);if(!e&&make){e=document.createElement("meta");make(e);document.head.appendChild(e)}if(e)e.setAttribute(attr,val)}
+function seo(){const p=location.pathname.replace(/\/+$/,"")||"/",k=p==="/"?"/":"/"+p.split("/")[1],known=SEO[k]&&k!=="404",d=known?SEO[k]:SEO["404"],url="https://rnexa.in"+(known?k:"/");
+  document.title=d[0];meta('meta[name="description"]',"content",d[1]);meta('link[rel="canonical"]',"href",url);meta('meta[property="og:title"]',"content",d[0]);meta('meta[property="og:url"]',"content",url);
+  meta('meta[name="robots"]',"content",["/login","/reset","/app","/admin"].includes(k)||!known?"noindex,nofollow":"index,follow",e=>e.setAttribute("name","robots"))}
 let recovering=false;
 sb.auth.onAuthStateChange(ev=>{if(ev==="PASSWORD_RECOVERY"){recovering=true;show("reset")}});
 $("fpBtn").onclick=async()=>{const m=$("authMsg"),email=$("email").value.trim();m.className="msg";
@@ -428,7 +468,7 @@ $("rpb").onclick=async()=>{const m=$("rpm"),a=$("rp1").value;m.className="msg";
   if(a.length<8){m.textContent="Use 8 or more characters.";return}if(a!==$("rp2").value){m.textContent="The two passwords do not match.";return}
   const {error}=await sb.auth.updateUser({password:a});if(error){m.textContent=error.message;return}
   m.className="msg ok";m.textContent="Password updated. Taking you to your dashboard...";
-  setTimeout(()=>{recovering=false;history.replaceState(null,"","/");location.hash="#/app";route()},1200)};
+  setTimeout(()=>{recovering=false;history.replaceState(null,"","/");go("/app")},1200)};
 
 function pk(){return (window.ALLP||[]).filter(p=>["line","minutes"].includes(p.kind))}
 async function startPay(id,m,done){m.className="msg";m.textContent="";try{const j={"Content-Type":"application/json"};const o=await(await api("/api/orders",{method:"POST",headers:j,body:JSON.stringify({pack:id})})).json();
@@ -458,12 +498,31 @@ const R={req:v=>v.length>0,email:v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),pw:v=>v
 function netUi(){$("net").classList.toggle("hide",navigator.onLine)}
 addEventListener("offline",netUi);addEventListener("online",()=>{netUi();toast("You are back online","ok")});netUi();
 $("terms").innerHTML=PAGES.terms().replace("<h1>","<h2>").replace("</h1>","</h2>");
-const TOUR=[["Welcome to Rnexa","This short tour shows you where everything is. It takes less than a minute.","overview"],["Overview","See your minutes left and how many calls you got today.","overview"],["AI Receptionist","Tell the AI about your business, tap a sample to get started, and get your AI phone number.","reception"],["Forward your calls","Set call forwarding on your business phone so missed calls go to your AI number. The guide is in AI Receptionist, step 3.","reception"],["Credits and invoices","Buy minutes when you run low and download your invoices. We email you when you have 20 minutes left.","billing"],["Help center","Search for answers or send us a ticket to change your details or delete your account.","help"],["Settings","Update your company details, PAN, GST and password. Use the Show tour button any time to see this again.","settings"]];
-let tI=0;
-function tourShow(i){tI=i;const t=TOUR[i];$("tourN").textContent="Step "+(i+1)+" of "+TOUR.length;$("tourT").textContent=t[0];$("tourP").textContent=t[1];dashSec(t[2]);$("tourBack").style.visibility=i?"visible":"hidden";$("tourNext").textContent=i===TOUR.length-1?"Finish":"Next"}
-function tourOpen(){$("tour").classList.remove("hide");tourShow(0)}
-function tourEnd(){$("tour").classList.add("hide");try{localStorage.setItem("rnexa_tour","1")}catch(e){}dashSec("overview")}
-$("tourNext").onclick=()=>tI<TOUR.length-1?tourShow(tI+1):tourEnd();$("tourBack").onclick=()=>tourShow(tI-1);$("tourSkip").onclick=tourEnd;$("tourBtn").onclick=tourOpen;
+const TOUR=[["Welcome to Rnexa","This short tour shows you where everything is. It takes less than a minute.","overview",""],
+["Overview","See your minutes left and how many calls you got today.","overview",'#dnav [data-s="overview"]'],
+["AI Receptionist","Tell the AI about your business, tap a sample to get started, and get your AI phone number.","reception",'#dnav [data-s="reception"]'],
+["Forward your calls","Set call forwarding on your business phone so missed calls go to your AI number. Pick your phone company here to get the exact codes.","reception","#fw_op"],
+["Credits and invoices","Buy minutes when you run low and download your invoices. We email you when you have 20 minutes left.","billing",'#dnav [data-s="billing"]'],
+["Help center","Search for answers or send us a ticket to change your details or delete your account.","help",'#dnav [data-s="help"]'],
+["Settings","Update your company details, PAN, GST and password. Press Show tour any time to see this again.","settings",'#dnav [data-s="settings"]']];
+let tI=0,tEl=null;
+function tourPlace(el){const card=$("tourCard"),hi=$("tourHi"),mask=$("tourMask");
+ if(!el){hi.style.display="none";mask.style.clipPath="none";card.style.left="50%";card.style.top="50%";card.style.transform="translate(-50%,-50%)";return}
+ card.style.transform="none";hi.style.display="";const r=el.getBoundingClientRect(),p=6,x=r.left-p,y=r.top-p,w=r.width+2*p,h=r.height+2*p,vw=innerWidth,vh=innerHeight;
+ hi.style.left=x+"px";hi.style.top=y+"px";hi.style.width=w+"px";hi.style.height=h+"px";
+ mask.style.clipPath="polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,"+x+"px "+y+"px,"+x+"px "+(y+h)+"px,"+(x+w)+"px "+(y+h)+"px,"+(x+w)+"px "+y+"px,"+x+"px "+y+"px)";
+ const cw=card.offsetWidth,ch=card.offsetHeight;let L,T;
+ if(vw<800){L=(vw-cw)/2;T=vh-ch-16}else if(r.right+20+cw<vw){L=r.right+20;T=r.top}else{L=Math.max(12,Math.min(r.left,vw-cw-12));T=r.bottom+16+ch>vh?r.top-ch-16:r.bottom+16}
+ card.style.left=L+"px";card.style.top=Math.max(12,Math.min(T,vh-ch-12))+"px"}
+function tourShow(i){tI=i;const t=TOUR[i];$("tourN").textContent="Step "+(i+1)+" of "+TOUR.length;$("tourT").textContent=t[0];$("tourP").textContent=t[1];
+ $("tourBack").style.visibility=i?"visible":"hidden";$("tourNext").textContent=i===TOUR.length-1?"Finish":"Next";dashSec(t[2]);
+ const find=()=>{tEl=t[3]?document.querySelector(t[3]):null;if(tEl&&tEl.id==="fw_op"){tEl=tEl.closest(".card");tEl.scrollIntoView({block:"center"})}tourPlace(tEl)};
+ requestAnimationFrame(()=>{find();setTimeout(find,450)})}
+function tourOpen(){$("tour").classList.remove("hide");$("tourBtn").textContent="Skip tour";tourShow(0)}
+function tourEnd(){$("tour").classList.add("hide");$("tourBtn").textContent="Show tour";try{localStorage.setItem("rnexa_tour","1")}catch(e){}dashSec("overview")}
+$("tourNext").onclick=()=>tI<TOUR.length-1?tourShow(tI+1):tourEnd();$("tourBack").onclick=()=>tourShow(tI-1);
+$("tourBtn").onclick=()=>$("tour").classList.contains("hide")?tourOpen():tourEnd();
+addEventListener("resize",()=>{if(!$("tour").classList.contains("hide"))tourPlace(tEl)});
 function tourMaybe(){let d;try{d=localStorage.getItem("rnexa_tour")}catch(e){}if(!d&&$("tour").classList.contains("hide"))setTimeout(tourOpen,700)}
 const SUG=[["Book appointments","We take appointments Monday to Saturday. To book, ask the caller's name, preferred day and time, and the reason. Services and fees: [list your services and prices]. Tell the caller our team will confirm the booking by call or WhatsApp."],
 ["Answer customer questions","Answer common questions politely. Services and prices: [list them]. Delivery, warranty or other policy: [write it]. If the caller is upset or the problem is serious, take their name and number and promise a callback within [time]."],

@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /app
+Disallow: /admin
+Disallow: /reset
 
 Sitemap: https://rnexa.in/sitemap.xml

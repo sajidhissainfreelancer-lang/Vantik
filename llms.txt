@@ -15,3 +15,8 @@
 
 ## Pages
 - Home: https://rnexa.in/
+- Create account: https://rnexa.in/signup
+- Terms: https://rnexa.in/terms
+- Privacy: https://rnexa.in/privacy
+- Refunds: https://rnexa.in/refund
+- Contact: https://rnexa.in/contact
