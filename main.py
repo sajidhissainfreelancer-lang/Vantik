@@ -270,6 +270,7 @@ class ClientEdit(BaseModel):
     industry: Optional[str] = None
     city: Optional[str] = None
     suspended: Optional[bool] = None
+    reason: Optional[str] = None
     credits_delta: Optional[int] = None
 
 
@@ -317,6 +318,16 @@ def admin_edit_client(uid: str, b: ClientEdit, authorization: str = Header(None)
         db("PATCH", "profiles", {"id": f"eq.{uid}"}, f)
     if b.suspended is not None and not db("PATCH", "account_status", {"user_id": f"eq.{uid}"}, {"suspended": b.suspended}):
         db("POST", "account_status", json={"user_id": uid, "suspended": b.suspended})
+    if b.suspended is not None:
+        prof = db("GET", "profiles", {"id": f"eq.{uid}", "select": "company_name"})
+        name = prof[0]["company_name"] if prof else "there"
+        contact = "Email: ss@rnexa.in\nPhone / WhatsApp: +91 7358145522"
+        if b.suspended:
+            why = f"\nReason: {b.reason.strip()}\n" if b.reason and b.reason.strip() else ""
+            subject, body = "Your Rnexa account has been suspended", f"Hello {name},\n\nYour Rnexa account has been suspended.{why}\nWhile it is suspended you cannot use the dashboard or your AI receptionist.\n\nTo sort this out, please contact us:\n{contact}\n\nRnexa"
+        else:
+            subject, body = "Your Rnexa account is active again", f"Hello {name},\n\nYour Rnexa account has been switched back on. You can log in and use the dashboard again at {SITE_URL}/login.\n\nIf you have any questions:\n{contact}\n\nRnexa"
+        threading.Thread(target=send_mail, args=(email_of(uid), subject, body), daemon=True).start()
     if b.credits_delta:
         credits_of(uid)
         if rpc("add_credits" if b.credits_delta > 0 else "use_credits", {"p_user": uid, "p_n": abs(b.credits_delta)}) is None:

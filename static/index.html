@@ -134,12 +134,46 @@ button:disabled{opacity:.5;cursor:not-allowed}
 #tourCard{position:fixed;z-index:99992;width:min(340px,calc(100vw - 24px));background:#fff;border-radius:16px;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.35);transition:left .35s cubic-bezier(.23,1,.32,1),top .35s cubic-bezier(.23,1,.32,1)}
 #tourBtn{z-index:99995!important}
 .crumbs{font-size:13px;color:var(--mut);margin-bottom:10px}.crumbs a{text-decoration:none}
+
+.hero2 a.cta.p{background:transparent!important;color:#fff!important;border-color:#fff!important}
+.hero2 a.cta.p::before{background:#fff}
+.hero2 a.cta.p:hover{color:var(--deep)!important;background:transparent!important}
+.hero2 a.cta.s{padding:13px 28px}
+/* mobile */
+html,body{overflow-x:hidden}
+#navToggle{display:none;font-size:22px;line-height:1;padding:4px 10px!important;width:auto;margin:0}
+@media (max-width:800px){
+ .grid,.g3,.steps{grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr))}
+ table{display:block;overflow-x:auto;max-width:100%}
+ .row{flex-direction:column;gap:0}
+ input,select,textarea{font-size:16px}
+ .side{padding:14px;gap:12px}
+ #dnav,#atabs{flex-direction:row;flex-wrap:nowrap;overflow-x:auto;gap:6px;padding-bottom:4px}
+ #dnav button,#dnav a,#atabs button{width:auto;white-space:nowrap;padding:9px 14px}
+ .sidefoot{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:0}
+ .main{padding:18px 12px}.card{padding:18px}
+ .hero2{padding:7vh 5vw}.hero2 p{font-size:16px}
+ .sec{padding:28px 5vw}
+ .mbox{width:100%;max-height:90vh;overflow:auto;padding:26px 18px}
+ #tourBtn{padding:9px 16px!important;font-size:14px;right:12px!important;bottom:12px!important}
+ button:not(.ghost):not(.chip):not([data-s]):not([data-t]),a.cta.p,a.cta.s{padding:12px 30px 12px 20px}
+ .hero2 .cta{display:block;margin:10px auto;max-width:300px}
+}
+@media (max-width:720px){
+ #navToggle{display:block}
+ .nav{flex-wrap:wrap;gap:6px;padding:10px 4vw}
+ .nav>span:last-child{display:flex;align-items:center;gap:8px}
+ .nav .links a{margin:0;padding:11px 4px;border-top:1px solid var(--line)}
+ .nav.open .links{display:flex;flex-direction:column;order:3;width:100%;padding:6px 0}
+ .nav .btn,.nav .ghostb{padding:8px 14px!important;font-size:14px}
+ .brand{font-size:18px}.brand img{height:30px}
+}
 </style></head><body>
 
 <div id="home" class="hide">
  <div class="nav"><a href="/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a>
   <span class="links"><a href="#services">Services</a><a href="#aicaller">AI Caller</a><a href="#how">How it works</a><a href="#faq">FAQ</a><a href="#contact">Contact</a></span>
-  <span><a class="ghostb" id="navLogin" href="/login">Log in</a><a class="btn" id="navCta" href="/signup">Sign up</a></span></div>
+  <span><button class="ghost" id="navToggle" aria-label="Open menu" aria-expanded="false">&#9776;</button><a class="ghostb" id="navLogin" href="/login">Log in</a><a class="btn" id="navCta" href="/signup">Sign up</a></span></div>
  <div class="hero2"><img src="/logo-mark.png" alt="Rnexa logo" style="height:92px;margin-bottom:12px"><h1>Websites that bring customers. An AI receptionist that answers them.</h1>
   <p>Rnexa builds fast, clean and friendly websites and web apps for local businesses, and gives you an AI receptionist that answers the calls you miss, takes bookings and shows you every conversation.</p>
   <a class="cta p" href="/signup">Get your AI receptionist</a><a class="cta s" href="#contact">Get a website</a></div>
@@ -310,7 +344,7 @@ terms:()=>`<h1>Terms &amp; Conditions</h1><p>${upd} By creating an account you a
 +sec("5. Outbound calling","If you use our AI to call people, you must have their consent or a lawful right to call them, and you must follow TRAI and DND rules and any other Indian law. Do not use the service to cheat, threaten or mislead anyone.")
 +sec("6. Minutes, credits and payment","AI calls use prepaid minutes, and each call is rounded up to the next full minute. The AI phone line has a monthly fee shown with the price. When your minutes finish, the AI stops answering until you buy more. Prices are in Indian rupees and are shown before you pay. Payments are handled by Razorpay.")
 +sec("7. Invoices","After each payment you can download an invoice from Credits &amp; billing. We use the company name, PAN, GST number and billing address you saved, so please keep them correct. Rnexa is currently not registered for GST, so no GST is charged on our invoices.")
-+sec("8. Emails we send you","We send emails only about your account and service: (a) confirm your email address; (b) reset your password or confirm a changed email; (c) tell you when your AI phone number is ready; (d) warn you when you have 20 minutes or fewer left; (e) tell you when your AI is paused because your minutes ended; (f) replies to your support tickets; (g) important notices about these terms or your account. We do not send advertising emails without your permission.")
++sec("8. Emails we send you","We send emails only about your account and service: (a) confirm your email address; (b) reset your password or confirm a changed email; (c) tell you when your AI phone number is ready; (d) warn you when you have 20 minutes or fewer left; (e) tell you when your AI is paused because your minutes ended; (f) replies to your support tickets; (g) a notice if your account is suspended or switched back on; (h) important notices about these terms or your account. We do not send advertising emails without your permission.")
 +sec("9. Rules of use","You may not use the service for anything illegal, harmful or misleading, to call people who asked not to be called, or to share other people's private data without the right to do so. We may suspend or close an account that breaks these terms. A suspended account can contact us to sort things out.")
 +sec("10. Your data","You own your business details, lead lists and call content. We use them only to run the service for you, as explained in our Privacy Policy.")
 +sec("11. Our responsibility","We work hard to keep the service running, but we cannot promise it will never stop or never make mistakes. To the extent the law allows, Rnexa is not responsible for lost business or indirect losses.")
@@ -409,7 +443,7 @@ async function adminTab(t){urlSet("/admin/"+t);$("atabs").innerHTML=Object.keys(
 $("atabs").onclick=e=>{if(e.target.dataset.t)adminTab(e.target.dataset.t)};
 $("abody").onclick=async e=>{const a=e.target.dataset.a,id=e.target.dataset.id;if(!a)return;const c=CL.find(x=>x.id===id);
   try{
-  if(a==="sus"){if(confirm((c.suspended?"Activate ":"Suspend ")+c.company_name+"?")){await J("PATCH","/api/admin/clients/"+id,{suspended:!c.suspended});adminTab("clients")}}
+  if(a==="sus"){if(confirm((c.suspended?"Activate ":"Suspend ")+c.company_name+"? The client will get an email.")){const why=c.suspended?"":(prompt("Reason for suspension (optional, shown in the email):")||"");await J("PATCH","/api/admin/clients/"+id,{suspended:!c.suspended,reason:why});adminTab("clients")}}
   else if(a==="cr"){const n=parseInt(prompt("Add (+) or remove (-) credits for "+c.company_name+":"));if(n){await J("PATCH","/api/admin/clients/"+id,{credits_delta:n});adminTab("clients")}}
   else if(a==="del"){if(prompt('Type DELETE to permanently delete '+c.company_name+" and all their data:")==="DELETE"){await api("/api/admin/clients/"+id,{method:"DELETE"});adminTab("clients")}}
   else if(a==="edit"){$("abody").innerHTML='<h2>Edit '+esc(c.company_name)+'</h2><label>Company</label><input id="ec" value="'+esc(c.company_name)+'"><label>Contact name</label><input id="en" value="'+esc(c.contact_name)+'"><label>Phone</label><input id="ep" value="'+esc(c.phone)+'"><label>City</label><input id="ey" value="'+esc(c.city||"")+'"><button id="esave" data-id="'+id+'" style="width:auto">Save</button> <span class="msg" id="emsg"></span>';
@@ -458,6 +492,8 @@ function meta(sel,attr,val,make){let e=document.querySelector(sel);if(!e&&make){
 function seo(){const p=location.pathname.replace(/\/+$/,"")||"/",k=p==="/"?"/":"/"+p.split("/")[1],known=SEO[k]&&k!=="404",d=known?SEO[k]:SEO["404"],url="https://rnexa.in"+(known?k:"/");
   document.title=d[0];meta('meta[name="description"]',"content",d[1]);meta('link[rel="canonical"]',"href",url);meta('meta[property="og:title"]',"content",d[0]);meta('meta[property="og:url"]',"content",url);
   meta('meta[name="robots"]',"content",["/login","/reset","/app","/admin"].includes(k)||!known?"noindex,nofollow":"index,follow",e=>e.setAttribute("name","robots"))}
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("#navToggle"),n=document.querySelector("#home .nav");
+  if(t){n.classList.toggle("open");t.setAttribute("aria-expanded",n.classList.contains("open"))}else if(e.target.closest&&e.target.closest("#home .links a"))n.classList.remove("open")});
 let recovering=false;
 sb.auth.onAuthStateChange(ev=>{if(ev==="PASSWORD_RECOVERY"){recovering=true;show("reset")}});
 $("fpBtn").onclick=async()=>{const m=$("authMsg"),email=$("email").value.trim();m.className="msg";
@@ -506,17 +542,21 @@ const TOUR=[["Welcome to Rnexa","This short tour shows you where everything is. 
 ["Help center","Search for answers or send us a ticket to change your details or delete your account.","help",'#dnav [data-s="help"]'],
 ["Settings","Update your company details, PAN, GST and password. Press Show tour any time to see this again.","settings",'#dnav [data-s="settings"]']];
 let tI=0,tEl=null;
-function tourPlace(el){const card=$("tourCard"),hi=$("tourHi"),mask=$("tourMask");
- if(!el){hi.style.display="none";mask.style.clipPath="none";card.style.left="50%";card.style.top="50%";card.style.transform="translate(-50%,-50%)";return}
- card.style.transform="none";hi.style.display="";const r=el.getBoundingClientRect(),p=6,x=r.left-p,y=r.top-p,w=r.width+2*p,h=r.height+2*p,vw=innerWidth,vh=innerHeight;
+function tourPlace(el){const card=$("tourCard"),hi=$("tourHi"),mask=$("tourMask"),vw=innerWidth,vh=innerHeight,gap=vw<800?84:76,cw=card.offsetWidth,ch=card.offsetHeight;
+ card.style.transform="none";
+ if(!el){hi.style.display="none";mask.style.clipPath="none";card.style.left=Math.max(12,(vw-cw)/2)+"px";card.style.top=Math.max(12,(vh-ch)/2)+"px";return}
+ hi.style.display="";const r=el.getBoundingClientRect(),p=6,x=r.left-p,y=r.top-p,w=r.width+2*p,h=r.height+2*p;
  hi.style.left=x+"px";hi.style.top=y+"px";hi.style.width=w+"px";hi.style.height=h+"px";
  mask.style.clipPath="polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,"+x+"px "+y+"px,"+x+"px "+(y+h)+"px,"+(x+w)+"px "+(y+h)+"px,"+(x+w)+"px "+y+"px,"+x+"px "+y+"px)";
- const cw=card.offsetWidth,ch=card.offsetHeight;let L,T;
- if(vw<800){L=(vw-cw)/2;T=vh-ch-16}else if(r.right+20+cw<vw){L=r.right+20;T=r.top}else{L=Math.max(12,Math.min(r.left,vw-cw-12));T=r.bottom+16+ch>vh?r.top-ch-16:r.bottom+16}
- card.style.left=L+"px";card.style.top=Math.max(12,Math.min(T,vh-ch-12))+"px"}
+ const free=(L,T)=>L>=8&&T>=8&&L+cw<=vw-8&&T+ch<=vh-8&&(L+cw<x||L>x+w||T+ch<y||T>y+h),cl=Math.max(12,Math.min(x,vw-cw-12)),c=[];
+ if(vw>=800){c.push([x+w+20,y],[x-20-cw,y]);if(w<vw*.5)c.push([cl,y+h+16],[cl,y-ch-16])}
+ const pick=c.find(a=>free(a[0],a[1]))||[(vw-cw)/2,vh-ch-gap];
+ card.style.left=pick[0]+"px";card.style.top=Math.max(12,pick[1])+"px"}
 function tourShow(i){tI=i;const t=TOUR[i];$("tourN").textContent="Step "+(i+1)+" of "+TOUR.length;$("tourT").textContent=t[0];$("tourP").textContent=t[1];
  $("tourBack").style.visibility=i?"visible":"hidden";$("tourNext").textContent=i===TOUR.length-1?"Finish":"Next";dashSec(t[2]);
- const find=()=>{tEl=t[3]?document.querySelector(t[3]):null;if(tEl&&tEl.id==="fw_op"){tEl=tEl.closest(".card");tEl.scrollIntoView({block:"center"})}tourPlace(tEl)};
+ const find=()=>{tEl=t[3]?document.querySelector(t[3]):null;
+  if(tEl&&!t[3].startsWith("#dnav")){const r=tEl.getBoundingClientRect();if(r.top<90||r.top>innerHeight*.4)scrollBy(0,r.top-100)}else if(innerWidth<800)scrollTo(0,0);
+  requestAnimationFrame(()=>tourPlace(tEl))};
  requestAnimationFrame(()=>{find();setTimeout(find,450)})}
 function tourOpen(){$("tour").classList.remove("hide");$("tourBtn").textContent="Skip tour";tourShow(0)}
 function tourEnd(){$("tour").classList.add("hide");$("tourBtn").textContent="Show tour";try{localStorage.setItem("rnexa_tour","1")}catch(e){}dashSec("overview")}
