@@ -168,6 +168,43 @@ html,body{overflow-x:hidden}
  .nav .btn,.nav .ghostb{padding:8px 14px!important;font-size:14px}
  .brand{font-size:18px}.brand img{height:30px}
 }
+
+.split{display:grid;grid-template-columns:minmax(340px,44%) 1fr;min-height:100vh}
+.brandpane{position:relative;overflow:hidden;background:linear-gradient(160deg,#192307 0%,#2f3a12 55%,#506022 100%);color:#fff;padding:40px 46px;display:flex;flex-direction:column;justify-content:space-between;gap:24px}
+.brandpane::after{content:"";position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.14) 1.4px,transparent 2px);background-size:34px 34px;pointer-events:none}
+.brandpane>*{position:relative;z-index:1}.brandpane .brand{color:#fff!important;font-size:24px}.brandpane .brand img{height:40px}
+.bp-title{color:#fff;font-size:clamp(26px,3.2vw,42px);line-height:1.15;margin:0 0 12px}.bp-text{color:#dfe6c6;font-size:17px;max-width:420px;line-height:1.55}
+.bp-list{list-style:none;padding:0;margin:24px 0 0;display:grid;gap:12px;color:#fff}.bp-list li::before{content:"\2713";display:inline-grid;place-items:center;width:22px;height:22px;margin-right:10px;border-radius:50%;background:#77814B;font-size:13px}
+.brandpane small{color:#aab58a}
+.formpane{display:flex;align-items:center;justify-content:center;padding:28px 4vw}
+.fcard{width:100%;max-width:520px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:30px 28px;box-shadow:0 18px 48px rgba(25,35,7,.16)}
+.stepper{display:flex;align-items:flex-start;margin-bottom:22px}.stepper.hide{display:none!important}
+.st{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:46px}.st small{font-size:12px;color:var(--mut)}
+.dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#e9ecdd;color:var(--mut);font-weight:700;font-size:14px;transition:background .3s,color .3s}
+.st.on .dot{background:var(--pri);color:#fff;box-shadow:0 0 0 5px rgba(80,96,34,.18)}.st.on small{color:var(--deep);font-weight:700}.st.done .dot{background:#77814B;color:#fff}
+.ln{flex:1;height:2px;background:var(--line);margin-top:17px;min-width:10px}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
+.tile{display:flex;gap:10px;align-items:flex-start;padding:14px;border:1px solid var(--line);border-radius:14px;background:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(25,35,7,.07);transition:border-color .2s,box-shadow .2s,background .2s}
+.tile:hover{border-color:var(--pri2)}.tile:focus-visible{outline:2px solid var(--pri)}.tile.on{border-color:var(--pri);background:#f1f4e6;box-shadow:0 0 0 3px rgba(80,96,34,.2)}
+.tile .ti{font-size:22px;line-height:1}.tile b{display:block;font-size:14px;color:var(--deep)}.tile small{display:block;font-size:12px;color:var(--mut);margin-top:2px}
+.tip{display:flex;gap:10px;align-items:center;background:#eef2df;border-radius:12px;padding:12px 14px;margin-top:18px;color:var(--pri);font-size:14px}
+.wizbtn{display:flex;gap:10px;align-items:center;margin-top:16px}.wizbtn #obNext{flex:1;margin-top:0}
+.ostep .terms{height:230px}
+@media (max-width:900px){
+ .split{grid-template-columns:1fr}
+ .brandpane{padding:18px 20px;gap:6px}.brandpane .brand{font-size:20px}.brandpane .brand img{height:32px}
+ .bp-text,.bp-list,.brandpane small{display:none}.bp-title{font-size:22px;margin:10px 0 0}
+ .formpane{padding:16px 12px 28px;align-items:flex-start}.fcard{padding:22px 18px}
+ .tiles{grid-template-columns:1fr 1fr;gap:10px}.st small{font-size:10px}.st{min-width:40px}
+}
+@media (max-width:380px){.tiles{grid-template-columns:1fr}}
+
+html{overflow-x:visible!important}body{overflow-x:clip!important}
+.side{position:sticky;top:0;height:100vh;height:100dvh;align-self:start;overflow-y:auto}
+@media (max-width:800px){.side{position:static;height:auto;overflow:visible}}
+.pk{position:relative}.pk h3{margin:0 0 6px;font-size:17px;color:var(--deep)}.pk s{color:var(--mut)}.pk .pp b{font-size:26px;color:var(--deep)}.pk .pp small,.pk>small{color:var(--mut)}
+.pk button,.pk .cta{margin-top:12px}.pk .cm_t{font-size:13px;color:var(--pri);font-weight:600}
+.offer{position:absolute;top:12px;right:12px;background:#506022;color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px}
 </style></head><body>
 
 <div id="home" class="hide">
@@ -217,40 +254,41 @@ html,body{overflow-x:hidden}
  <div id="tourCard"><small id="tourN"></small><h2 id="tourT"></h2><p id="tourP"></p><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="ghost" id="tourBack">Back</button><button id="tourNext" style="width:auto;margin:0">Next</button></div></div></div>
 <button id="tourBtn" style="display:none;position:fixed;right:18px;bottom:18px;z-index:50;width:auto">Show tour</button>
 <!-- AUTH -->
-<div id="auth" class="wrap hide"><div class="card">
-  <a href="/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a><h2 data-h1 id="authH" style="margin-top:14px">Log in</h2><p id="authSub">Log in to your client account.</p>
+<div id="auth" class="split hide"><div class="formpane"><div class="fcard">
+  <div id="authStepper" class="stepper hide"></div>
+  <h2 data-h1 id="authH">Log in</h2><p id="authSub">Log in to your client account.</p>
   <label>Email</label><input id="email" type="email" autocomplete="email">
-  <label>Password</label><input id="pass" type="password" autocomplete="current-password" placeholder="Minimum 8 characters">
+  <label>Password</label><input id="pass" type="password" autocomplete="current-password">
   <button id="authBtn">Log in</button>
   <div id="authMsg" class="msg"></div><button class="ghost" id="fpBtn" style="width:auto;padding:6px 0">Forgot password?</button>
   <p style="margin-top:14px"><span id="swText">New here?</span> <button class="ghost" id="swBtn">Create account</button></p>
-</div></div>
+</div></div></div>
 
 <!-- ONBOARDING -->
-<div id="onb" class="wrap wide hide"><div class="card">
-  <h2 data-h1>Tell us about your company</h2><p>Step 2 of 2. Fill the details and accept our terms to continue.</p>
-  <div class="row"><div><label>Company name *</label><input id="company"></div><div><label>Your name *</label><input id="cname"></div></div>
-  <div class="row"><div><label>Mobile number *</label><input id="phone" type="tel"></div><div><label>Industry *</label><select id="industry"><option value="">Select</option><option>Clinic / hospital</option><option>Salon / spa</option><option>Education / coaching</option><option>Real estate</option><option>Restaurant / food</option><option>Retail / shop</option><option>Gym / fitness</option><option>Automobile / service</option><option>Insurance / finance</option><option>Other</option></select></div></div>
-  <div class="row"><div><label>City</label><input id="city"></div><div><label>Company PAN (optional)</label><input id="pan" maxlength="10"></div></div>
-  <div class="row"><div><label>GST number (optional)</label><input id="gstin" maxlength="15"></div><div><label>Billing address (for invoices)</label><input id="baddr"></div></div>
-  <p style="font-size:12px">PAN and GST are used only on your invoices.</p>
-  <h2 style="margin-top:20px">Terms &amp; Conditions and Privacy Policy</h2>
-  <div class="terms" id="terms"></div>
-  <p id="scrollHint" style="font-size:12px">Scroll to the end of the terms to enable the checkbox.</p>
-  <label style="font-weight:400"><input id="agree" type="checkbox" disabled style="width:auto"> I have read and accept the Terms &amp; Conditions and Privacy Policy.</label>
-  <button id="saveBtn" disabled>Save and continue</button><div id="onbMsg" class="msg"></div>
-</div></div>
+<div id="onb" class="split hide"><div class="formpane"><div class="fcard">
+ <div id="stepper" class="stepper"></div>
+ <h2 data-h1 id="onbH"></h2><p id="onbSub"></p>
+ <div class="ostep" data-o="1"><label>Company name *</label><input id="company" autocomplete="organization"><label>Your name *</label><input id="cname" autocomplete="name"><label>Mobile number *</label><input id="phone" type="tel" autocomplete="tel"></div>
+ <div class="ostep hide" data-o="2"><div class="tiles" id="tiles"></div><select id="industry" class="hide"></select></div>
+ <div class="ostep hide" data-o="3"><div class="row"><div><label>City</label><input id="city"></div><div><label>Company PAN (optional)</label><input id="pan" maxlength="10"></div></div>
+  <div class="row"><div><label>GST number (optional)</label><input id="gstin" maxlength="15"></div><div><label>Billing address</label><input id="baddr"></div></div></div>
+ <div class="ostep hide" data-o="4"><div class="terms" id="terms"></div><p id="scrollHint" style="font-size:12px">Scroll to the end of the terms to enable the checkbox.</p>
+  <label style="font-weight:400"><input id="agree" type="checkbox" disabled style="width:auto"> I have read and accept the Terms &amp; Conditions and Privacy Policy.</label></div>
+ <div class="tip"><span>&#10024;</span><span id="tipTxt"></span></div>
+ <div class="wizbtn"><button class="ghost" id="obBack" style="width:auto">Back</button><button id="obNext">Continue</button></div>
+ <div id="onbMsg" class="msg"></div>
+</div></div></div>
 
 <!-- DASHBOARD -->
 <div id="dash" class="hide shell">
  <aside class="side"><a href="/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a>
-  <nav id="dnav"><button data-s="overview">Overview</button><button data-s="reception">AI Receptionist</button><button data-s="new">New campaign</button><button data-s="camps">Campaigns</button><button data-s="billing">Credits &amp; billing</button><button data-s="help">Help center</button><button data-s="settings">Settings</button><a id="aLink" href="/admin" style="display:none">Admin panel</a></nav>
+  <nav id="dnav"><button data-s="overview">Overview</button><button data-s="reception">AI Receptionist</button><button data-s="billing">Credits &amp; billing</button><button data-s="help">Help center</button><button data-s="settings">Settings</button><a id="aLink" href="/admin" style="display:none">Admin panel</a></nav>
   <div class="sidefoot"><b id="cr" style="color:var(--pri)"></b><small id="who" style="color:var(--mut);word-break:break-all"></small><button class="ghost" id="out" style="text-align:left;padding:6px 0">Log out</button></div>
  </aside>
  <main class="main">
-  <section data-sec="overview"><h2 data-h1 id="hello"></h2><p>Upload your leads and let the AI call them. You get an Excel report with remarks.</p>
-   <div class="grid"><div class="stat"><b id="stC">-</b>Credits</div><div class="stat"><b id="stK">-</b>Campaigns</div><div class="stat"><b id="stL">-</b>Leads called</div></div>
-   <p style="margin-top:18px"><button data-go="new" style="width:auto">Start a campaign</button> <button class="ghost" data-go="billing">Buy credits</button></p></section>
+  <section data-sec="overview"><h2 data-h1 id="hello"></h2><p>Your AI receptionist answers the calls you miss. Check your minutes and today's calls here.</p>
+   <div class="grid"><div class="stat"><b id="stC">-</b>Minutes left</div><div class="stat"><b id="stK">-</b>Calls today</div><div class="stat"><b id="stL" style="font-size:17px">-</b>AI number</div></div>
+   <p style="margin-top:18px"><button data-go="reception" style="width:auto">Set up AI receptionist</button> <button class="ghost" data-go="billing">Buy minutes</button></p></section>
   <section data-sec="new" class="hide"><div class="card"><h2>1. Upload your leads</h2>
    <p>Excel or CSV with a <b>phone_number</b> column. Optional: customer_name, business_name, product_or_service.</p><input id="file" type="file" accept=".xlsx,.xls,.csv"><div id="prev"></div></div>
    <div class="card"><h2>2. Start calling</h2><p id="est">Upload a file first.</p><button id="go" disabled style="width:auto">Start calling</button><div id="goMsg" class="msg"></div></div></section>
@@ -269,7 +307,10 @@ html,body{overflow-x:hidden}
    <label>Your phone company</label><select id="fw_op"><option>Airtel</option><option>Jio</option><option>Vi (Vodafone Idea)</option><option>BSNL</option><option>Other / landline</option></select><div id="fw_body"></div></div>
   <div class="card"><h2>Recent calls</h2><div id="rc_calls"><p>No calls yet.</p></div></div></section>
   <section data-sec="camps" class="hide"><div class="card"><h2>Your campaigns</h2><div id="camps"><p>No campaigns yet.</p></div></div></section>
-  <section data-sec="billing" class="hide"><div class="card"><h2>Buy call credits</h2><p>One credit = one AI call. Calls that do not connect are credited back.</p><div class="grid" id="buy"></div><div id="payMsg" class="msg"></div></div>
+  <section data-sec="billing" class="hide">
+   <div class="card"><h2>Your balance</h2><div class="grid"><div class="stat"><b id="bl_min">-</b>Minutes left</div><div class="stat"><b id="bl_num" style="font-size:17px">-</b>AI number</div></div></div>
+   <div class="card"><h2>Get your AI phone number</h2><p>Your own number that answers your customers. Offer prices for a limited time.</p><div class="grid" id="buyLine"></div></div>
+   <div class="card"><h2>Buy minutes</h2><p>Calls use minutes, and each call is rounded up to the next full minute. Buy first, then use.</p><div class="grid" id="buyMin"></div><div id="payMsg" class="msg"></div></div>
    <div class="card"><h2>Payment history</h2><div id="plist"></div></div></section>
   <section data-sec="help" class="hide"><div class="card"><h2>Help center</h2><input id="hs" placeholder="Search your question..."><div id="faq2" style="margin-top:12px"></div></div>
    <div class="card"><h2>Still need help? Raise a ticket</h2><p>Change details, delete your account, billing, or anything else.</p>
@@ -292,16 +333,16 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
 document.querySelectorAll("[data-email]").forEach(e=>{e.href="mailto:"+SITE.email});
 document.querySelectorAll("[data-wa]").forEach(e=>{e.href="https://wa.me/"+SITE.whatsapp});
-function renderPacks(L){window.ALLP=L;const A=L.filter(p=>["line","minutes"].includes(p.kind)),C=L.filter(p=>(p.kind||"calls")==="calls");
-$("packs").innerHTML=A.map(p=>'<div class="card"><h2>'+p.name+'</h2><p style="font-size:26px;color:var(--ink);margin:0"><b>&#8377;'+p.price.toLocaleString("en-IN")+'</b></p><p>'+p.calls+' minutes &middot; about &#8377;'+Math.round(p.price/p.calls)+' per minute</p><a class="cta p" href="/signup" style="margin:0">Get started</a></div>').join("");
-$("buy").innerHTML=C.map(p=>'<div class="stat"><b>'+p.calls+' calls</b>&#8377;'+p.price.toLocaleString("en-IN")+'<br><button data-pack="'+p.id+'" style="margin-top:8px">Buy</button></div>').join("")}
+function renderPacks(L){window.ALLP=L;const A=L.filter(p=>p.kind!=="calls");
+$("packs").innerHTML=A.map(p=>packCard(p,true)).join("");
+$("buyLine").innerHTML=A.filter(p=>p.kind==="line").map(p=>packCard(p)).join("");$("buyMin").innerHTML=A.filter(p=>p.kind!=="line").map(p=>packCard(p)).join("");document.querySelectorAll(".cm_h").forEach(updCustom)}
 fetch("/api/packs").then(r=>r.json()).then(renderPacks).catch(()=>{});
 $("owner").textContent=SITE.owner;$("yr").textContent=new Date().getFullYear();
 let signup = false;
 function show(v){$("gload").style.display="none";$("tourBtn").style.display=v==="dash"?"":"none";["home","auth","onb","dash","legal","admin","reset","nf","denied"].forEach(x=>$(x).classList.toggle("hide",x!==v));normalizeH1(v);seo()}
 
-function setMode(v){signup=v;$("fpBtn").style.display=signup?"none":"";$("authBtn").textContent=signup?"Create account":"Log in";
-  $("authSub").textContent=signup?"Step 1 of 2. Create your account.":"Log in to your client account.";
+function setMode(v){signup=v;paneSet("auth",v?"signup":"login");$("authStepper").classList.toggle("hide",!v);if(v)$("authStepper").innerHTML=stepperHTML(1);$("fpBtn").style.display=signup?"none":"";$("authBtn").textContent=signup?"Create account":"Log in";
+  $("authSub").textContent=signup?"Create your login. Next, a few quick questions about your business.":"Log in to your client account.";
   $("swText").textContent=signup?"Already have an account?":"New here?";$("swBtn").textContent=signup?"Log in":"Create account";$("authMsg").textContent=""}
 $("swBtn").onclick=()=>{go(signup?"/login":"/signup")};
 
@@ -318,18 +359,8 @@ $("authBtn").onclick=async()=>{
 
 const t=$("terms");
 t.onscroll=()=>{if(t.scrollTop+t.clientHeight>=t.scrollHeight-8){$("agree").disabled=false;$("scrollHint").textContent="Thank you. You can now accept."}};
-$("agree").onchange=()=>$("saveBtn").disabled=!$("agree").checked;
+$("agree").onchange=()=>{$("obNext").disabled=!$("agree").checked};
 
-$("saveBtn").onclick=async()=>{
-  const {data:{user}}=await sb.auth.getUser(),m=$("onbMsg");m.textContent="";
-  if(!check([["company",R.req,"Enter your company name"],["cname",R.req,"Enter your name"],["phone",R.phone,"Enter a valid 10-digit mobile number"],["industry",R.req,"Choose your industry"],["pan",R.pan,"PAN looks wrong (example format: ABCDE1234F)"],["gstin",R.gst,"GST number looks wrong (15 characters)"]]))return;
-  const row={id:user.id,company_name:$("company").value.trim(),contact_name:$("cname").value.trim(),phone:$("phone").value.trim(),
-    industry:$("industry").value,city:$("city").value.trim()||null,pan:$("pan").value.trim().toUpperCase()||null,gstin:$("gstin").value.trim().toUpperCase()||null,
-    billing_address:$("baddr").value.trim()||null,terms_version:TERMS_VERSION,terms_accepted_at:new Date().toISOString()};
-  const {error}=await sb.from("profiles").upsert(row);
-  if(error){m.textContent=error.message;return}
-  toast("Welcome to Rnexa","ok");route();
-};
 
 $("out").onclick=async()=>{await sb.auth.signOut();go("/")};
 
@@ -380,8 +411,8 @@ async function route(){
   if(h==="#/app"){
     if(!session){go("/login");return}
     const {data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
-    if(!p||p.terms_version!==TERMS_VERSION){show("onb");return}
-    $("hello").textContent="Welcome, "+p.company_name;$("who").textContent=session.user.email;show("dash");dashSec(SLUGKEY[location.pathname.split("/")[2]||"overview"]||"overview");tourMaybe();loadCredits();checkAdmin();loadTickets();loadCamps();return}
+    if(!p||p.terms_version!==TERMS_VERSION){show("onb");obGo(obStep);return}
+    $("hello").textContent="Welcome, "+p.company_name;$("who").textContent=session.user.email;show("dash");dashSec(SLUGKEY[location.pathname.split("/")[2]||"overview"]||"overview");tourMaybe();loadCredits();checkAdmin();loadTickets();loadOverview();return}
   const pg=PAGES[h.slice(2)];if(pg){$("legalBody").innerHTML='<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> &rsaquo; <span>'+SEO["/"+h.slice(2)][0].split(" | ")[0].replace("&","&amp;")+"</span></nav>"+pg();show("legal");scrollTo(0,0);return}
   if(h.startsWith("#/")&&h!=="#/"){show("nf");return}
   show("home");
@@ -406,18 +437,13 @@ $("go").onclick=async()=>{const m=$("goMsg");m.className="msg";m.textContent="";
     m.className="msg ok";m.textContent="Calling started for "+c.total+" leads."+(c.limited?" (Only "+c.limit+" leads started - not enough credits.)":"");loadCamps();loadCredits()}
   catch(e){m.textContent=e.message}$("go").disabled=false};
 async function loadCamps(){if($("dash").classList.contains("hide"))return;
-  try{const L=await(await api("/api/campaigns")).json();$("stK").textContent=L.length;$("stL").textContent=L.reduce((a,c)=>a+(c.done||0),0);if(!L.length)return;
+  try{const L=await(await api("/api/campaigns")).json();if(!L.length)return;
   $("camps").innerHTML="<table><tr><th>File</th><th>Status</th><th>Progress</th><th></th></tr>"+L.map(c=>"<tr><td>"+esc(c.name)+"</td><td>"+esc(c.status)+"</td><td>"+c.done+" / "+c.total+
     '</td><td><button class="ghost" data-id="'+c.id+'">Download Excel</button></td></tr>').join("")+"</table>"}catch(e){}}
 $("camps").onclick=async e=>{const id=e.target.dataset.id;if(!id)return;
   const b=await(await api("/api/campaigns/"+id+"/download")).blob();const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="rnexa_results.xlsx";a.click()};
-setInterval(loadCamps,8000);
-async function loadCredits(){try{const m=await(await api("/api/me")).json();$("cr").textContent="Credits: "+m.credits;$("stC").textContent=m.credits}catch(e){}}
-$("buy").onclick=async e=>{const id=e.target.dataset.pack;if(!id)return;const m=$("payMsg");m.className="msg";m.textContent="";
- try{const j={"Content-Type":"application/json"};const o=await(await api("/api/orders",{method:"POST",headers:j,body:JSON.stringify({pack:id})})).json();
-  await loadScript(RZP);new Razorpay({key:o.key_id,amount:o.amount,currency:"INR",order_id:o.order_id,name:"Rnexa",description:o.description,
-   handler:async r=>{try{await api("/api/payments/verify",{method:"POST",headers:j,body:JSON.stringify(r)});m.className="msg ok";m.textContent="Payment successful. Credits added.";toast("Payment successful","ok");loadCredits()}catch(er){m.textContent=er.message}}}).open()}
- catch(er){m.textContent=er.message}};
+
+async function loadCredits(){try{const m=await(await api("/api/me")).json();$("cr").textContent="Minutes left: "+m.minutes}catch(e){}}
 
 const J=async(m,p,b)=>await(await api(p,{method:m,headers:{"Content-Type":"application/json"},body:JSON.stringify(b)})).json();
 const inr=n=>"\u20b9"+Number(n).toLocaleString("en-IN");
@@ -433,8 +459,7 @@ const VIEW={
  async overview(){const o=await(await api("/api/admin/overview")).json();return '<div class="grid">'+[["Clients",o.clients],["Calls made",o.calls],["Revenue",inr(o.revenue)],["Est. call cost",inr(o.est_cost)],["Est. profit",inr(o.est_profit)],["Credits held by clients",o.credits]].map(x=>'<div class="stat"><b>'+x[1]+'</b>'+x[0]+'</div>').join("")+'</div><p>Cost is an estimate: calls x the cost per call set in Render (COST_PER_CALL_INR).</p>'},
  async clients(){CL=await(await api("/api/admin/clients")).json();return "<table><tr><th>Email</th><th>Company</th><th>Phone</th><th>Credits</th><th>Status</th><th>Actions</th></tr>"+CL.map(c=>"<tr><td>"+esc(c.email||"")+"</td><td>"+esc(c.company_name)+"</td><td>"+esc(c.phone)+"</td><td>"+c.credits+"</td><td>"+(c.suspended?"Suspended":"Active")+'</td><td><button class="ghost" data-a="edit" data-id="'+c.id+'">Edit</button> <button class="ghost" data-a="cr" data-id="'+c.id+'">Credits</button> <button class="ghost" data-a="sus" data-id="'+c.id+'">'+(c.suspended?"Activate":"Suspend")+'</button> <button class="ghost" style="color:var(--err)" data-a="del" data-id="'+c.id+'">Delete</button></td></tr>').join("")+"</table>"},
  async tickets(){const L=await(await api("/api/admin/tickets")).json();return L.length?L.map(t=>'<div style="border-bottom:1px solid var(--line);padding:10px 0"><b>'+esc(t.subject)+'</b> <small>'+esc(t.email||"")+'</small><p>'+esc(t.message)+'</p><input id="r'+t.id+'" placeholder="Reply" value="'+esc(t.admin_reply||"")+'"><select id="s'+t.id+'">'+["open","in progress","done"].map(x=>"<option"+(x===t.status?" selected":"")+">"+x+"</option>").join("")+'</select> <button class="ghost" data-a="tk" data-id="'+t.id+'">Save</button></div>').join(""):"<p>No tickets yet.</p>"},
- async pricing(){const L=await(await api("/api/admin/packs")).json();return "<p>Change the price or number of calls. The website and checkout update straight away.</p><table><tr><th>Pack</th><th>Calls</th><th>Price (INR)</th><th>On sale</th><th></th></tr>"+L.map(p=>'<tr><td><input id="pn'+p.id+'" value="'+esc(p.name)+'"></td><td><input id="pc'+p.id+'" type="number" value="'+p.calls+'"></td><td><input id="pp'+p.id+'" type="number" value="'+p.price+'"></td><td><input id="pa'+p.id+'" type="checkbox" style="width:auto"'+(p.active?" checked":"")+'></td><td><button class="ghost" data-a="pk" data-id="'+p.id+'">Save</button></td></tr>').join("")+"</table>"},
- async lines(){const L=await(await api("/api/admin/lines")).json();return L.length?"<table><tr><th>Client</th><th>Business</th><th>Number</th><th>Status</th><th>Paid until</th><th></th></tr>"+L.map(l=>"<tr><td>"+esc(l.email||"")+"</td><td>"+esc(l.company||"")+"</td><td>"+esc(l.phone_number||"-")+"</td><td>"+esc(l.status)+(l.error?'<br><small style="color:var(--err)">'+esc(l.error)+"</small>":"")+"</td><td>"+(l.paid_until?new Date(l.paid_until).toLocaleDateString("en-IN"):"-")+'</td><td><button class="ghost" data-a="lretry" data-id="'+l.user_id+'">Set up / retry</button> <button class="ghost" style="color:var(--err)" data-a="lrel" data-id="'+l.user_id+'">Release number</button></td></tr>').join("")+"</table><p>Each number costs you about $5 a month on Bolna. Release it when a client stops paying.</p>":"<p>No AI lines yet.</p>"},
+ async pricing(){const L=(await(await api("/api/admin/packs")).json()).filter(p=>p.kind!=="calls");return "<p>Set the actual price (shown crossed out to clients) and the offer price clients really pay. Hours and the rate per minute are worked out for you.</p><table><tr><th>Pack</th><th>Minutes</th><th>Gives</th><th>Actual price (INR)</th><th>Offer price (INR)</th><th>Per minute</th><th>On sale</th><th></th></tr>"+L.map(p=>'<tr><td><input id="pn'+p.id+'" value="'+esc(p.name)+'"></td><td><input id="pc'+p.id+'" type="number" value="'+p.calls+'"></td><td>'+(p.kind==="custom"?"Minimum "+dur(p.calls)+", client picks more":p.calls?dur(p.calls)+" of calls":"Number only")+'</td><td><input id="pm'+p.id+'" type="number" value="'+(p.mrp||"")+'"></td><td><input id="pp'+p.id+'" type="number" value="'+p.price+'"></td><td>'+(p.kind==="custom"?'<input id="pr'+p.id+'" type="number" value="'+(p.rate_per_min||0)+'">':p.calls?inr(Math.round(p.price/p.calls))+" / min":"-")+'</td><td><input id="pa'+p.id+'" type="checkbox" style="width:auto"'+(p.active?" checked":"")+'></td><td><button class="ghost" data-a="pk" data-id="'+p.id+'">Save</button></td></tr>').join("")+"</table>"},
  async payments(){const L=await(await api("/api/admin/payments")).json();return "<table><tr><th>Date</th><th>Client</th><th>Pack</th><th>Amount</th><th>Status</th></tr>"+L.map(p=>"<tr><td>"+new Date(p.created_at).toLocaleString("en-IN")+"</td><td>"+esc(p.email||"")+"</td><td>"+esc(p.pack)+"</td><td>"+inr(p.amount_paise/100)+"</td><td>"+esc(p.status)+"</td></tr>").join("")+"</table>"},
  async account(){return '<h2>Change my admin login</h2><label>New email (a confirmation link is sent)</label><input id="ne" type="email"><label>New password (8+ characters)</label><input id="np" type="password"><button id="ago" style="width:auto">Update</button><div id="amsg" class="msg"></div>'}
 };
@@ -451,7 +476,7 @@ $("abody").onclick=async e=>{const a=e.target.dataset.a,id=e.target.dataset.id;i
   else if(a==="lretry"){await J("POST","/api/admin/lines/"+id+"/retry",{});e.target.textContent="Started";setTimeout(()=>adminTab("lines"),4000)}
   else if(a==="lrel"){if(confirm("Delete this phone number from Bolna? The AI will stop answering.")){await J("POST","/api/admin/lines/"+id+"/release",{});adminTab("lines")}}
   else if(a==="tk"){await J("PATCH","/api/admin/tickets/"+id,{status:$("s"+id).value,admin_reply:$("r"+id).value});e.target.textContent="Saved"}
-  else if(a==="pk"){await J("PUT","/api/admin/packs/"+id,{name:$("pn"+id).value,calls:+$("pc"+id).value,price:+$("pp"+id).value,active:$("pa"+id).checked});e.target.textContent="Saved"}
+  else if(a==="pk"){await J("PUT","/api/admin/packs/"+id,{name:$("pn"+id).value,calls:+$("pc"+id).value,price:+$("pp"+id).value,active:$("pa"+id).checked,mrp:+$("pm"+id).value||null,rate_per_min:$("pr"+id)?+$("pr"+id).value:null});e.target.textContent="Saved"}
   }catch(er){alert(er.message)}
   if(e.target.id==="ago"){}};
 document.addEventListener("click",async e=>{if(e.target.id!=="ago")return;const m=$("amsg");m.className="msg";m.textContent="";const u={};if($("ne").value)u.email=$("ne").value;if($("np").value.length>=8)u.password=$("np").value;
@@ -461,10 +486,10 @@ document.addEventListener("click",async e=>{if(e.target.id!=="ago")return;const 
 function showSusp(){$("suspName").textContent=SITE.business;$("callus").href="tel:"+SITE.phone.replace(/\s/g,"");$("susp").classList.remove("hide");document.body.style.overflow="hidden"}
 $("suspOut").onclick=async()=>{await sb.auth.signOut();location.reload()};
 function dashSec(n){urlSet("/app/"+(n==="camps"?"campaigns":n));document.querySelectorAll("[data-sec]").forEach(x=>x.classList.toggle("hide",x.dataset.sec!==n));document.querySelectorAll("#dnav button").forEach(b=>b.classList.toggle("on",b.dataset.s===n));
-  if(n==="reception")loadReception();if(n==="billing")loadPays();if(n==="settings")loadSettings();if(n==="camps")loadCamps();if(n==="help")renderFaq()}
+  if(n==="reception")loadReception();if(n==="billing"){loadPays();loadOverview()}if(n==="settings")loadSettings();if(n==="camps")loadCamps();if(n==="help")renderFaq()}
 $("dnav").onclick=e=>{if(e.target.dataset.s)dashSec(e.target.dataset.s)};
 document.addEventListener("click",e=>{const g=e.target.dataset&&e.target.dataset.go;if(g)dashSec(g)});
-async function loadPays(){$("plist").innerHTML='<div class="spin"></div>';try{const L=await(await api("/api/payments")).json();$("plist").innerHTML=L.length?"<table><tr><th>Date</th><th>Pack</th><th>Calls</th><th>Amount</th><th></th></tr>"+L.map(p=>"<tr><td>"+new Date(p.created_at).toLocaleDateString("en-IN")+"</td><td>"+esc(p.pack)+"</td><td>"+p.calls+"</td><td>"+inr(p.amount_paise/100)+'</td><td><button class="ghost" data-inv="'+p.id+'">Invoice</button></td></tr>').join("")+"</table>":"<p>No payments yet.</p>"}catch(e){}}
+async function loadPays(){$("plist").innerHTML='<div class="spin"></div>';try{const L=await(await api("/api/payments")).json();$("plist").innerHTML=L.length?"<table><tr><th>Date</th><th>Pack</th><th>Calls</th><th>Amount</th><th></th></tr>"+L.map(p=>"<tr><td>"+new Date(p.created_at).toLocaleDateString("en-IN")+"</td><td>"+esc(((window.ALLP||[]).find(x=>x.id===p.pack)||{}).name||p.pack)+"</td><td>"+p.calls+"</td><td>"+inr(p.amount_paise/100)+'</td><td><button class="ghost" data-inv="'+p.id+'">Invoice</button></td></tr>').join("")+"</table>":"<p>No payments yet.</p>"}catch(e){}}
 const FAQS=[["How do I start a campaign?","Open New campaign, upload an Excel or CSV with a phone_number column, then click Start calling."],["Which columns can my file have?","phone_number is required. Optional: customer_name, business_name, product_or_service."],["How do credits work?","One credit equals one AI call. Calls that do not connect are credited back automatically."],["How do I buy more credits?","Open Credits & billing and choose a pack."],["Where do I download my results?","Open Campaigns and click Download Excel next to your file."],["Can I change my company details?","Yes. Open Settings and edit them. For a new login email, raise a ticket."],["How do I delete my account?","Raise a ticket with the subject Delete my account. Our team will confirm and remove your data."],["I paid but credits did not arrive","Raise a ticket with your payment details. We will check and add the credits."],["Why did a call fail?","The number may be invalid, busy or not answered. Failed calls are credited back."],["Which language does the AI speak?","English is supported today. Tamil depends on the voice setup, so ask us to test it."],["When will I get a low-minutes email?","We email you when you have 20 minutes or fewer left, and again if your AI is paused at 0 minutes."],["How do I forward missed calls?","Open AI Receptionist, go to step 3, choose your phone company and dial the code shown."],["Where are my invoices?","Open Credits & billing, then Payment history, and click Invoice next to a payment."]];
 function renderFaq(){const q=$("hs").value.toLowerCase().trim(),L=FAQS.filter(f=>!q||(f[0]+" "+f[1]).toLowerCase().includes(q));
   $("faq2").innerHTML=L.length?L.map(f=>"<details><summary>"+esc(f[0])+"</summary><p>"+esc(f[1])+"</p></details>").join(""):'<div class="empty"><b>No results found</b><p>We could not find an answer for "'+esc($("hs").value)+'". Send us your question and our team will reply.</p><button id="toTicket" style="width:auto">Raise a ticket with this question</button></div>'}
@@ -494,6 +519,53 @@ function seo(){const p=location.pathname.replace(/\/+$/,"")||"/",k=p==="/"?"/":"
   meta('meta[name="robots"]',"content",["/login","/reset","/app","/admin"].includes(k)||!known?"noindex,nofollow":"index,follow",e=>e.setAttribute("name","robots"))}
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("#navToggle"),n=document.querySelector("#home .nav");
   if(t){n.classList.toggle("open");t.setAttribute("aria-expanded",n.classList.contains("open"))}else if(e.target.closest&&e.target.closest("#home .links a"))n.classList.remove("open")});
+
+const BP={login:["Welcome back","Log in to see today's calls, your minutes and your invoices."],signup:["Create your Rnexa account","It takes about two minutes. Your AI receptionist will answer the calls you miss."],
+o1:["Tell us about your business","We use this on your invoices and to introduce the AI to your customers."],o2:["What kind of business do you run?","We tailor sample prompts and answers to your industry."],
+o3:["Billing details","Optional. PAN and GST are used only on your invoices."],o4:["Almost there","Read and accept our terms. They also list every email we may send you."]};
+function paneHTML(){return '<div class="brandpane"><a href="/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a><div class="bp-body"><h2 class="bp-title"></h2><p class="bp-text"></p><ul class="bp-list"><li>Answers your missed calls day and night</li><li>Takes bookings and messages for you</li><li>Every call in your dashboard</li></ul></div><small>&copy; Rnexa &middot; Tondiarpet, Chennai</small></div>'}
+["auth","onb"].forEach(id=>$(id).insertAdjacentHTML("afterbegin",paneHTML()));
+function paneSet(view,key){const v=$(view),d=BP[key];v.querySelector(".bp-title").textContent=d[0];v.querySelector(".bp-text").textContent=d[1]}
+const STEPS=["Account","Business","Industry","Billing","Terms"];
+function stepperHTML(a){return STEPS.map((n,i)=>{const k=i+1,c=k<a?"done":k===a?"on":"";return '<div class="st '+c+'"><span class="dot">'+(k<a?"&#10003;":k)+"</span><small>"+n+"</small></div>"}).join('<i class="ln"></i>')}
+const IND=[["Clinic / hospital","\u{1F3E5}","Appointments and patient questions"],["Salon / spa","\u{1F487}","Bookings and offers"],["Education / coaching","\u{1F393}","Admissions and fees"],["Real estate","\u{1F3E0}","Property enquiries"],["Restaurant / food","\u{1F37D}","Orders and table bookings"],["Retail / shop","\u{1F6CD}","Products and timings"],["Gym / fitness","\u{1F3CB}","Memberships and trials"],["Automobile / service","\u{1F697}","Service bookings"],["Insurance / finance","\u{1F4BC}","Policy and loan enquiries"],["Other","\u2728","Something else"]];
+$("industry").innerHTML='<option value=""></option>'+IND.map(x=>"<option>"+x[0]+"</option>").join("");
+$("tiles").innerHTML=IND.map(x=>'<div class="tile" role="button" tabindex="0" data-v="'+x[0]+'"><span class="ti">'+x[1]+'</span><span><b>'+x[0]+"</b><small>"+x[2]+"</small></span></div>").join("");
+function pickTile(el){if(!el)return;$("industry").value=el.dataset.v;document.querySelectorAll("#tiles .tile").forEach(n=>n.classList.toggle("on",n===el));$("onbMsg").textContent=""}
+$("tiles").onclick=e=>pickTile(e.target.closest(".tile"));
+$("tiles").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pickTile(e.target.closest(".tile"))}};
+let obStep=1;
+const OB=[["Tell us about your business","It takes less than a minute."],["What kind of business do you run?","Pick the closest match. You can change it later."],["Billing details","Optional. Used only on your invoices."],["Review and accept","Please read our terms. They list every email we may send you."]];
+const TIP=["We use your company name on invoices and when the AI greets your customers.","We tailor sample answers and prompts to your industry.","You can skip PAN and GST now and add them later in Settings.","You can read these terms again any time from the footer of our website."];
+function obGo(n){obStep=n;document.querySelectorAll(".ostep").forEach(e=>e.classList.toggle("hide",+e.dataset.o!==n));$("stepper").innerHTML=stepperHTML(n+1);
+  $("onbH").textContent=OB[n-1][0];$("onbSub").textContent=OB[n-1][1];$("tipTxt").textContent=TIP[n-1];$("obBack").style.visibility=n>1?"visible":"hidden";
+  $("obNext").textContent=n===4?"Finish":"Continue";$("obNext").disabled=n===4&&!$("agree").checked;$("onbMsg").textContent="";paneSet("onb","o"+n)}
+$("obBack").onclick=()=>obGo(obStep-1);
+$("obNext").onclick=async()=>{const m=$("onbMsg");m.textContent="";
+  if(obStep===1){if(check([["company",R.req,"Enter your company name"],["cname",R.req,"Enter your name"],["phone",R.phone,"Enter a valid 10-digit mobile number"]]))obGo(2);return}
+  if(obStep===2){if(!$("industry").value){m.textContent="Please pick the closest match.";return}obGo(3);return}
+  if(obStep===3){if(check([["pan",R.pan,"PAN looks wrong (example: ABCDE1234F)"],["gstin",R.gst,"GST number looks wrong (15 characters)"]]))obGo(4);return}
+  if(!$("agree").checked){m.textContent="Please accept the terms to continue.";return}
+  const {data:{user}}=await sb.auth.getUser();
+  const row={id:user.id,company_name:$("company").value.trim(),contact_name:$("cname").value.trim(),phone:$("phone").value.trim(),industry:$("industry").value,city:$("city").value.trim()||null,
+    pan:$("pan").value.trim().toUpperCase()||null,gstin:$("gstin").value.trim().toUpperCase()||null,billing_address:$("baddr").value.trim()||null,terms_version:TERMS_VERSION,terms_accepted_at:new Date().toISOString()};
+  $("obNext").disabled=true;const {error}=await sb.from("profiles").upsert(row);$("obNext").disabled=false;
+  if(error){m.textContent=error.message;return}
+  toast("Welcome to Rnexa","ok");route()};
+
+const dur=m=>{const h=Math.floor(m/60),r=m%60;return((h?h+" hr"+(h>1?"s":""):"")+(h&&r?" ":"")+(r?r+" min":""))||"0 min"};
+function packCard(p,home){const off=p.mrp&&p.mrp>p.price?Math.round((1-p.price/p.mrp)*100):0,tag=off?'<span class="offer">'+off+"% OFF</span>":"",
+ act=home?'<a class="cta p" href="/signup" style="margin:0">Get started</a>':'<button data-pk="'+p.id+'"'+(p.kind==="custom"?' data-custom="1"':"")+">Buy</button>";
+ if(p.kind==="custom")return '<div class="card pk"><h3>'+esc(p.name)+'</h3><div class="pp"><b>'+inr(p.rate_per_min)+"</b> <small>per minute</small></div><p>Choose the hours you need. Minimum "+dur(p.calls)+".</p>"+
+  (home?"":'<label>Hours</label><input class="cm_h" type="number" min="'+Math.ceil(p.calls/60)+'" step="1" value="'+Math.ceil(p.calls/60)+'" data-rate="'+p.rate_per_min+'"><p class="cm_t"></p>')+act+"</div>";
+ const gives=p.kind==="line"?(p.calls?"Includes "+dur(p.calls)+" of calls":"Number only. Minutes are bought separately."):dur(p.calls)+" of calls";
+ return '<div class="card pk">'+tag+"<h3>"+esc(p.name)+'</h3><div class="pp">'+(off?"<s>"+inr(p.mrp)+"</s> ":"")+"<b>"+inr(p.price)+"</b>"+(p.kind==="line"?" <small>/month</small>":"")+"</div><p>"+gives+"</p>"+(p.calls?"<small>"+inr(Math.round(p.price/p.calls))+" per minute</small>":"")+act+"</div>"}
+function updCustom(i){const h=Math.max(parseFloat(i.value)||0,0),mn=Math.round(h*60),t=i.parentElement.querySelector(".cm_t");t.textContent=mn+" minutes ("+dur(mn)+") for "+inr(mn*(+i.dataset.rate))}
+document.addEventListener("input",e=>{if(e.target.classList&&e.target.classList.contains("cm_h"))updCustom(e.target)});
+async function loadOverview(){try{const d=await(await api("/api/line")).json(),n=(d.line&&d.line.phone_number)||"Not set up";$("stC").textContent=d.minutes;$("stK").textContent=d.calls_today;$("stL").textContent=n;$("bl_min").textContent=d.minutes;$("bl_num").textContent=n}catch(e){}}
+function payClick(e,msgId){const b=e.target.closest("[data-pk]");if(!b)return;let mins;if(b.dataset.custom){const i=b.closest(".pk").querySelector(".cm_h");if(i)mins=Math.round(parseFloat(i.value)*60)}
+ startPay(b.dataset.pk,$(msgId),()=>{loadReception();loadCredits();loadOverview()},mins)}
+$("buyLine").onclick=e=>payClick(e,"payMsg");$("buyMin").onclick=e=>payClick(e,"payMsg");$("rc_buy").onclick=e=>payClick(e,"rc_pay");
 let recovering=false;
 sb.auth.onAuthStateChange(ev=>{if(ev==="PASSWORD_RECOVERY"){recovering=true;show("reset")}});
 $("fpBtn").onclick=async()=>{const m=$("authMsg"),email=$("email").value.trim();m.className="msg";
@@ -507,10 +579,10 @@ $("rpb").onclick=async()=>{const m=$("rpm"),a=$("rp1").value;m.className="msg";
   setTimeout(()=>{recovering=false;history.replaceState(null,"","/");go("/app")},1200)};
 
 function pk(){return (window.ALLP||[]).filter(p=>["line","minutes"].includes(p.kind))}
-async function startPay(id,m,done){m.className="msg";m.textContent="";try{const j={"Content-Type":"application/json"};const o=await(await api("/api/orders",{method:"POST",headers:j,body:JSON.stringify({pack:id})})).json();
+async function startPay(id,m,done,minutes){m.className="msg";m.textContent="";try{const j={"Content-Type":"application/json"};const o=await(await api("/api/orders",{method:"POST",headers:j,body:JSON.stringify({pack:id,minutes})})).json();
  await loadScript(RZP);new Razorpay({key:o.key_id,amount:o.amount,currency:"INR",order_id:o.order_id,name:"Rnexa",description:o.description,
   handler:async r=>{try{await api("/api/payments/verify",{method:"POST",headers:j,body:JSON.stringify(r)});m.className="msg ok";m.textContent="Payment successful. Setting things up...";if(done)done()}catch(er){m.textContent=er.message}}}).open()}catch(er){m.textContent=er.message}}
-const STAT={none:"Save your business details, then buy your AI line.",pending:"Waiting for set up. This usually takes a minute.",provisioning:"Setting up your AI number now...",active:"Your AI receptionist is live. Set call forwarding from your business phone to the number above.",failed:"We could not finish setting up your number yet. Our team has been told and will fix it. You do not need to pay again.",paused:"Your AI is paused because your minutes ran out. Buy minutes to switch it back on.",cancelled:"This line was cancelled."};
+const STAT={none:"Save your business details, then buy your AI line.",pending:"Waiting for set up. This usually takes a minute.",provisioning:"Setting up your AI number now...",active:"Your AI receptionist is live. Set call forwarding from your business phone to the number above.",failed:"We could not finish setting up your number yet. Our team has been told and will fix it. You do not need to pay again.",paused:"Your AI number is switched off until you have minutes. Buy minutes and it turns on by itself.",cancelled:"This line was cancelled."};
 async function loadReception(){
   if(!window.ALLP){try{window.ALLP=await(await fetch("/api/packs")).json()}catch(e){}}
   let d;try{d=await(await api("/api/line")).json()}catch(e){return}
@@ -518,10 +590,9 @@ async function loadReception(){
   f.forEach(x=>{if(document.activeElement!==$(x[0]))$(x[0]).value=b[x[1]]||""});if(b.language&&document.activeElement!==$("rb_lang"))$("rb_lang").value=b.language;if(b.industry)$("rb_ind").value=b.industry;
   $("rc_min").textContent=d.minutes;$("rc_today").textContent=d.calls_today;
   const st=d.line?d.line.status:"none";$("rc_num").textContent=(d.line&&d.line.phone_number)||"Not set up";renderFw(d.line&&d.line.phone_number);$("rc_status").textContent=STAT[st]||"";
-  $("rc_buy").innerHTML=pk().map(p=>'<div class="stat"><b>'+esc(p.name)+'</b>'+inr(p.price)+'<br><button data-pk="'+p.id+'" style="margin-top:8px">Buy</button></div>').join("")||"<p>Packs are not available yet.</p>";
+  $("rc_buy").innerHTML=(window.ALLP||[]).filter(p=>p.kind==="line").map(p=>packCard(p)).join("")||"<p>Packs are not available yet.</p>";
   try{const C=await(await api("/api/calls")).json();$("rc_calls").innerHTML=C.length?C.map(c=>'<details class="callrow"><summary><b>'+new Date(c.created_at).toLocaleString("en-IN")+"</b><span>"+esc(c.from_number||"Unknown caller")+"</span><span>"+c.minutes+" min</span></summary><p>"+esc(c.summary||"No summary")+"</p><pre>"+esc(c.transcript||"")+"</pre>"+(c.recording_url?'<a href="'+esc(c.recording_url)+'" target="_blank" rel="noopener">Play recording</a>':"")+"</details>").join(""):"<p>No calls yet.</p>"}catch(e){}
   if(["pending","provisioning"].includes(st)&&!$("dash").classList.contains("hide")&&!document.querySelector('[data-sec="reception"]').classList.contains("hide"))setTimeout(loadReception,6000)}
-$("rc_buy").onclick=e=>{if(e.target.dataset.pk)startPay(e.target.dataset.pk,$("rc_pay"),()=>{loadReception();loadCredits()})};
 $("rb_save").onclick=async()=>{const m=$("rb_msg");m.className="msg";m.textContent="";if(!check([["rb_name",R.req,"Enter your business name"],["rb_hours",R.req,"Enter your opening hours"],["rb_addr",R.req,"Enter your address"]]))return;
   try{await J("POST","/api/line",{name:$("rb_name").value,hours:$("rb_hours").value,address:$("rb_addr").value,info:$("rb_info").value,language:$("rb_lang").value,industry:$("rb_ind").value});m.className="msg ok";m.textContent="Saved.";toast("Saved","ok")}catch(e){m.textContent=e.message}};
 
