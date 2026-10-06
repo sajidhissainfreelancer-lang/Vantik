@@ -140,7 +140,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .hero2 a.cta.p:hover{color:var(--deep)!important;background:transparent!important}
 .hero2 a.cta.s{padding:13px 28px}
 /* mobile */
-html,body{overflow-x:hidden}
+html{overflow-x:hidden}
 #navToggle{display:none;font-size:22px;line-height:1;padding:4px 10px!important;width:auto;margin:0}
 @media (max-width:800px){
  .grid,.g3,.steps{grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr))}
@@ -205,6 +205,16 @@ html{overflow-x:visible!important}body{overflow-x:clip!important}
 .pk{position:relative}.pk h3{margin:0 0 6px;font-size:17px;color:var(--deep)}.pk s{color:var(--mut)}.pk .pp b{font-size:26px;color:var(--deep)}.pk .pp small,.pk>small{color:var(--mut)}
 .pk button,.pk .cta{margin-top:12px}.pk .cm_t{font-size:13px;color:var(--pri);font-weight:600}
 .offer{position:absolute;top:12px;right:12px;background:#506022;color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:20px}
+
+.side{align-self:start;overflow-y:auto}
+.nbadge{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;margin-left:8px;border-radius:99px;background:#d32f2f;color:#fff;font-size:11px;font-weight:700;vertical-align:middle;line-height:1}
+.nbadge.hide{display:none!important}
+.bell{position:fixed;top:14px;right:20px;z-index:60;width:auto!important;margin:0!important;padding:9px 12px!important;font-size:18px;line-height:1;border-radius:50%!important;background:#fff!important;border:1px solid var(--line)!important;box-shadow:0 8px 20px rgba(25,35,7,.16)!important;color:var(--deep)!important}
+.bell .nbadge{position:absolute;top:-5px;right:-5px;margin:0}
+.ni{padding:14px;border:1px solid var(--line);border-radius:12px;margin:10px 0;background:#fff}.ni.new{border-color:var(--pri);background:#f4f7e8}.ni p{margin:6px 0}
+.chip2{background:#e6edcf;color:var(--pri);font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;margin-right:8px}
+#abody table input{min-width:80px}#abody textarea{width:100%}
+@media (max-width:800px){.side{align-self:stretch}.bell{top:10px;right:12px}}
 </style></head><body>
 
 <div id="home" class="hide">
@@ -253,6 +263,7 @@ html{overflow-x:visible!important}body{overflow-x:clip!important}
 <div id="tour" class="hide"><div id="tourMask"></div><div id="tourHi"></div>
  <div id="tourCard"><small id="tourN"></small><h2 id="tourT"></h2><p id="tourP"></p><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="ghost" id="tourBack">Back</button><button id="tourNext" style="width:auto;margin:0">Next</button></div></div></div>
 <button id="tourBtn" style="display:none;position:fixed;right:18px;bottom:18px;z-index:50;width:auto">Show tour</button>
+<button class="bell ghost" id="bell" aria-label="Notifications" style="display:none">&#128276;<span class="nbadge hide" id="nbadge2"></span></button>
 <!-- AUTH -->
 <div id="auth" class="split hide"><div class="formpane"><div class="fcard">
   <div id="authStepper" class="stepper hide"></div>
@@ -282,7 +293,7 @@ html{overflow-x:visible!important}body{overflow-x:clip!important}
 <!-- DASHBOARD -->
 <div id="dash" class="hide shell">
  <aside class="side"><a href="/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a>
-  <nav id="dnav"><button data-s="overview">Overview</button><button data-s="reception">AI Receptionist</button><button data-s="billing">Credits &amp; billing</button><button data-s="help">Help center</button><button data-s="settings">Settings</button><a id="aLink" href="/admin" style="display:none">Admin panel</a></nav>
+  <nav id="dnav"><button data-s="overview">Overview</button><button data-s="reception">AI Receptionist</button><button data-s="billing">Minutes &amp; billing</button><button data-s="notif">Notifications<span class="nbadge hide" id="nbadge"></span></button><button data-s="help">Help center</button><button data-s="settings">Settings</button><a id="aLink" href="/admin" style="display:none">Admin panel</a></nav>
   <div class="sidefoot"><b id="cr" style="color:var(--pri)"></b><small id="who" style="color:var(--mut);word-break:break-all"></small><button class="ghost" id="out" style="text-align:left;padding:6px 0">Log out</button></div>
  </aside>
  <main class="main">
@@ -312,6 +323,7 @@ html{overflow-x:visible!important}body{overflow-x:clip!important}
    <div class="card"><h2>Get your AI phone number</h2><p>Your own number that answers your customers. Offer prices for a limited time.</p><div class="grid" id="buyLine"></div></div>
    <div class="card"><h2>Buy minutes</h2><p>Calls use minutes, and each call is rounded up to the next full minute. Buy first, then use.</p><div class="grid" id="buyMin"></div><div id="payMsg" class="msg"></div></div>
    <div class="card"><h2>Payment history</h2><div id="plist"></div></div></section>
+  <section data-sec="notif" class="hide"><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">Notifications</h2><button class="ghost" id="nmark">Mark all as read</button></div><div id="nlist"></div></div></section>
   <section data-sec="help" class="hide"><div class="card"><h2>Help center</h2><input id="hs" placeholder="Search your question..."><div id="faq2" style="margin-top:12px"></div></div>
    <div class="card"><h2>Still need help? Raise a ticket</h2><p>Change details, delete your account, billing, or anything else.</p>
    <select id="tsub"><option>Change my account details</option><option>Delete my account</option><option>Billing question</option><option>Other</option></select>
@@ -328,7 +340,7 @@ html{overflow-x:visible!important}body{overflow-x:clip!important}
  <p><button class="ghost" id="suspOut">Log out</button></p></div></div>
 
 <script>
-const TERMS_VERSION = "2.0";
+let TERMS_VERSION = "2.0";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
 document.querySelectorAll("[data-email]").forEach(e=>{e.href="mailto:"+SITE.email});
@@ -336,10 +348,10 @@ document.querySelectorAll("[data-wa]").forEach(e=>{e.href="https://wa.me/"+SITE.
 function renderPacks(L){window.ALLP=L;const A=L.filter(p=>p.kind!=="calls");
 $("packs").innerHTML=A.map(p=>packCard(p,true)).join("");
 $("buyLine").innerHTML=A.filter(p=>p.kind==="line").map(p=>packCard(p)).join("");$("buyMin").innerHTML=A.filter(p=>p.kind!=="line").map(p=>packCard(p)).join("");document.querySelectorAll(".cm_h").forEach(updCustom)}
-fetch("/api/packs").then(r=>r.json()).then(renderPacks).catch(()=>{});
+fetch("/api/packs",{cache:"no-store"}).then(r=>r.json()).then(L=>renderPacks(L)).catch(()=>{});
 $("owner").textContent=SITE.owner;$("yr").textContent=new Date().getFullYear();
 let signup = false;
-function show(v){$("gload").style.display="none";$("tourBtn").style.display=v==="dash"?"":"none";["home","auth","onb","dash","legal","admin","reset","nf","denied"].forEach(x=>$(x).classList.toggle("hide",x!==v));normalizeH1(v);seo()}
+function show(v){$("gload").style.display="none";$("tourBtn").style.display=v==="dash"?"":"none";$("bell").style.display=v==="dash"?"":"none";["home","auth","onb","dash","legal","admin","reset","nf","denied"].forEach(x=>$(x).classList.toggle("hide",x!==v));normalizeH1(v);seo()}
 
 function setMode(v){signup=v;paneSet("auth",v?"signup":"login");$("authStepper").classList.toggle("hide",!v);if(v)$("authStepper").innerHTML=stepperHTML(1);$("fpBtn").style.display=signup?"none":"";$("authBtn").textContent=signup?"Create account":"Log in";
   $("authSub").textContent=signup?"Create your login. Next, a few quick questions about your business.":"Log in to your client account.";
@@ -375,7 +387,7 @@ terms:()=>`<h1>Terms &amp; Conditions</h1><p>${upd} By creating an account you a
 +sec("5. Outbound calling","If you use our AI to call people, you must have their consent or a lawful right to call them, and you must follow TRAI and DND rules and any other Indian law. Do not use the service to cheat, threaten or mislead anyone.")
 +sec("6. Minutes, credits and payment","AI calls use prepaid minutes, and each call is rounded up to the next full minute. The AI phone line has a monthly fee shown with the price. When your minutes finish, the AI stops answering until you buy more. Prices are in Indian rupees and are shown before you pay. Payments are handled by Razorpay.")
 +sec("7. Invoices","After each payment you can download an invoice from Credits &amp; billing. We use the company name, PAN, GST number and billing address you saved, so please keep them correct. Rnexa is currently not registered for GST, so no GST is charged on our invoices.")
-+sec("8. Emails we send you","We send emails only about your account and service: (a) confirm your email address; (b) reset your password or confirm a changed email; (c) tell you when your AI phone number is ready; (d) warn you when you have 20 minutes or fewer left; (e) tell you when your AI is paused because your minutes ended; (f) replies to your support tickets; (g) a notice if your account is suspended or switched back on; (h) important notices about these terms or your account. We do not send advertising emails without your permission.")
++sec("8. Emails we send you","We send emails only about your account and service: (a) confirm your email address; (b) reset your password or confirm a changed email; (c) tell you when your AI phone number is ready; (d) warn you when you have 20 minutes or fewer left; (e) tell you when your AI is paused because your minutes ended; (f) replies to your support tickets; (g) your invoice by email after each purchase; (h) a notice if your account is suspended or switched back on; (i) important notices about these terms or your account. We do not send advertising emails without your permission.")
 +sec("9. Rules of use","You may not use the service for anything illegal, harmful or misleading, to call people who asked not to be called, or to share other people's private data without the right to do so. We may suspend or close an account that breaks these terms. A suspended account can contact us to sort things out.")
 +sec("10. Your data","You own your business details, lead lists and call content. We use them only to run the service for you, as explained in our Privacy Policy.")
 +sec("11. Our responsibility","We work hard to keep the service running, but we cannot promise it will never stop or never make mistakes. To the extent the law allows, Rnexa is not responsible for lost business or indirect losses.")
@@ -443,7 +455,7 @@ async function loadCamps(){if($("dash").classList.contains("hide"))return;
 $("camps").onclick=async e=>{const id=e.target.dataset.id;if(!id)return;
   const b=await(await api("/api/campaigns/"+id+"/download")).blob();const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="rnexa_results.xlsx";a.click()};
 
-async function loadCredits(){try{const m=await(await api("/api/me")).json();$("cr").textContent="Minutes left: "+m.minutes}catch(e){}}
+async function loadCredits(){try{const m=await(await api("/api/me")).json();$("cr").textContent="Minutes left: "+m.minutes;setBadge(m.unread||0);const pv=window.HAS_NUM;window.HAS_NUM=m.has_number;if(pv!==m.has_number&&window.ALLP)renderPacks(window.ALLP)}catch(e){}}
 
 const J=async(m,p,b)=>await(await api(p,{method:m,headers:{"Content-Type":"application/json"},body:JSON.stringify(b)})).json();
 const inr=n=>"\u20b9"+Number(n).toLocaleString("en-IN");
@@ -456,20 +468,20 @@ $("aout").onclick=async()=>{await sb.auth.signOut();go("/")};
 let CL=[];
 const TABS={lines:"AI Lines",overview:"Overview",clients:"Clients",tickets:"Tickets",pricing:"Pricing",payments:"Payments",account:"My account"};
 const VIEW={
- async overview(){const o=await(await api("/api/admin/overview")).json();return '<div class="grid">'+[["Clients",o.clients],["Calls made",o.calls],["Revenue",inr(o.revenue)],["Est. call cost",inr(o.est_cost)],["Est. profit",inr(o.est_profit)],["Credits held by clients",o.credits]].map(x=>'<div class="stat"><b>'+x[1]+'</b>'+x[0]+'</div>').join("")+'</div><p>Cost is an estimate: calls x the cost per call set in Render (COST_PER_CALL_INR).</p>'},
- async clients(){CL=await(await api("/api/admin/clients")).json();return "<table><tr><th>Email</th><th>Company</th><th>Phone</th><th>Credits</th><th>Status</th><th>Actions</th></tr>"+CL.map(c=>"<tr><td>"+esc(c.email||"")+"</td><td>"+esc(c.company_name)+"</td><td>"+esc(c.phone)+"</td><td>"+c.credits+"</td><td>"+(c.suspended?"Suspended":"Active")+'</td><td><button class="ghost" data-a="edit" data-id="'+c.id+'">Edit</button> <button class="ghost" data-a="cr" data-id="'+c.id+'">Credits</button> <button class="ghost" data-a="sus" data-id="'+c.id+'">'+(c.suspended?"Activate":"Suspend")+'</button> <button class="ghost" style="color:var(--err)" data-a="del" data-id="'+c.id+'">Delete</button></td></tr>').join("")+"</table>"},
+ async overview(){const o=await(await api("/api/admin/overview")).json();return '<div class="grid">'+[["Clients",o.clients],["Calls made",o.calls],["Revenue",inr(o.revenue)],["Est. call cost",inr(o.est_cost)],["Est. profit",inr(o.est_profit)],["Minutes held by clients",o.credits]].map(x=>'<div class="stat"><b>'+x[1]+'</b>'+x[0]+'</div>').join("")+'</div><p>Cost is an estimate: calls x the cost per call set in Render (COST_PER_CALL_INR).</p>'},
+ async clients(){CL=await(await api("/api/admin/clients")).json();return "<table><tr><th>Email</th><th>Company</th><th>Phone</th><th>Minutes</th><th>Status</th><th>Actions</th></tr>"+CL.map(c=>"<tr><td>"+esc(c.email||"")+"</td><td>"+esc(c.company_name)+"</td><td>"+esc(c.phone)+"</td><td>"+c.credits+"</td><td>"+(c.suspended?"Suspended":"Active")+'</td><td><button class="ghost" data-a="edit" data-id="'+c.id+'">Edit</button> <button class="ghost" data-a="cr" data-id="'+c.id+'">Minutes</button> <button class="ghost" data-a="sus" data-id="'+c.id+'">'+(c.suspended?"Activate":"Suspend")+'</button> <button class="ghost" style="color:var(--err)" data-a="del" data-id="'+c.id+'">Delete</button></td></tr>').join("")+"</table>"},
  async tickets(){const L=await(await api("/api/admin/tickets")).json();return L.length?L.map(t=>'<div style="border-bottom:1px solid var(--line);padding:10px 0"><b>'+esc(t.subject)+'</b> <small>'+esc(t.email||"")+'</small><p>'+esc(t.message)+'</p><input id="r'+t.id+'" placeholder="Reply" value="'+esc(t.admin_reply||"")+'"><select id="s'+t.id+'">'+["open","in progress","done"].map(x=>"<option"+(x===t.status?" selected":"")+">"+x+"</option>").join("")+'</select> <button class="ghost" data-a="tk" data-id="'+t.id+'">Save</button></div>').join(""):"<p>No tickets yet.</p>"},
  async pricing(){const L=(await(await api("/api/admin/packs")).json()).filter(p=>p.kind!=="calls");return "<p>Set the actual price (shown crossed out to clients) and the offer price clients really pay. Hours and the rate per minute are worked out for you.</p><table><tr><th>Pack</th><th>Minutes</th><th>Gives</th><th>Actual price (INR)</th><th>Offer price (INR)</th><th>Per minute</th><th>On sale</th><th></th></tr>"+L.map(p=>'<tr><td><input id="pn'+p.id+'" value="'+esc(p.name)+'"></td><td><input id="pc'+p.id+'" type="number" value="'+p.calls+'"></td><td>'+(p.kind==="custom"?"Minimum "+dur(p.calls)+", client picks more":p.calls?dur(p.calls)+" of calls":"Number only")+'</td><td><input id="pm'+p.id+'" type="number" value="'+(p.mrp||"")+'"></td><td><input id="pp'+p.id+'" type="number" value="'+p.price+'"></td><td>'+(p.kind==="custom"?'<input id="pr'+p.id+'" type="number" value="'+(p.rate_per_min||0)+'">':p.calls?inr(Math.round(p.price/p.calls))+" / min":"-")+'</td><td><input id="pa'+p.id+'" type="checkbox" style="width:auto"'+(p.active?" checked":"")+'></td><td><button class="ghost" data-a="pk" data-id="'+p.id+'">Save</button></td></tr>').join("")+"</table>"},
  async payments(){const L=await(await api("/api/admin/payments")).json();return "<table><tr><th>Date</th><th>Client</th><th>Pack</th><th>Amount</th><th>Status</th></tr>"+L.map(p=>"<tr><td>"+new Date(p.created_at).toLocaleString("en-IN")+"</td><td>"+esc(p.email||"")+"</td><td>"+esc(p.pack)+"</td><td>"+inr(p.amount_paise/100)+"</td><td>"+esc(p.status)+"</td></tr>").join("")+"</table>"},
  async account(){return '<h2>Change my admin login</h2><label>New email (a confirmation link is sent)</label><input id="ne" type="email"><label>New password (8+ characters)</label><input id="np" type="password"><button id="ago" style="width:auto">Update</button><div id="amsg" class="msg"></div>'}
 };
 async function adminTab(t){urlSet("/admin/"+t);$("atabs").innerHTML=Object.keys(TABS).map(k=>'<button data-t="'+k+'"'+(k===t?' class="on"':'')+'>'+TABS[k]+"</button>").join(" ");
-  $("abody").innerHTML="Loading...";try{$("abody").innerHTML=await VIEW[t]()}catch(e){$("abody").innerHTML='<div class="msg">'+esc(e.message)+"</div>"}}
+  $("abody").innerHTML="Loading...";try{$("abody").innerHTML=await VIEW[t]();if(AFTER[t])await AFTER[t]()}catch(e){$("abody").innerHTML='<div class="msg">'+esc(e.message)+"</div>"}}
 $("atabs").onclick=e=>{if(e.target.dataset.t)adminTab(e.target.dataset.t)};
 $("abody").onclick=async e=>{const a=e.target.dataset.a,id=e.target.dataset.id;if(!a)return;const c=CL.find(x=>x.id===id);
   try{
   if(a==="sus"){if(confirm((c.suspended?"Activate ":"Suspend ")+c.company_name+"? The client will get an email.")){const why=c.suspended?"":(prompt("Reason for suspension (optional, shown in the email):")||"");await J("PATCH","/api/admin/clients/"+id,{suspended:!c.suspended,reason:why});adminTab("clients")}}
-  else if(a==="cr"){const n=parseInt(prompt("Add (+) or remove (-) credits for "+c.company_name+":"));if(n){await J("PATCH","/api/admin/clients/"+id,{credits_delta:n});adminTab("clients")}}
+  else if(a==="cr"){const n=parseInt(prompt("Add (+) or remove (-) minutes for "+c.company_name+":"));if(n){await J("PATCH","/api/admin/clients/"+id,{credits_delta:n});adminTab("clients")}}
   else if(a==="del"){if(prompt('Type DELETE to permanently delete '+c.company_name+" and all their data:")==="DELETE"){await api("/api/admin/clients/"+id,{method:"DELETE"});adminTab("clients")}}
   else if(a==="edit"){$("abody").innerHTML='<h2>Edit '+esc(c.company_name)+'</h2><label>Company</label><input id="ec" value="'+esc(c.company_name)+'"><label>Contact name</label><input id="en" value="'+esc(c.contact_name)+'"><label>Phone</label><input id="ep" value="'+esc(c.phone)+'"><label>City</label><input id="ey" value="'+esc(c.city||"")+'"><button id="esave" data-id="'+id+'" style="width:auto">Save</button> <span class="msg" id="emsg"></span>';
     $("esave").onclick=async()=>{try{await J("PATCH","/api/admin/clients/"+id,{company_name:$("ec").value,contact_name:$("en").value,phone:$("ep").value,city:$("ey").value});adminTab("clients")}catch(er){$("emsg").textContent=er.message}}}
@@ -486,11 +498,11 @@ document.addEventListener("click",async e=>{if(e.target.id!=="ago")return;const 
 function showSusp(){$("suspName").textContent=SITE.business;$("callus").href="tel:"+SITE.phone.replace(/\s/g,"");$("susp").classList.remove("hide");document.body.style.overflow="hidden"}
 $("suspOut").onclick=async()=>{await sb.auth.signOut();location.reload()};
 function dashSec(n){urlSet("/app/"+(n==="camps"?"campaigns":n));document.querySelectorAll("[data-sec]").forEach(x=>x.classList.toggle("hide",x.dataset.sec!==n));document.querySelectorAll("#dnav button").forEach(b=>b.classList.toggle("on",b.dataset.s===n));
-  if(n==="reception")loadReception();if(n==="billing"){loadPays();loadOverview()}if(n==="settings")loadSettings();if(n==="camps")loadCamps();if(n==="help")renderFaq()}
-$("dnav").onclick=e=>{if(e.target.dataset.s)dashSec(e.target.dataset.s)};
+  if(n==="billing"||n==="reception")refreshPacks();if(n==="notif")loadNotifs();if(n==="reception")loadReception();if(n==="billing"){loadPays();loadOverview()}if(n==="settings")loadSettings();if(n==="camps")loadCamps();if(n==="help")renderFaq()}
+$("dnav").onclick=e=>{const b=e.target.closest("[data-s]");if(b)dashSec(b.dataset.s)};
 document.addEventListener("click",e=>{const g=e.target.dataset&&e.target.dataset.go;if(g)dashSec(g)});
 async function loadPays(){$("plist").innerHTML='<div class="spin"></div>';try{const L=await(await api("/api/payments")).json();$("plist").innerHTML=L.length?"<table><tr><th>Date</th><th>Pack</th><th>Calls</th><th>Amount</th><th></th></tr>"+L.map(p=>"<tr><td>"+new Date(p.created_at).toLocaleDateString("en-IN")+"</td><td>"+esc(((window.ALLP||[]).find(x=>x.id===p.pack)||{}).name||p.pack)+"</td><td>"+p.calls+"</td><td>"+inr(p.amount_paise/100)+'</td><td><button class="ghost" data-inv="'+p.id+'">Invoice</button></td></tr>').join("")+"</table>":"<p>No payments yet.</p>"}catch(e){}}
-const FAQS=[["How do I start a campaign?","Open New campaign, upload an Excel or CSV with a phone_number column, then click Start calling."],["Which columns can my file have?","phone_number is required. Optional: customer_name, business_name, product_or_service."],["How do credits work?","One credit equals one AI call. Calls that do not connect are credited back automatically."],["How do I buy more credits?","Open Credits & billing and choose a pack."],["Where do I download my results?","Open Campaigns and click Download Excel next to your file."],["Can I change my company details?","Yes. Open Settings and edit them. For a new login email, raise a ticket."],["How do I delete my account?","Raise a ticket with the subject Delete my account. Our team will confirm and remove your data."],["I paid but credits did not arrive","Raise a ticket with your payment details. We will check and add the credits."],["Why did a call fail?","The number may be invalid, busy or not answered. Failed calls are credited back."],["Which language does the AI speak?","English is supported today. Tamil depends on the voice setup, so ask us to test it."],["When will I get a low-minutes email?","We email you when you have 20 minutes or fewer left, and again if your AI is paused at 0 minutes."],["How do I forward missed calls?","Open AI Receptionist, go to step 3, choose your phone company and dial the code shown."],["Where are my invoices?","Open Credits & billing, then Payment history, and click Invoice next to a payment."]];
+const FAQS=[["How do I start a campaign?","Open New campaign, upload an Excel or CSV with a phone_number column, then click Start calling."],["Which columns can my file have?","phone_number is required. Optional: customer_name, business_name, product_or_service."],["How do minutes work?","Your AI uses minutes while it talks to callers, and each call is rounded up to the next full minute. Buy minutes first, then use them."],["How do I buy more minutes?","Open Minutes & billing and choose a minutes pack."],["Where do I download my results?","Open Campaigns and click Download Excel next to your file."],["Can I change my company details?","Yes. Open Settings and edit them. For a new login email, raise a ticket."],["How do I delete my account?","Raise a ticket with the subject Delete my account. Our team will confirm and remove your data."],["I paid but credits did not arrive","Raise a ticket with your payment details. We will check and add the credits."],["Why did a call fail?","The number may be invalid, busy or not answered. Failed calls are credited back."],["Which language does the AI speak?","English is supported today. Tamil depends on the voice setup, so ask us to test it."],["When will I get a low-minutes email?","We email you when you have 20 minutes or fewer left, and again if your AI is paused at 0 minutes."],["How do I forward missed calls?","Open AI Receptionist, go to step 3, choose your phone company and dial the code shown."],["Where are my invoices?","Open Credits & billing, then Payment history, and click Invoice next to a payment."]];
 function renderFaq(){const q=$("hs").value.toLowerCase().trim(),L=FAQS.filter(f=>!q||(f[0]+" "+f[1]).toLowerCase().includes(q));
   $("faq2").innerHTML=L.length?L.map(f=>"<details><summary>"+esc(f[0])+"</summary><p>"+esc(f[1])+"</p></details>").join(""):'<div class="empty"><b>No results found</b><p>We could not find an answer for "'+esc($("hs").value)+'". Send us your question and our team will reply.</p><button id="toTicket" style="width:auto">Raise a ticket with this question</button></div>'}
 $("hs").oninput=renderFaq;
@@ -503,7 +515,7 @@ $("ssave").onclick=async()=>{const m=$("smsg");m.className="msg";const {data:{se
 $("spwb").onclick=async()=>{const m=$("spm");m.className="msg";if($("spw").value.length<8){m.textContent="Use 8 or more characters.";return}
   const {error}=await sb.auth.updateUser({password:$("spw").value});if(error)m.textContent=error.message;else{m.className="msg ok";m.textContent="Password updated.";$("spw").value=""}};
 
-const SEO={"/": ["Rnexa | AI Receptionist and Websites for Local Businesses in Chennai", "Rnexa builds fast websites and runs an AI receptionist that answers your missed calls, takes bookings and shows every call in your dashboard."], "/login": ["Log in | Rnexa", "Log in to your Rnexa dashboard to manage your AI receptionist, call history, minutes and invoices."], "/signup": ["Create your account | Rnexa", "Create a Rnexa account to set up your AI receptionist, get an AI phone number and see every call in your dashboard."], "/reset": ["Set a new password | Rnexa", "Choose a new password for your Rnexa account."], "/terms": ["Terms & Conditions | Rnexa", "Read the Rnexa terms for the AI receptionist service: accounts, call forwarding, minutes, invoices and the emails we send."], "/privacy": ["Privacy Policy | Rnexa", "How Rnexa collects, uses and protects your business details, call data and payment records."], "/refund": ["Refund & Cancellation Policy | Rnexa", "Rnexa refund and cancellation rules for minutes, AI phone lines and wrong or double payments."], "/contact": ["Contact Rnexa | Tondiarpet, Chennai", "Contact Rnexa by email, phone or WhatsApp, or visit us at Tondiarpet, Chennai."], "/app": ["Dashboard | Rnexa", "Your Rnexa client dashboard."], "/admin": ["Admin | Rnexa", "Rnexa admin panel."], "404": ["Page not found | Rnexa", "This page does not exist."]},SLUGKEY={overview:"overview",reception:"reception",new:"new",campaigns:"camps",billing:"billing",help:"help",settings:"settings"};
+const SEO={"/": ["Rnexa | AI Receptionist and Websites for Local Businesses in Chennai", "Rnexa builds fast websites and runs an AI receptionist that answers your missed calls, takes bookings and shows every call in your dashboard."], "/login": ["Log in | Rnexa", "Log in to your Rnexa dashboard to manage your AI receptionist, call history, minutes and invoices."], "/signup": ["Create your account | Rnexa", "Create a Rnexa account to set up your AI receptionist, get an AI phone number and see every call in your dashboard."], "/reset": ["Set a new password | Rnexa", "Choose a new password for your Rnexa account."], "/terms": ["Terms & Conditions | Rnexa", "Read the Rnexa terms for the AI receptionist service: accounts, call forwarding, minutes, invoices and the emails we send."], "/privacy": ["Privacy Policy | Rnexa", "How Rnexa collects, uses and protects your business details, call data and payment records."], "/refund": ["Refund & Cancellation Policy | Rnexa", "Rnexa refund and cancellation rules for minutes, AI phone lines and wrong or double payments."], "/contact": ["Contact Rnexa | Tondiarpet, Chennai", "Contact Rnexa by email, phone or WhatsApp, or visit us at Tondiarpet, Chennai."], "/app": ["Dashboard | Rnexa", "Your Rnexa client dashboard."], "/admin": ["Admin | Rnexa", "Rnexa admin panel."], "404": ["Page not found | Rnexa", "This page does not exist."]},SLUGKEY={notif:"notif",overview:"overview",reception:"reception",new:"new",campaigns:"camps",billing:"billing",help:"help",settings:"settings"};
 function hashOf(){const p=location.pathname.replace(/\/+$/,"")||"/";return "#/"+(p.split("/")[1]||"")}
 function urlSet(p){if(location.pathname!==p)history.replaceState(null,"",p+location.search)}
 function go(p){if(location.pathname!==p.split("?")[0])history.pushState(null,"",p);route();scrollTo(0,0)}
@@ -562,7 +574,7 @@ function packCard(p,home){const off=p.mrp&&p.mrp>p.price?Math.round((1-p.price/p
  return '<div class="card pk">'+tag+"<h3>"+esc(p.name)+'</h3><div class="pp">'+(off?"<s>"+inr(p.mrp)+"</s> ":"")+"<b>"+inr(p.price)+"</b>"+(p.kind==="line"?" <small>/month</small>":"")+"</div><p>"+gives+"</p>"+(p.calls?"<small>"+inr(Math.round(p.price/p.calls))+" per minute</small>":"")+act+"</div>"}
 function updCustom(i){const h=Math.max(parseFloat(i.value)||0,0),mn=Math.round(h*60),t=i.parentElement.querySelector(".cm_t");t.textContent=mn+" minutes ("+dur(mn)+") for "+inr(mn*(+i.dataset.rate))}
 document.addEventListener("input",e=>{if(e.target.classList&&e.target.classList.contains("cm_h"))updCustom(e.target)});
-async function loadOverview(){try{const d=await(await api("/api/line")).json(),n=(d.line&&d.line.phone_number)||"Not set up";$("stC").textContent=d.minutes;$("stK").textContent=d.calls_today;$("stL").textContent=n;$("bl_min").textContent=d.minutes;$("bl_num").textContent=n}catch(e){}}
+async function loadOverview(){try{const d=await(await api("/api/line")).json(),n=(d.line&&d.line.phone_number)||"Not set up";window.HAS_NUM=d.has_number;if(window.ALLP)renderPacks(window.ALLP);$("stC").textContent=d.minutes;$("stK").textContent=d.calls_today;$("stL").textContent=n;$("bl_min").textContent=d.minutes;$("bl_num").textContent=n}catch(e){}}
 function payClick(e,msgId){const b=e.target.closest("[data-pk]");if(!b)return;let mins;if(b.dataset.custom){const i=b.closest(".pk").querySelector(".cm_h");if(i)mins=Math.round(parseFloat(i.value)*60)}
  startPay(b.dataset.pk,$(msgId),()=>{loadReception();loadCredits();loadOverview()},mins)}
 $("buyLine").onclick=e=>payClick(e,"payMsg");$("buyMin").onclick=e=>payClick(e,"payMsg");$("rc_buy").onclick=e=>payClick(e,"rc_pay");
@@ -590,7 +602,7 @@ async function loadReception(){
   f.forEach(x=>{if(document.activeElement!==$(x[0]))$(x[0]).value=b[x[1]]||""});if(b.language&&document.activeElement!==$("rb_lang"))$("rb_lang").value=b.language;if(b.industry)$("rb_ind").value=b.industry;
   $("rc_min").textContent=d.minutes;$("rc_today").textContent=d.calls_today;
   const st=d.line?d.line.status:"none";$("rc_num").textContent=(d.line&&d.line.phone_number)||"Not set up";renderFw(d.line&&d.line.phone_number);$("rc_status").textContent=STAT[st]||"";
-  $("rc_buy").innerHTML=(window.ALLP||[]).filter(p=>p.kind==="line").map(p=>packCard(p)).join("")||"<p>Packs are not available yet.</p>";
+  window.HAS_NUM=d.has_number;$("rc_buy").innerHTML=window.HAS_NUM?"":((window.ALLP||[]).filter(p=>p.kind==="line").map(p=>packCard(p)).join("")||"<p>Packs are not available yet.</p>");$("rc_buy").closest(".card").style.display=window.HAS_NUM?"none":"";
   try{const C=await(await api("/api/calls")).json();$("rc_calls").innerHTML=C.length?C.map(c=>'<details class="callrow"><summary><b>'+new Date(c.created_at).toLocaleString("en-IN")+"</b><span>"+esc(c.from_number||"Unknown caller")+"</span><span>"+c.minutes+" min</span></summary><p>"+esc(c.summary||"No summary")+"</p><pre>"+esc(c.transcript||"")+"</pre>"+(c.recording_url?'<a href="'+esc(c.recording_url)+'" target="_blank" rel="noopener">Play recording</a>':"")+"</details>").join(""):"<p>No calls yet.</p>"}catch(e){}
   if(["pending","provisioning"].includes(st)&&!$("dash").classList.contains("hide")&&!document.querySelector('[data-sec="reception"]').classList.contains("hide"))setTimeout(loadReception,6000)}
 $("rb_save").onclick=async()=>{const m=$("rb_msg");m.className="msg";m.textContent="";if(!check([["rb_name",R.req,"Enter your business name"],["rb_hours",R.req,"Enter your opening hours"],["rb_addr",R.req,"Enter your address"]]))return;
@@ -609,7 +621,7 @@ const TOUR=[["Welcome to Rnexa","This short tour shows you where everything is. 
 ["Overview","See your minutes left and how many calls you got today.","overview",'#dnav [data-s="overview"]'],
 ["AI Receptionist","Tell the AI about your business, tap a sample to get started, and get your AI phone number.","reception",'#dnav [data-s="reception"]'],
 ["Forward your calls","Set call forwarding on your business phone so missed calls go to your AI number. Pick your phone company here to get the exact codes.","reception","#fw_op"],
-["Credits and invoices","Buy minutes when you run low and download your invoices. We email you when you have 20 minutes left.","billing",'#dnav [data-s="billing"]'],
+["Minutes and invoices","Buy minutes when you run low and download your invoices. We email you when you have 20 minutes left.","billing",'#dnav [data-s="billing"]'],
 ["Help center","Search for answers or send us a ticket to change your details or delete your account.","help",'#dnav [data-s="help"]'],
 ["Settings","Update your company details, PAN, GST and password. Press Show tour any time to see this again.","settings",'#dnav [data-s="settings"]']];
 let tI=0,tEl=null;
@@ -650,5 +662,90 @@ function renderFw(n){if(n)FWNUM=n;const num=FWNUM,op=$("fw_op").value,c=num||"YO
   $("fw_body").innerHTML="<p>"+esc(note)+"</p><table>"+rows.map(r=>"<tr><td>"+r[0]+"</td><td><b>"+esc(r[1])+"</b></td></tr>").join("")+"</table><p>Dial the code on the phone that receives your customer calls, then press call. Test it by asking a friend to call while you do not answer. Your phone company may charge for forwarded calls.</p>"}
 $("fw_op").onchange=()=>renderFw();renderFw();
 $("plist").onclick=async e=>{const id=e.target.dataset.inv;if(!id)return;const w=window.open("","_blank");try{const h=await(await api("/api/invoice/"+id)).text();w.document.write(h);w.document.close()}catch(er){if(w)w.close();toast(er.message,"err")}};
-route();
+
+/* ===== shop rules, notifications, admin tools, editable pages ===== */
+const AFTER={};let TK=[],PY=[],PK=[];
+const _rp=renderPacks;renderPacks=function(L){_rp(L);const c=$("buyLine")&&$("buyLine").closest(".card");if(c)c.style.display=window.HAS_NUM?"none":""};
+async function refreshPacks(){try{const r=await fetch("/api/packs",{cache:"no-store"});renderPacks(await r.json())}catch(e){}}
+function setBadge(n){["nbadge","nbadge2"].forEach(id=>{const b=$(id);b.textContent=n>9?"9+":n;b.classList.toggle("hide",!n)})}
+const NI={ticket:"Ticket",offer:"Offer",event:"Event",message:"Message"},dtt=d=>new Date(d).toLocaleString("en-IN");
+async function loadNotifs(){$("nlist").innerHTML='<div class="spin"></div>';
+  try{const L=await(await api("/api/notifications")).json();
+    $("nlist").innerHTML=L.length?L.map(n=>'<div class="ni'+(n.read?"":" new")+'"><span class="chip2">'+(NI[n.kind]||"Message")+"</span><b>"+esc(n.title)+"</b><p>"+esc(n.body||"").replace(/\n/g,"<br>")+"</p><small>"+dtt(n.created_at)+"</small></div>").join(""):'<div class="empty"><b>No notifications yet</b><p>Offers, events and updates on your tickets will appear here.</p></div>';
+    if(L.some(n=>!n.read)){await api("/api/notifications/read",{method:"POST"});setBadge(0)}}catch(e){$("nlist").innerHTML=""}}
+$("nmark").onclick=async()=>{try{await api("/api/notifications/read",{method:"POST"});setBadge(0);loadNotifs()}catch(e){}};
+$("bell").onclick=()=>dashSec("notif");
+setInterval(()=>{if(!$("dash").classList.contains("hide"))loadCredits()},60000);
+
+/* website text the admin can edit */
+const CONTENT={},PG0={},FAQS_DEF=FAQS.map(f=>f.slice());
+Object.keys(PAGES).forEach(k=>{PG0[k]=PAGES[k];PAGES[k]=()=>CONTENT[k]?textToHtml(CONTENT[k]):PG0[k]()});
+function textToHtml(t){const link=x=>x.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/(^|[\s>])([\w.+-]+@[\w-]+\.[\w.-]+)/g,'$1<a href="mailto:$2">$2</a>');
+  return t.split(/\n\s*\n/).map(b=>b.trim()).filter(Boolean).map(b=>b.startsWith("# ")?"<h1>"+esc(b.slice(2))+"</h1>":b.startsWith("## ")?"<h2>"+esc(b.slice(3))+"</h2>":"<p>"+link(esc(b)).replace(/\n/g,"<br>")+"</p>").join("")}
+function htmlToText(h){const d=new DOMParser().parseFromString(h,"text/html");return [...d.body.children].map(e=>e.tagName==="H1"?"# "+e.textContent:e.tagName==="H2"?"## "+e.textContent:e.textContent).filter(Boolean).join("\n\n")}
+function parseFaq(t){return t.split(/\n\s*\n/).map(b=>{const q=/^Q:\s*(.*)$/m.exec(b),a=/^A:\s*([\s\S]*)$/m.exec(b);return q&&a?[q[1].trim(),a[1].trim()]:null}).filter(Boolean)}
+function faqText(L){return L.map(f=>"Q: "+f[0]+"\nA: "+f[1]).join("\n\n")}
+function applyContent(d){Object.keys(CONTENT).forEach(k=>delete CONTENT[k]);Object.assign(CONTENT,d.pages||{});if(d.faq)CONTENT.faq=d.faq;
+  FAQS.length=0;(d.faq?parseFaq(d.faq):FAQS_DEF).forEach(f=>FAQS.push(f));if(d.terms_version)TERMS_VERSION=d.terms_version;
+  $("terms").innerHTML=PAGES.terms().replace("<h1>","<h2>").replace("</h1>","</h2>")}
+async function loadContent(){try{const r=await Promise.race([fetch("/api/content",{cache:"no-store"}),new Promise((_,j)=>setTimeout(j,3000))]);applyContent(await r.json())}catch(e){}}
+
+/* admin: tabs order */
+const LB={overview:"Overview",clients:"Clients",tickets:"Tickets",notifs:"Notifications",pricing:"Pricing",payments:"Invoices",pages:"Pages",settings:"Settings",lines:"AI Lines",account:"My account"};
+Object.keys(TABS).forEach(k=>delete TABS[k]);Object.keys(LB).forEach(k=>TABS[k]=LB[k]);
+
+/* admin: tickets (list, then a page for each ticket) */
+VIEW.tickets=async()=>{TK=await(await api("/api/admin/tickets")).json();return TK.length?"<table><tr><th>Date</th><th>Client</th><th>Subject</th><th>Status</th><th></th></tr>"+TK.map(t=>"<tr><td>"+dtt(t.created_at)+"</td><td>"+esc(t.email||"")+"</td><td>"+esc(t.subject)+"</td><td>"+esc(t.status)+'</td><td><button class="ghost" data-x="tkopen" data-id="'+t.id+'">Open</button></td></tr>').join("")+"</table>":"<p>No tickets yet.</p>"};
+function tkForm(t){return '<button class="ghost" data-x="tkback">&larr; All tickets</button><h2>Ticket from '+esc(t.email||"")+'</h2><label>Subject</label><input id="tk_s" value="'+esc(t.subject)+'"><label>Client message</label><textarea id="tk_m" rows="5">'+esc(t.message)+'</textarea><label>Status</label><select id="tk_st">'+["open","in progress","done"].map(x=>"<option"+(x===t.status?" selected":"")+">"+x+"</option>").join("")+'</select><label>Reply to the client (they get a notification)</label><textarea id="tk_r" rows="4">'+esc(t.admin_reply||"")+'</textarea><p><button data-x="tksave" data-id="'+t.id+'" style="width:auto">Save changes</button> <button class="ghost" style="color:var(--err)" data-x="tkdel" data-id="'+t.id+'">Delete ticket</button></p>'}
+
+/* admin: invoices */
+VIEW.payments=async()=>{PY=await(await api("/api/admin/payments")).json();return "<p>Open an invoice, edit it, or delete it. Editing changes only the invoice, not the money in Razorpay or the client's minutes.</p><table><tr><th>Date</th><th>Client</th><th>Item</th><th>Amount</th><th>Status</th><th></th></tr>"+PY.map(p=>"<tr><td>"+dtt(p.created_at)+"</td><td>"+esc(p.email||"")+"</td><td>"+esc(p.item_text||p.pack)+"</td><td>"+inr(p.amount_paise/100)+"</td><td>"+esc(p.status)+'</td><td><button class="ghost" data-x="pyinv" data-id="'+p.id+'">Invoice</button> <button class="ghost" data-x="pyopen" data-id="'+p.id+'">Edit</button> <button class="ghost" style="color:var(--err)" data-x="pydel" data-id="'+p.id+'">Delete</button></td></tr>').join("")+"</table>"};
+function pyForm(p){return '<button class="ghost" data-x="pyback">&larr; All invoices</button><h2>Edit invoice</h2><p>'+esc(p.email||"")+'</p><label>Item shown on the invoice (empty = pack name)</label><input id="py_i" value="'+esc(p.item_text||"")+'"><label>Amount paid (INR)</label><input id="py_a" type="number" step="0.01" value="'+p.amount_paise/100+'"><label>Date</label><input id="py_d" type="date" value="'+new Date(p.created_at).toLocaleDateString("en-CA",{timeZone:"Asia/Kolkata"})+'"><p><button data-x="pysave" data-id="'+p.id+'" style="width:auto">Save invoice</button></p>'}
+
+/* admin: pricing, every column editable */
+VIEW.pricing=async()=>{PK=(await(await api("/api/admin/packs")).json()).filter(p=>p.kind!=="calls");
+  const inp=(id,v,t,w)=>'<input id="'+id+'" type="'+(t||"number")+'" step="any" value="'+(v===null||v===undefined?"":esc(v))+'"'+(w?' style="min-width:'+w+'px"':"")+">";
+  return "<p>Every column can be edited. Change the hours and the minutes follow, change a price and the per-minute rate follows (and the other way round). Click Save on a row and the website shows it straight away.</p><table><tr><th>Order</th><th>Name</th><th>Hours</th><th>Minutes</th><th>Actual price</th><th>Offer price</th><th>Actual per min</th><th>Offer per min</th><th>On sale</th><th></th></tr>"+PK.map(p=>{const i=p.id,m=p.calls||0;return '<tr data-k="'+p.kind+'"><td>'+inp("po"+i,p.sort)+"</td><td>"+inp("pn"+i,p.name,"text",170)+"</td><td>"+inp("ph"+i,m?+(m/60).toFixed(2):"")+"</td><td>"+inp("pc"+i,m)+"</td><td>"+inp("pm"+i,p.mrp)+"</td><td>"+inp("pp"+i,p.price)+"</td><td>"+inp("pq"+i,p.mrp&&m?+(p.mrp/m).toFixed(2):"")+"</td><td>"+inp("pr"+i,p.kind==="custom"?p.rate_per_min:(m?+(p.price/m).toFixed(2):""))+'</td><td><input id="pa'+i+'" type="checkbox" style="width:auto"'+(p.active?" checked":"")+'></td><td><button class="ghost" data-x="pksave" data-id="'+i+'">Save</button></td></tr>'}).join("")+"</table><p>For the 'hours or more' pack, Minutes is the least a client can buy, and Offer per min is the rate for every minute they choose.</p>"};
+$("abody").addEventListener("input",e=>{const m=/^p([hcmpqr])(.+)$/.exec(e.target.id||"");if(!m)return;const f=m[1],i=m[2],g=x=>parseFloat($("p"+x+i).value),s=(x,v)=>{$("p"+x+i).value=isFinite(v)&&v>0?+v.toFixed(2):""};
+  if(f==="h")s("c",Math.round(g("h")*60));
+  if(f==="c"||f==="h"){const mn=g("c");if(f==="c")s("h",mn/60);if(mn>0){s("q",g("m")/mn);s("r",g("p")/mn)}}
+  const mn=g("c");if(mn>0){if(f==="m")s("q",g("m")/mn);if(f==="q")s("m",Math.round(g("q")*mn));if(f==="p")s("r",g("p")/mn);if(f==="r")s("p",Math.round(g("r")*mn))}});
+
+/* admin: notifications */
+VIEW.notifs=async()=>'<h2>Send a notification</h2><p>Clients see it in Notifications, with a red dot until they read it.</p><label>Type</label><select id="nt_k"><option value="event">Event</option><option value="offer">Offer</option><option value="message">Message</option></select><label>Send to</label><select id="nt_t"><option value="all">All clients</option></select><label>Title</label><input id="nt_h" maxlength="120"><label>Message</label><textarea id="nt_b" rows="4"></textarea><p><button data-x="ntsend" style="width:auto">Send</button></p><h2 style="margin-top:22px">Sent</h2><div id="nt_list"><div class="spin"></div></div>';
+async function ntList(){const L=await(await api("/api/admin/notifications")).json();$("nt_list").innerHTML=L.length?"<table><tr><th>Date</th><th>To</th><th>Type</th><th>Title</th><th></th></tr>"+L.map(n=>"<tr><td>"+dtt(n.created_at)+"</td><td>"+esc(n.to)+"</td><td>"+esc(n.kind)+"</td><td>"+esc(n.title)+'</td><td><button class="ghost" style="color:var(--err)" data-x="ntdel" data-id="'+n.id+'">Delete</button></td></tr>').join("")+"</table>":"<p>Nothing sent yet.</p>"}
+AFTER.notifs=async()=>{const C=await(await api("/api/admin/clients")).json();$("nt_t").innerHTML='<option value="all">All clients</option>'+C.map(c=>'<option value="'+c.id+'">'+esc(c.email||"")+" - "+esc(c.company_name)+"</option>").join("");await ntList()};
+
+/* admin: editable pages and help center */
+VIEW.pages=async()=>'<h2>Website pages</h2><p>Pick a page, edit the text, and save. The website shows it straight away. Start a heading with ## and leave a blank line between paragraphs.</p><select id="cpSel"><option value="terms">Terms &amp; Conditions</option><option value="privacy">Privacy Policy</option><option value="refund">Refund &amp; Cancellation</option><option value="contact">Contact Us</option><option value="faq">Help center questions</option></select><textarea id="cpText" rows="18" style="margin-top:10px"></textarea><p id="cpHelp"></p><label style="font-weight:400" id="cpReL"><input type="checkbox" id="cpRe" style="width:auto"> Ask all clients to accept the new Terms again</label><p><button data-x="cpsave" style="width:auto">Save page</button> <button class="ghost" data-x="cpreset">Back to original text</button></p>';
+function pageText(k){return k==="faq"?(CONTENT.faq||faqText(FAQS_DEF)):(CONTENT[k]||htmlToText(PG0[k]()))}
+function fillPage(){const k=$("cpSel").value;$("cpText").value=pageText(k);$("cpReL").style.display=k==="terms"?"":"none";$("cpHelp").textContent=k==="faq"?"Write each question as Q: ... and its answer as A: ... with a blank line between questions.":""}
+AFTER.pages=()=>{$("cpSel").onchange=fillPage;fillPage()};
+
+/* admin: company details used on every invoice */
+VIEW.settings=async()=>'<h2>Company details on invoices</h2><p>These details print on every invoice and invoice email, old ones too. Add your GSTIN when you register and it will appear on the invoices.</p><label>Company name</label><input id="cs_n"><label>Owner name</label><input id="cs_o"><label>Address</label><input id="cs_a"><label>Email</label><input id="cs_e"><label>Phone</label><input id="cs_p"><label>GSTIN (empty if not registered)</label><input id="cs_g" maxlength="15"><label>PAN (optional)</label><input id="cs_pan" maxlength="10"><p><button data-x="cssave" style="width:auto">Save details</button></p>';
+AFTER.settings=async()=>{const c=await(await api("/api/admin/company")).json();[["cs_n","name"],["cs_o","owner"],["cs_a","address"],["cs_e","email"],["cs_p","phone"],["cs_g","gstin"],["cs_pan","pan"]].forEach(x=>$(x[0]).value=c[x[1]]||"")};
+
+/* admin: actions for the new screens */
+$("abody").addEventListener("click",async e=>{const b=e.target.closest("[data-x]");if(!b)return;const x=b.dataset.x,id=b.dataset.id;
+  try{switch(x){
+   case "tkopen":$("abody").innerHTML=tkForm(TK.find(t=>t.id===id));break;
+   case "tkback":adminTab("tickets");break;
+   case "tksave":await J("PATCH","/api/admin/tickets/"+id,{status:$("tk_st").value,admin_reply:$("tk_r").value,subject:$("tk_s").value,message:$("tk_m").value});toast("Ticket saved. The client was notified.","ok");adminTab("tickets");break;
+   case "tkdel":if(confirm("Delete this ticket for good?")){await api("/api/admin/tickets/"+id,{method:"DELETE"});adminTab("tickets")}break;
+   case "pyinv":{const w=window.open("","_blank");try{w.document.write(await(await api("/api/admin/invoice/"+id)).text());w.document.close()}catch(er){w.close();throw er}break}
+   case "pyopen":$("abody").innerHTML=pyForm(PY.find(p=>p.id===id));break;
+   case "pyback":adminTab("payments");break;
+   case "pysave":await J("PATCH","/api/admin/payments/"+id,{item_text:$("py_i").value,amount:parseFloat($("py_a").value),date:$("py_d").value});toast("Invoice updated","ok");adminTab("payments");break;
+   case "pydel":if(confirm("Delete this invoice and payment record? Money in Razorpay and the client's minutes are not changed.")){await api("/api/admin/payments/"+id,{method:"DELETE"});adminTab("payments")}break;
+   case "pksave":{const i=id,v=k=>$("p"+k+i).value,custom=$("pr"+i).closest("tr").dataset.k==="custom",mn=Math.round(+v("c")||0),rate=Math.round(+v("r")||0);
+     await J("PUT","/api/admin/packs/"+i,{name:v("n"),calls:mn,price:custom?mn*rate:Math.round(+v("p")||0),mrp:Math.round(+v("m"))||null,rate_per_min:custom?rate:null,active:$("pa"+i).checked,sort:Math.round(+v("o"))||0});
+     b.textContent="Saved";toast("Saved. Clients see the new price now.","ok");refreshPacks();break}
+   case "ntsend":await J("POST","/api/admin/notifications",{kind:$("nt_k").value,target:$("nt_t").value,title:$("nt_h").value,body:$("nt_b").value});toast("Notification sent","ok");$("nt_h").value="";$("nt_b").value="";ntList();break;
+   case "ntdel":if(confirm("Delete this notification?")){await api("/api/admin/notifications/"+id,{method:"DELETE"});ntList()}break;
+   case "cssave":await J("PUT","/api/admin/company",{name:$("cs_n").value,owner:$("cs_o").value,address:$("cs_a").value,email:$("cs_e").value,phone:$("cs_p").value,gstin:$("cs_g").value,pan:$("cs_pan").value});toast("Saved. Invoices now use these details.","ok");break;
+   case "cpsave":{const k=$("cpSel").value,t=$("cpText").value;if(!t.trim()){toast("Please write some text first","err");break}await J("PUT","/api/admin/content",{key:k,text:t,reaccept:k==="terms"&&$("cpRe").checked});await loadContent();toast("Saved. The website shows it now.","ok");break}
+   case "cpreset":if(confirm("Go back to the original text for this page?")){await api("/api/admin/content/"+$("cpSel").value,{method:"DELETE"});await loadContent();fillPage();toast("Original text restored","ok")}break;
+  }}catch(er){toast(er.message,"err")}});
+loadContent().finally(route);
 </script></body></html>

@@ -21,10 +21,12 @@ FREE_CALLS = int(os.getenv("FREE_CALLS", "2"))                    # free trial c
 MAX_CALLS = int(os.getenv("MAX_CALLS_PER_CAMPAIGN", "500"))
 ADMINS = {e.strip().lower() for e in os.getenv("ADMIN_EMAILS", "syedshahid3533@gmail.com").split(",") if e.strip()}
 COST_PER_CALL = float(os.getenv("COST_PER_CALL_INR", "8"))   # your estimated cost per call, for the profit estimate
-DEFAULT_PACKS = [  # used only if the packs table is empty; real prices are edited in the admin panel
-    {"id": "starter", "name": "Starter", "calls": 50, "price": 1000},
-    {"id": "growth", "name": "Growth", "calls": 100, "price": 1800},
-    {"id": "business", "name": "Business", "calls": 500, "price": 8000},  # kind defaults to "calls"
+DEFAULT_PACKS = [
+    {"id": "num", "name": "AI phone number (per month)", "calls": 0, "price": 999, "mrp": 1500, "kind": "line"},
+    {"id": "numplus", "name": "AI number + 60 minutes", "calls": 60, "price": 1499, "mrp": 2000, "kind": "line"},
+    {"id": "m60", "name": "60 minutes", "calls": 60, "price": 900, "kind": "minutes"},
+    {"id": "m100", "name": "1 hr 40 min", "calls": 100, "price": 1100, "kind": "minutes"},
+    {"id": "mcustom", "name": "5 hours or more", "calls": 300, "price": 2700, "rate_per_min": 9, "kind": "custom"},
 ]
 H = {"apikey": SKEY, "Content-Type": "application/json", "Prefer": "return=representation"}
 if not SKEY.startswith("sb_"):
@@ -110,12 +112,13 @@ def run_campaign(cid, uid):
 
 @app.get("/api/packs")
 def packs():
-    return load_packs()
+    return JSONResponse(load_packs(), headers={"Cache-Control": "no-store"})
 
 
 @app.get("/api/me")
 def me(authorization: str = Header(None)):
-    return {"credits": credits_of(current_user(authorization))}
+    uid = current_user(authorization)
+    return {"credits": credits_of(uid), "minutes": rpc("get_minutes", {"p_user": uid}), "unread": unread_count(uid), "has_number": has_number(uid)}
 
 
 @app.post("/api/campaigns")
@@ -166,6 +169,7 @@ def download(cid: str, authorization: str = Header(None)):
 # ---------- payments (Razorpay) ----------
 class OrderIn(BaseModel):
     pack: str
+    minutes: Optional[int] = None
 
 
 class VerifyIn(BaseModel):
@@ -189,6 +193,8 @@ def credit_order(order_id, payment_id):
                 threading.Thread(target=provision, args=(r0["user_id"],), daemon=True).start()
             else:
                 threading.Thread(target=relink, args=(r0["user_id"],), daemon=True).start()
+        threading.Thread(target=email_invoice, args=(r0,), daemon=True).start()
+        notify(r0["user_id"], "Payment received", f"We received Rs. {(r0['amount_paise'] or 0) / 100:,.2f}. Your invoice was sent to your email and is in Minutes & billing.", "message")
     return bool(rows)
 
 
@@ -199,16 +205,26 @@ def create_order(b: OrderIn, authorization: str = Header(None)):
     if not p or not RZP_ID:
         raise HTTPException(400, "This pack is not available")
     kind = p.get("kind", "calls")
+    if kind == "line" and has_number(uid):
+        raise HTTPException(400, "You already have an AI number. Please buy minutes instead.")
     if kind == "line" and not db("GET", "lines", {"user_id": f"eq.{uid}", "select": "id"}):
         raise HTTPException(400, "Please save your business details first")
+    price, units = p["price"], p["calls"]
+    if kind == "custom":                      # client chooses how many minutes (hours x 60) at a fixed rate per minute
+        units = b.minutes or 0
+        if units < p["calls"] or units > 20000:
+            raise HTTPException(400, f"Please choose at least {p['calls'] // 60} hours")
+        price = units * int(p.get("rate_per_min") or 0)
+    if price < 1:
+        raise HTTPException(400, "This pack is not available")
     r = requests.post("https://api.razorpay.com/v1/orders", auth=(RZP_ID, RZP_SECRET), timeout=30,
-                      json={"amount": p["price"] * 100, "currency": "INR", "receipt": f"rx{uid[:8]}"})
+                      json={"amount": price * 100, "currency": "INR", "receipt": f"rx{uid[:8]}"})
     if not r.ok:
         raise HTTPException(502, "Could not start the payment. Please try again.")
     o = r.json()
     db("POST", "payments", json={"user_id": uid, "razorpay_order_id": o["id"], "pack": p["id"],
-                                 "calls": p["calls"], "amount_paise": o["amount"], "kind": kind})
-    return {"order_id": o["id"], "amount": o["amount"], "key_id": RZP_ID, "description": f'{p["name"]} - {p["calls"]} calls'}
+                                 "calls": units, "amount_paise": o["amount"], "kind": kind})
+    return {"order_id": o["id"], "amount": o["amount"], "key_id": RZP_ID, "description": f'{p["name"]} - {units} minutes' if units else p["name"]}
 
 
 @app.post("/api/payments/verify")
@@ -253,7 +269,9 @@ class TicketIn(BaseModel):
 @app.post("/api/tickets")
 def new_ticket(b: TicketIn, authorization: str = Header(None)):
     uid = current_user(authorization)
-    return db("POST", "tickets", json={"user_id": uid, "subject": b.subject[:80], "message": b.message[:2000]})[0]
+    t = db("POST", "tickets", json={"user_id": uid, "subject": b.subject[:80], "message": b.message[:2000]})[0]
+    notify(uid, "You raised a ticket", f"'{t['subject']}' was received. Status: open. We will reply soon.", "ticket")
+    return t
 
 
 @app.get("/api/tickets")
@@ -279,11 +297,16 @@ class PackEdit(BaseModel):
     calls: int
     price: int
     active: bool = True
+    mrp: Optional[int] = None
+    rate_per_min: Optional[int] = None
+    sort: Optional[int] = None
 
 
 class TicketEdit(BaseModel):
     status: str
     admin_reply: Optional[str] = None
+    subject: Optional[str] = None
+    message: Optional[str] = None
 
 
 @app.get("/api/admin/me")
@@ -298,14 +321,14 @@ def admin_overview(authorization: str = Header(None)):
     revenue = sum(p["amount_paise"] or 0 for p in db("GET", "payments", {"status": "eq.paid", "select": "amount_paise"})) / 100
     est_cost = round(calls * COST_PER_CALL)
     return {"clients": len(db("GET", "profiles", {"select": "id"})), "calls": calls, "revenue": revenue,
-            "credits": sum(w["credits"] for w in db("GET", "wallets")), "est_cost": est_cost, "est_profit": revenue - est_cost}
+            "credits": sum(w["minutes"] for w in db("GET", "wallets")), "est_cost": est_cost, "est_profit": revenue - est_cost}
 
 
 @app.get("/api/admin/clients")
 def admin_clients(authorization: str = Header(None)):
     current_admin(authorization)
     st = {x["user_id"]: x for x in db("GET", "account_status")}
-    wl = {x["user_id"]: x["credits"] for x in db("GET", "wallets")}
+    wl = {x["user_id"]: x["minutes"] for x in db("GET", "wallets")}
     return [{**p, "email": st.get(p["id"], {}).get("email"), "suspended": st.get(p["id"], {}).get("suspended", False),
              "credits": wl.get(p["id"], 0)} for p in db("GET", "profiles", {"order": "created_at.desc"})]
 
@@ -329,9 +352,8 @@ def admin_edit_client(uid: str, b: ClientEdit, authorization: str = Header(None)
             subject, body = "Your Rnexa account is active again", f"Hello {name},\n\nYour Rnexa account has been switched back on. You can log in and use the dashboard again at {SITE_URL}/login.\n\nIf you have any questions:\n{contact}\n\nRnexa"
         threading.Thread(target=send_mail, args=(email_of(uid), subject, body), daemon=True).start()
     if b.credits_delta:
-        credits_of(uid)
-        if rpc("add_credits" if b.credits_delta > 0 else "use_credits", {"p_user": uid, "p_n": abs(b.credits_delta)}) is None:
-            raise HTTPException(400, "Client does not have that many credits")
+        if rpc("add_minutes" if b.credits_delta > 0 else "use_minutes", {"p_user": uid, "p_n": abs(b.credits_delta)}) is None:
+            raise HTTPException(400, "Client does not have that many minutes")
     return {"ok": True}
 
 
@@ -347,16 +369,21 @@ def admin_delete_client(uid: str, authorization: str = Header(None)):
 @app.get("/api/admin/packs")
 def admin_packs(authorization: str = Header(None)):
     current_admin(authorization)
-    return load_packs(True)
+    return db("GET", "packs", {"order": "sort"})
 
 
 @app.put("/api/admin/packs/{pid}")
 def admin_edit_pack(pid: str, b: PackEdit, authorization: str = Header(None)):
     current_admin(authorization)
-    if b.calls < 1 or b.price < 1:
-        raise HTTPException(400, "Calls and price must be above zero")
-    db("PATCH", "packs", {"id": f"eq.{pid}"}, b.dict())
-    return {"ok": True}
+    if b.calls < 0 or b.price < 1:
+        raise HTTPException(400, "Minutes cannot be negative and the price must be above zero")
+    f = b.dict()
+    if f.get("sort") is None:
+        f.pop("sort", None)
+    rows = db("PATCH", "packs", {"id": f"eq.{pid}"}, f)
+    if not rows:
+        raise HTTPException(404, "Pack not found")
+    return {"ok": True, "pack": rows[0]}
 
 
 @app.get("/api/admin/payments")
@@ -376,7 +403,26 @@ def admin_tickets(authorization: str = Header(None)):
 @app.patch("/api/admin/tickets/{tid}")
 def admin_edit_ticket(tid: str, b: TicketEdit, authorization: str = Header(None)):
     current_admin(authorization)
-    db("PATCH", "tickets", {"id": f"eq.{tid}"}, {"status": b.status, "admin_reply": b.admin_reply})
+    rows = db("GET", "tickets", {"id": f"eq.{tid}"})
+    if not rows:
+        raise HTTPException(404, "Ticket not found")
+    old = rows[0]
+    f = {"status": b.status, "admin_reply": b.admin_reply}
+    if b.subject is not None:
+        f["subject"] = b.subject[:80]
+    if b.message is not None:
+        f["message"] = b.message[:2000]
+    db("PATCH", "tickets", {"id": f"eq.{tid}"}, f)
+    if b.status != old.get("status") or (b.admin_reply or "") != (old.get("admin_reply") or ""):
+        reply = f"\nReply from Rnexa: {b.admin_reply}" if b.admin_reply else ""
+        notify(old["user_id"], f"Your ticket is now: {b.status}", f"'{f.get('subject', old['subject'])}'{reply}", "ticket")
+    return {"ok": True}
+
+
+@app.delete("/api/admin/tickets/{tid}")
+def admin_delete_ticket(tid: str, authorization: str = Header(None)):
+    current_admin(authorization)
+    db("DELETE", "tickets", {"id": f"eq.{tid}"})
     return {"ok": True}
 
 
@@ -396,13 +442,15 @@ def bh():
     return {"Authorization": f"Bearer {os.environ['BOLNA_API_KEY']}", "Content-Type": "application/json"}
 
 
-def send_mail(to, subject, body):
+def send_mail(to, subject, body, html=None):
     host = os.getenv("SMTP_HOST")
     if not host or not to:
         return
     msg = EmailMessage()
     msg["From"], msg["To"], msg["Subject"] = os.getenv("MAIL_FROM", "Rnexa <ss@rnexa.in>"), to, subject
     msg.set_content(body)
+    if html:
+        msg.add_alternative(html, subtype="html")
     try:
         with smtplib.SMTP(host, int(os.getenv("SMTP_PORT", "587")), timeout=20) as s:
             s.starttls()
@@ -500,6 +548,10 @@ def provision(uid, force=False):
                 raise RuntimeError(f"Buying number failed ({r.status_code}): {r.text[:150]}")
             pid, num = r.json()["id"], r.json().get("phone_number", num)
             db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"phone_number_id": pid, "phone_number": num, "provisioned_at": datetime.now(timezone.utc).isoformat()})
+        if rpc("get_minutes", {"p_user": uid}) <= 0:       # number reserved, but the AI stays off until minutes are bought
+            db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"status": "paused", "error": None})
+            send_mail(email_of(uid), "Your Rnexa AI number is reserved", f"Your AI number is {num}.\nIt is switched off until you buy minutes. Buy minutes at {SITE_URL}/app/billing and it turns on by itself.\n\nRnexa")
+            return
         link(agent, pid)
         db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"status": "active", "error": None})
         send_mail(email_of(uid), "Your Rnexa AI phone number is ready", f"Your AI receptionist number is {num}.\nSet call forwarding from your business phone to this number, then test it by calling.\n\nRnexa")
@@ -571,7 +623,7 @@ def my_line(authorization: str = Header(None)):
     start = datetime.now(IST).replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
     n = len(db("GET", "calls", {"user_id": f"eq.{uid}", "created_at": f"gte.{start}", "select": "execution_id"}))
     return {"business": line["business"] if line else None, "minutes": rpc("get_minutes", {"p_user": uid}), "calls_today": n,
-            "line": {k: line[k] for k in ("status", "phone_number", "paid_until")} if line else None}
+            "line": {k: line[k] for k in ("status", "phone_number", "paid_until")} if line else None, "has_number": line_has_number(line)}
 
 
 @app.post("/api/line")
@@ -633,31 +685,16 @@ def invoice(pid: str, authorization: str = Header(None)):
     rows = db("GET", "payments", {"id": f"eq.{pid}", "user_id": f"eq.{uid}", "status": "eq.paid"})
     if not rows:
         raise HTTPException(404, "Invoice not found")
-    p, prof = rows[0], db("GET", "profiles", {"id": f"eq.{uid}"})[0]
-    pk = db("GET", "packs", {"id": f"eq.{p['pack']}"})
-    item = pk[0]["name"] if pk else p["pack"]
-    e = _html.escape
-    when = datetime.fromisoformat(p["created_at"].replace("Z", "+00:00")).astimezone(IST)
-    amt = f"{p['amount_paise'] / 100:,.2f}"
-    seller = [os.getenv("SELLER_NAME", "Rnexa"), os.getenv("SELLER_OWNER", "Sajid Hussain"),
-              os.getenv("SELLER_ADDRESS", "162/80 Nethaji Nagar 5th Street, Tondiarpet, Chennai, Tamil Nadu 600081, India"),
-              os.getenv("SELLER_EMAIL", "ss@rnexa.in"), os.getenv("SELLER_PHONE", "+91 7358145522")]
-    buyer = "<br>".join(e(x) for x in [prof.get("company_name"), prof.get("contact_name"), prof.get("billing_address"), prof.get("city")] if x)
-    ids = "".join(f"<br>{k}: {e(v)}" for k, v in (("PAN", prof.get("pan")), ("GSTIN", prof.get("gstin"))) if v)
-    page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Invoice RNX-{when:%Y%m}-{p['id'][:6].upper()}</title>
-<style>body{{font-family:Segoe UI,Arial,sans-serif;color:#192307;max-width:760px;margin:30px auto;padding:0 20px}}h1{{color:#506022;margin:0}}
-table{{width:100%;border-collapse:collapse;margin:22px 0}}th,td{{border-bottom:1px solid #dde2cc;padding:10px;text-align:left}}.r{{text-align:right}}
-.box{{display:flex;justify-content:space-between;gap:20px;margin-top:20px}}small{{color:#5b6648}}button{{background:#506022;color:#fff;border:0;padding:10px 18px;border-radius:8px;cursor:pointer}}
-@media print{{button{{display:none}}}}</style></head><body>
-<div style="display:flex;justify-content:space-between;align-items:center"><h1>Rnexa</h1><button onclick="window.print()">Print / Save as PDF</button></div>
-<p><b>INVOICE</b> RNX-{when:%Y%m}-{p['id'][:6].upper()}<br>Date: {when:%d %b %Y}</p>
-<div class="box"><div><small>From</small><br><b>{e(seller[0])}</b><br>{e(seller[1])}<br>{e(seller[2])}<br>{e(seller[3])} &middot; {e(seller[4])}<br>GSTIN: Not registered</div>
-<div><small>Billed to</small><br>{buyer}{ids}</div></div>
-<table><tr><th>Description</th><th class="r">Qty</th><th class="r">Amount (INR)</th></tr>
-<tr><td>{e(item)}</td><td class="r">1</td><td class="r">{amt}</td></tr>
-<tr><td colspan="2" class="r"><b>Total paid</b></td><td class="r"><b>{amt}</b></td></tr></table>
-<p><small>GST: not applicable, the seller is not registered under GST. Paid online through Razorpay (payment {e(p.get('razorpay_payment_id') or '')}). This is a computer-generated invoice and needs no signature.</small></p></body></html>"""
-    return Response(content=page, media_type="text/html")
+    return Response(content=invoice_html(rows[0]), media_type="text/html")
+
+
+@app.get("/api/admin/invoice/{pid}")
+def admin_invoice(pid: str, authorization: str = Header(None)):
+    current_admin(authorization)
+    rows = db("GET", "payments", {"id": f"eq.{pid}"})
+    if not rows:
+        raise HTTPException(404, "Invoice not found")
+    return Response(content=invoice_html(rows[0]), media_type="text/html")
 
 
 # ---------- clean URLs, per-page search tags, 404 ----------
@@ -701,6 +738,256 @@ async def http_error(request: Request, exc: StarletteHTTPException):
             return HTMLResponse(page_for(key))
         return HTMLResponse(NOTFOUND, status_code=404)
     return JSONResponse({"detail": exc.detail}, status_code=exc.status_code, headers=getattr(exc, "headers", None))
+
+
+# ---------- settings store, company details, invoices ----------
+DEFAULT_COMPANY = {"name": "Rnexa", "owner": "Sajid Hussain", "address": "162/80 Nethaji Nagar 5th Street, Tondiarpet, Chennai, Tamil Nadu 600081, India",
+                   "email": "ss@rnexa.in", "phone": "+91 7358145522", "gstin": "", "pan": ""}
+
+
+def get_setting(key, default=None):
+    try:
+        r = db("GET", "app_settings", {"key": f"eq.{key}"})
+        return r[0]["value"] if r else default
+    except HTTPException:
+        return default
+
+
+def set_setting(key, value):
+    if db("GET", "app_settings", {"key": f"eq.{key}"}):
+        db("PATCH", "app_settings", {"key": f"eq.{key}"}, {"value": value})
+    else:
+        db("POST", "app_settings", json={"key": key, "value": value})
+
+
+def company():
+    return {**DEFAULT_COMPANY, **(get_setting("company", {}) or {})}
+
+
+def invoice_inner(p):
+    e = _html.escape
+    prof = (db("GET", "profiles", {"id": f"eq.{p['user_id']}"}) or [{}])[0]
+    pk = db("GET", "packs", {"id": f"eq.{p['pack']}"})
+    item = p.get("item_text") or (pk[0]["name"] if pk else p["pack"])
+    if not p.get("item_text") and p.get("calls") and p.get("kind") != "line":
+        item += f" ({p['calls']} minutes)"
+    co = company()
+    when = datetime.fromisoformat(p["created_at"].replace("Z", "+00:00")).astimezone(IST)
+    no = f"RNX-{when:%Y%m}-{p['id'][:6].upper()}"
+    amt = f"{(p['amount_paise'] or 0) / 100:,.2f}"
+    buyer = "<br>".join(e(x) for x in [prof.get("company_name"), prof.get("contact_name"), prof.get("billing_address"), prof.get("city")] if x)
+    ids = "".join(f"<br>{k}: {e(v)}" for k, v in (("PAN", prof.get("pan")), ("GSTIN", prof.get("gstin"))) if v)
+    sid = f"<br>GSTIN: {e(co['gstin'])}" if co.get("gstin") else "<br>GSTIN: Not registered"
+    if co.get("pan"):
+        sid += f"<br>PAN: {e(co['pan'])}"
+    note = "" if co.get("gstin") else "GST: not applicable, the seller is not registered under GST. "
+    th = "border-bottom:1px solid #dde2cc;padding:10px;text-align:left"
+    inner = (f'<div style="font-family:Segoe UI,Arial,sans-serif;color:#192307;max-width:720px;margin:auto">'
+             f'<h1 style="color:#506022;margin:0">{e(co["name"])}</h1><p><b>INVOICE</b> {no}<br>Date: {when:%d %b %Y}</p>'
+             f'<table width="100%" style="margin-top:14px"><tr><td valign="top"><small style="color:#5b6648">From</small><br><b>{e(co["name"])}</b><br>{e(co["owner"])}<br>{e(co["address"])}<br>{e(co["email"])} &middot; {e(co["phone"])}{sid}</td>'
+             f'<td valign="top"><small style="color:#5b6648">Billed to</small><br>{buyer}{ids}</td></tr></table>'
+             f'<table width="100%" style="border-collapse:collapse;margin:22px 0"><tr><th style="{th}">Description</th><th style="{th};text-align:right">Qty</th><th style="{th};text-align:right">Amount (INR)</th></tr>'
+             f'<tr><td style="{th}">{e(item)}</td><td style="{th};text-align:right">1</td><td style="{th};text-align:right">{amt}</td></tr>'
+             f'<tr><td colspan="2" style="{th};text-align:right"><b>Total paid</b></td><td style="{th};text-align:right"><b>{amt}</b></td></tr></table>'
+             f'<p style="font-size:12px;color:#5b6648">{note}Paid online through Razorpay (payment {e(p.get("razorpay_payment_id") or "")}). This is a computer-generated invoice and needs no signature.</p></div>')
+    return inner, no, amt, prof
+
+
+def invoice_html(p):
+    inner, no, _, _ = invoice_inner(p)
+    return (f'<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Invoice {no}</title><style>body{{margin:30px 20px}}'
+            f'button{{background:#506022;color:#fff;border:0;padding:10px 18px;border-radius:8px;cursor:pointer;margin-bottom:14px}}@media print{{button{{display:none}}}}</style></head>'
+            f'<body><div style="max-width:720px;margin:auto;text-align:right"><button onclick="window.print()">Print / Save as PDF</button></div>{inner}</body></html>')
+
+
+def email_invoice(p):
+    try:
+        to = email_of(p["user_id"])
+        inner, no, amt, prof = invoice_inner(p)
+        name = _html.escape(prof.get("contact_name") or "there")
+        html = (f'<div style="background:#f4f6ee;padding:24px 10px;font-family:Segoe UI,Arial,sans-serif"><div style="max-width:720px;margin:auto;background:#fff;border-radius:16px;padding:26px;border:1px solid #dde2cc">'
+                f'<img src="{SITE_URL}/logo-mark.png" width="48" alt="Rnexa logo"><h2 style="color:#192307;margin:12px 0 4px">Thank you for your purchase</h2>'
+                f'<p style="color:#5b6648">Hello {name}, we received your payment of Rs. {amt}. Your invoice is below. You can download it again any time from Minutes &amp; billing in your dashboard.</p>'
+                f'<hr style="border:0;border-top:1px solid #dde2cc;margin:18px 0">{inner}</div></div>')
+        send_mail(to, f"Your Rnexa invoice {no} (Rs. {amt})", f"Thank you for your purchase. We received Rs. {amt}. Invoice {no}. Download it from Minutes & billing in your dashboard.\n\nRnexa", html)
+    except Exception as ex:
+        print("invoice email error:", ex)
+
+
+class CompanyIn(BaseModel):
+    name: str
+    owner: str = ""
+    address: str = ""
+    email: str = ""
+    phone: str = ""
+    gstin: str = ""
+    pan: str = ""
+
+
+@app.get("/api/admin/company")
+def admin_get_company(authorization: str = Header(None)):
+    current_admin(authorization)
+    return company()
+
+
+@app.put("/api/admin/company")
+def admin_set_company(b: CompanyIn, authorization: str = Header(None)):
+    current_admin(authorization)
+    g = b.gstin.strip().upper()
+    if g and not re.fullmatch(r"[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][A-Z0-9]Z[A-Z0-9]", g):
+        raise HTTPException(400, "GSTIN looks wrong. It must be 15 characters.")
+    set_setting("company", {**b.dict(), "gstin": g, "pan": b.pan.strip().upper()})
+    return {"ok": True}
+
+
+class PayEdit(BaseModel):
+    item_text: Optional[str] = None
+    amount: Optional[float] = None
+    date: Optional[str] = None
+
+
+@app.patch("/api/admin/payments/{pid}")
+def admin_edit_payment(pid: str, b: PayEdit, authorization: str = Header(None)):
+    current_admin(authorization)
+    f = {}
+    if b.item_text is not None:
+        f["item_text"] = b.item_text.strip()[:200] or None
+    if b.amount is not None:
+        if b.amount < 0:
+            raise HTTPException(400, "Amount cannot be negative")
+        f["amount_paise"] = int(round(b.amount * 100))
+    if b.date:
+        try:
+            f["created_at"] = datetime.fromisoformat(b.date).replace(hour=12, tzinfo=IST).isoformat()
+        except ValueError:
+            raise HTTPException(400, "Date must look like 2026-10-05")
+    if f:
+        db("PATCH", "payments", {"id": f"eq.{pid}"}, f)
+    return {"ok": True}
+
+
+@app.delete("/api/admin/payments/{pid}")
+def admin_delete_payment(pid: str, authorization: str = Header(None)):
+    current_admin(authorization)
+    db("DELETE", "payments", {"id": f"eq.{pid}"})
+    return {"ok": True}
+
+
+# ---------- website text the admin can edit ----------
+class ContentIn(BaseModel):
+    key: str
+    text: str
+    reaccept: bool = False
+
+
+@app.get("/api/content")
+def public_content():
+    c = get_setting("content", {}) or {}
+    return JSONResponse({"pages": {k: c[k] for k in ("terms", "privacy", "refund", "contact") if c.get(k)}, "faq": c.get("faq"),
+                         "terms_version": c.get("terms_version")}, headers={"Cache-Control": "no-store"})
+
+
+@app.put("/api/admin/content")
+def admin_set_content(b: ContentIn, authorization: str = Header(None)):
+    current_admin(authorization)
+    if b.key not in ("terms", "privacy", "refund", "contact", "faq") or not b.text.strip():
+        raise HTTPException(400, "Nothing to save")
+    c = get_setting("content", {}) or {}
+    c[b.key] = b.text.strip()[:30000]
+    if b.key == "terms" and b.reaccept:
+        c["terms_version"] = "v" + datetime.now(IST).strftime("%Y%m%d%H%M")
+    set_setting("content", c)
+    return {"ok": True}
+
+
+@app.delete("/api/admin/content/{key}")
+def admin_reset_content(key: str, authorization: str = Header(None)):
+    current_admin(authorization)
+    c = get_setting("content", {}) or {}
+    c.pop(key, None)
+    set_setting("content", c)
+    return {"ok": True}
+
+
+# ---------- notifications ----------
+def notify(uid, title, body="", kind="message"):
+    try:
+        db("POST", "notifications", json={"user_id": uid, "title": title[:120], "body": body[:1000], "kind": kind})
+    except Exception as ex:
+        print("notify error:", ex)
+
+
+def visible_notifs(uid):
+    return db("GET", "notifications", {"or": f"(user_id.eq.{uid},user_id.is.null)", "order": "created_at.desc", "limit": "60"})
+
+
+def read_ids(uid):
+    return {r["notif_id"] for r in db("GET", "notif_reads", {"user_id": f"eq.{uid}", "select": "notif_id"})}
+
+
+def unread_count(uid):
+    try:
+        rd = read_ids(uid)
+        return sum(1 for n in visible_notifs(uid) if n["id"] not in rd)
+    except Exception:
+        return 0
+
+
+def line_has_number(line):
+    return bool(line and (line.get("phone_number") or line.get("paid_until") or line.get("status") in ("active", "paused", "provisioning")))
+
+
+def has_number(uid):
+    rows = db("GET", "lines", {"user_id": f"eq.{uid}"})
+    return line_has_number(rows[0] if rows else None)
+
+
+@app.get("/api/notifications")
+def my_notifications(authorization: str = Header(None)):
+    uid = current_user(authorization)
+    rd = read_ids(uid)
+    return [{**n, "read": n["id"] in rd} for n in visible_notifs(uid)]
+
+
+@app.post("/api/notifications/read")
+def read_notifications(authorization: str = Header(None)):
+    uid = current_user(authorization)
+    rd = read_ids(uid)
+    new = [{"user_id": uid, "notif_id": n["id"]} for n in visible_notifs(uid) if n["id"] not in rd]
+    if new:
+        db("POST", "notif_reads", json=new)
+    return {"ok": True}
+
+
+class NotifIn(BaseModel):
+    title: str
+    body: str = ""
+    kind: str = "message"
+    target: str = "all"
+
+
+@app.post("/api/admin/notifications")
+def admin_send_notification(b: NotifIn, authorization: str = Header(None)):
+    current_admin(authorization)
+    if not b.title.strip():
+        raise HTTPException(400, "Please write a title")
+    db("POST", "notifications", json={"user_id": None if b.target == "all" else b.target, "kind": b.kind if b.kind in ("event", "offer", "message") else "message",
+                                      "title": b.title.strip()[:120], "body": b.body.strip()[:1000]})
+    return {"ok": True}
+
+
+@app.get("/api/admin/notifications")
+def admin_list_notifications(authorization: str = Header(None)):
+    current_admin(authorization)
+    em = {x["user_id"]: x["email"] for x in db("GET", "account_status")}
+    return [{**n, "to": em.get(n["user_id"], "Unknown") if n["user_id"] else "All clients"} for n in db("GET", "notifications", {"order": "created_at.desc", "limit": "100"})]
+
+
+@app.delete("/api/admin/notifications/{nid}")
+def admin_delete_notification(nid: str, authorization: str = Header(None)):
+    current_admin(authorization)
+    db("DELETE", "notifications", {"id": f"eq.{nid}"})
+    return {"ok": True}
 
 
 app.mount("/", StaticFiles(directory="static", html=True), name="site")
