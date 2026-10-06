@@ -215,6 +215,10 @@ html{overflow-x:visible!important}body{overflow-x:clip!important}
 .chip2{background:#e6edcf;color:var(--pri);font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;margin-right:8px}
 #abody table input{min-width:80px}#abody textarea{width:100%}
 @media (max-width:800px){.side{align-self:stretch}.bell{top:10px;right:12px}}
+
+textarea.ex{color:#9aa086}
+.pcard{border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;background:#fff;box-shadow:0 6px 16px rgba(25,35,7,.08)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:2px 12px}.pgrid label{margin-top:8px}
 </style></head><body>
 
 <div id="home" class="hide">
@@ -293,16 +297,23 @@ html{overflow-x:visible!important}body{overflow-x:clip!important}
 <!-- DASHBOARD -->
 <div id="dash" class="hide shell">
  <aside class="side"><a href="/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a>
-  <nav id="dnav"><button data-s="overview">Overview</button><button data-s="reception">AI Receptionist</button><button data-s="billing">Minutes &amp; billing</button><button data-s="notif">Notifications<span class="nbadge hide" id="nbadge"></span></button><button data-s="help">Help center</button><button data-s="settings">Settings</button><a id="aLink" href="/admin" style="display:none">Admin panel</a></nav>
+  <nav id="dnav"><button data-s="overview">Overview</button><button data-s="reception">AI Receptionist</button><button data-s="new">New campaign</button><button data-s="camps">Campaigns</button><button data-s="billing">Minutes &amp; billing</button><button data-s="notif">Notifications<span class="nbadge hide" id="nbadge"></span></button><button data-s="help">Help center</button><button data-s="settings">Settings</button><a id="aLink" href="/admin" style="display:none">Admin panel</a></nav>
   <div class="sidefoot"><b id="cr" style="color:var(--pri)"></b><small id="who" style="color:var(--mut);word-break:break-all"></small><button class="ghost" id="out" style="text-align:left;padding:6px 0">Log out</button></div>
  </aside>
  <main class="main">
   <section data-sec="overview"><h2 data-h1 id="hello"></h2><p>Your AI receptionist answers the calls you miss. Check your minutes and today's calls here.</p>
    <div class="grid"><div class="stat"><b id="stC">-</b>Minutes left</div><div class="stat"><b id="stK">-</b>Calls today</div><div class="stat"><b id="stL" style="font-size:17px">-</b>AI number</div></div>
    <p style="margin-top:18px"><button data-go="reception" style="width:auto">Set up AI receptionist</button> <button class="ghost" data-go="billing">Buy minutes</button></p></section>
-  <section data-sec="new" class="hide"><div class="card"><h2>1. Upload your leads</h2>
+  <section data-sec="new" class="hide">
+  <div class="card"><h2>1. Upload your leads</h2>
    <p>Excel or CSV with a <b>phone_number</b> column. Optional: customer_name, business_name, product_or_service.</p><input id="file" type="file" accept=".xlsx,.xls,.csv"><div id="prev"></div></div>
-   <div class="card"><h2>2. Start calling</h2><p id="est">Upload a file first.</p><button id="go" disabled style="width:auto">Start calling</button><div id="goMsg" class="msg"></div></div></section>
+  <div class="card"><h2>2. How should the AI speak?</h2>
+   <label>AI's name</label><input id="cp_name" maxlength="30" autocomplete="off"><small style="color:var(--mut)">The name the AI uses when it introduces itself on the call.</small>
+   <label>What the AI should say and do</label><textarea id="cp_prompt" rows="9"></textarea>
+   <small style="color:var(--mut)">Tip: you can select the grey example, copy it, and change it to suit your business.</small>
+   <label style="font-weight:400;margin-top:14px"><input type="checkbox" id="cp_ok" style="width:auto"> I have permission to call these people, and I will follow TRAI / DND rules.</label></div>
+  <div class="card"><h2>3. Start calling</h2><p id="est">Upload a file first.</p><p>Each answered call uses minutes from your balance, rounded up to the next full minute.</p>
+   <button id="go" disabled style="width:auto">Start calling</button><div id="goMsg" class="msg"></div></div></section>
   <section data-sec="reception" class="hide">
   <div class="card"><h2>Your AI Receptionist</h2><p>Your customers call your AI number. The AI answers, takes messages and bookings, and you see every call here.</p>
    <div class="grid"><div class="stat"><b id="rc_min">-</b>Minutes left</div><div class="stat"><b id="rc_today">-</b>Calls today</div><div class="stat"><b id="rc_num" style="font-size:17px">Not set up</b>Your AI number</div></div><p id="rc_status" style="margin-top:12px"></p></div>
@@ -319,9 +330,9 @@ html{overflow-x:visible!important}body{overflow-x:clip!important}
   <div class="card"><h2>Recent calls</h2><div id="rc_calls"><p>No calls yet.</p></div></div></section>
   <section data-sec="camps" class="hide"><div class="card"><h2>Your campaigns</h2><div id="camps"><p>No campaigns yet.</p></div></div></section>
   <section data-sec="billing" class="hide">
-   <div class="card"><h2>Your balance</h2><div class="grid"><div class="stat"><b id="bl_min">-</b>Minutes left</div><div class="stat"><b id="bl_num" style="font-size:17px">-</b>AI number</div></div></div>
-   <div class="card"><h2>Get your AI phone number</h2><p>Your own number that answers your customers. Offer prices for a limited time.</p><div class="grid" id="buyLine"></div></div>
-   <div class="card"><h2>Buy minutes</h2><p>Calls use minutes, and each call is rounded up to the next full minute. Buy first, then use.</p><div class="grid" id="buyMin"></div><div id="payMsg" class="msg"></div></div>
+   <div class="card"><h2>Your balance</h2><div class="grid"><div class="stat"><b id="bl_min">-</b>Minutes left</div><div class="stat"><b id="bl_num" style="font-size:17px">-</b>AI number</div></div><p id="bl_note" class="hide">You already have your AI number, so only minutes are sold to you. Buy minutes below.</p></div>
+   <div class="card"><h2 id="sh_lt">Get your AI phone number</h2><p id="sh_lx">Your own number that answers your customers. Offer prices for a limited time.</p><div class="grid" id="buyLine"></div></div>
+   <div class="card"><h2 id="sh_mt">Buy minutes</h2><p id="sh_mx">Calls use minutes, and each call is rounded up to the next full minute. Buy first, then use.</p><div class="grid" id="buyMin"></div><div id="payMsg" class="msg"></div></div>
    <div class="card"><h2>Payment history</h2><div id="plist"></div></div></section>
   <section data-sec="notif" class="hide"><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">Notifications</h2><button class="ghost" id="nmark">Mark all as read</button></div><div id="nlist"></div></div></section>
   <section data-sec="help" class="hide"><div class="card"><h2>Help center</h2><input id="hs" placeholder="Search your question..."><div id="faq2" style="margin-top:12px"></div></div>
@@ -444,8 +455,13 @@ let lastFile=null;
 const tok=async()=>(await sb.auth.getSession()).data.session.access_token;
 async function api(path,opt={}){const slow=setTimeout(()=>toast("Your connection is slow. Still trying...","warn"),6000);let r;try{r=await fetch(path,{...opt,headers:{Authorization:"Bearer "+await tok(),...(opt.headers||{})}})}catch(e){toast("Network problem. Please check your internet.","err");throw new Error("Network problem")}finally{clearTimeout(slow)}
   if(!r.ok){let m="Error";try{m=(await r.json()).detail||m}catch(e){}if(/suspended/i.test(m))showSusp();if(r.status===401){await sb.auth.signOut({scope:"local"});go("/login");show("auth");$("authMsg").className="msg";$("authMsg").textContent="Your session expired. Please log in again.";toast("Session expired. Please log in again.","warn")}throw new Error(m)}return r}
-$("go").onclick=async()=>{const m=$("goMsg");m.className="msg";m.textContent="";$("go").disabled=true;
-  try{const fd=new FormData();fd.append("file",lastFile);const c=await(await api("/api/campaigns",{method:"POST",body:fd})).json();
+$("go").onclick=async()=>{const m=$("goMsg");m.className="msg";m.textContent="";
+  const nm=$("cp_name").value.trim(),pr=$("cp_prompt").classList.contains("ex")?"":$("cp_prompt").value.trim();
+  if(!check([["cp_name",R.req,"Enter the name the AI should use"]]))return;
+  if(pr.length<20){ferr("cp_prompt","Write how the AI should speak, in a few sentences. You can copy the example and edit it.");$("cp_prompt").focus();return}ferr("cp_prompt","");
+  if(!$("cp_ok").checked){m.textContent="Please confirm you have permission to call these people.";return}
+  $("go").disabled=true;
+  try{const fd=new FormData();fd.append("file",lastFile);fd.append("prompt",pr);fd.append("ai_name",nm);fd.append("consent","yes");const c=await(await api("/api/campaigns",{method:"POST",body:fd})).json();
     m.className="msg ok";m.textContent="Calling started for "+c.total+" leads."+(c.limited?" (Only "+c.limit+" leads started - not enough credits.)":"");loadCamps();loadCredits()}
   catch(e){m.textContent=e.message}$("go").disabled=false};
 async function loadCamps(){if($("dash").classList.contains("hide"))return;
@@ -566,15 +582,17 @@ $("obNext").onclick=async()=>{const m=$("onbMsg");m.textContent="";
   toast("Welcome to Rnexa","ok");route()};
 
 const dur=m=>{const h=Math.floor(m/60),r=m%60;return((h?h+" hr"+(h>1?"s":""):"")+(h&&r?" ":"")+(r?r+" min":""))||"0 min"};
-function packCard(p,home){const off=p.mrp&&p.mrp>p.price?Math.round((1-p.price/p.mrp)*100):0,tag=off?'<span class="offer">'+off+"% OFF</span>":"",
- act=home?'<a class="cta p" href="/signup" style="margin:0">Get started</a>':'<button data-pk="'+p.id+'"'+(p.kind==="custom"?' data-custom="1"':"")+">Buy</button>";
- if(p.kind==="custom")return '<div class="card pk"><h3>'+esc(p.name)+'</h3><div class="pp"><b>'+inr(p.rate_per_min)+"</b> <small>per minute</small></div><p>Choose the hours you need. Minimum "+dur(p.calls)+".</p>"+
+function packCard(p,home){const off=p.mrp&&p.mrp>p.price?Math.round((1-p.price/p.mrp)*100):0,
+ tag=p.badge?'<span class="offer">'+esc(p.badge)+"</span>":(off?'<span class="offer">'+off+"% OFF</span>":""),
+ act=home?'<a class="cta p" href="/signup" style="margin:0">'+esc(p.button_text||"Get started")+"</a>":'<button data-pk="'+p.id+'"'+(p.kind==="custom"?' data-custom="1"':"")+">"+esc(p.button_text||"Buy")+"</button>",
+ desc=p.description?"<p>"+esc(p.description)+"</p>":"";
+ if(p.kind==="custom")return '<div class="card pk">'+tag+"<h3>"+esc(p.name)+'</h3><div class="pp"><b>'+inr(p.rate_per_min)+"</b> <small>per minute</small></div>"+(desc||"<p>Choose the hours you need. Minimum "+dur(p.calls)+".</p>")+
   (home?"":'<label>Hours</label><input class="cm_h" type="number" min="'+Math.ceil(p.calls/60)+'" step="1" value="'+Math.ceil(p.calls/60)+'" data-rate="'+p.rate_per_min+'"><p class="cm_t"></p>')+act+"</div>";
  const gives=p.kind==="line"?(p.calls?"Includes "+dur(p.calls)+" of calls":"Number only. Minutes are bought separately."):dur(p.calls)+" of calls";
- return '<div class="card pk">'+tag+"<h3>"+esc(p.name)+'</h3><div class="pp">'+(off?"<s>"+inr(p.mrp)+"</s> ":"")+"<b>"+inr(p.price)+"</b>"+(p.kind==="line"?" <small>/month</small>":"")+"</div><p>"+gives+"</p>"+(p.calls?"<small>"+inr(Math.round(p.price/p.calls))+" per minute</small>":"")+act+"</div>"}
+ return '<div class="card pk">'+tag+"<h3>"+esc(p.name)+'</h3><div class="pp">'+(off?"<s>"+inr(p.mrp)+"</s> ":"")+"<b>"+inr(p.price)+"</b>"+(p.kind==="line"?" <small>/month</small>":"")+"</div>"+(desc||"<p>"+gives+"</p>")+(p.calls?"<small>"+inr(Math.round(p.price/p.calls))+" per minute</small>":"")+act+"</div>"}
 function updCustom(i){const h=Math.max(parseFloat(i.value)||0,0),mn=Math.round(h*60),t=i.parentElement.querySelector(".cm_t");t.textContent=mn+" minutes ("+dur(mn)+") for "+inr(mn*(+i.dataset.rate))}
 document.addEventListener("input",e=>{if(e.target.classList&&e.target.classList.contains("cm_h"))updCustom(e.target)});
-async function loadOverview(){try{const d=await(await api("/api/line")).json(),n=(d.line&&d.line.phone_number)||"Not set up";window.HAS_NUM=d.has_number;if(window.ALLP)renderPacks(window.ALLP);$("stC").textContent=d.minutes;$("stK").textContent=d.calls_today;$("stL").textContent=n;$("bl_min").textContent=d.minutes;$("bl_num").textContent=n}catch(e){}}
+async function loadOverview(){try{const d=await(await api("/api/line")).json(),n=(d.line&&d.line.phone_number)||"Not set up";window.HAS_NUM=d.has_number;$("bl_note").classList.toggle("hide",!d.has_number);if(window.ALLP)renderPacks(window.ALLP);$("stC").textContent=d.minutes;$("stK").textContent=d.calls_today;$("stL").textContent=n;$("bl_min").textContent=d.minutes;$("bl_num").textContent=n}catch(e){}}
 function payClick(e,msgId){const b=e.target.closest("[data-pk]");if(!b)return;let mins;if(b.dataset.custom){const i=b.closest(".pk").querySelector(".cm_h");if(i)mins=Math.round(parseFloat(i.value)*60)}
  startPay(b.dataset.pk,$(msgId),()=>{loadReception();loadCredits();loadOverview()},mins)}
 $("buyLine").onclick=e=>payClick(e,"payMsg");$("buyMin").onclick=e=>payClick(e,"payMsg");$("rc_buy").onclick=e=>payClick(e,"rc_pay");
@@ -665,7 +683,7 @@ $("plist").onclick=async e=>{const id=e.target.dataset.inv;if(!id)return;const w
 
 /* ===== shop rules, notifications, admin tools, editable pages ===== */
 const AFTER={};let TK=[],PY=[],PK=[];
-const _rp=renderPacks;renderPacks=function(L){_rp(L);const c=$("buyLine")&&$("buyLine").closest(".card");if(c)c.style.display=window.HAS_NUM?"none":""};
+const _rp=renderPacks;renderPacks=function(L){_rp(L);const c=$("buyLine")&&$("buyLine").closest(".card");if(!c)return;if(window.HAS_NUM===undefined){$("buyLine").innerHTML='<div class="spin"></div>';c.style.display=""}else c.style.display=window.HAS_NUM?"none":""};$("rc_buy").innerHTML='<div class="spin"></div>';
 async function refreshPacks(){try{const r=await fetch("/api/packs",{cache:"no-store"});renderPacks(await r.json())}catch(e){}}
 function setBadge(n){["nbadge","nbadge2"].forEach(id=>{const b=$(id);b.textContent=n>9?"9+":n;b.classList.toggle("hide",!n)})}
 const NI={ticket:"Ticket",offer:"Offer",event:"Event",message:"Message"},dtt=d=>new Date(d).toLocaleString("en-IN");
@@ -685,7 +703,7 @@ function textToHtml(t){const link=x=>x.replace(/(https?:\/\/[^\s<]+)/g,'<a href=
 function htmlToText(h){const d=new DOMParser().parseFromString(h,"text/html");return [...d.body.children].map(e=>e.tagName==="H1"?"# "+e.textContent:e.tagName==="H2"?"## "+e.textContent:e.textContent).filter(Boolean).join("\n\n")}
 function parseFaq(t){return t.split(/\n\s*\n/).map(b=>{const q=/^Q:\s*(.*)$/m.exec(b),a=/^A:\s*([\s\S]*)$/m.exec(b);return q&&a?[q[1].trim(),a[1].trim()]:null}).filter(Boolean)}
 function faqText(L){return L.map(f=>"Q: "+f[0]+"\nA: "+f[1]).join("\n\n")}
-function applyContent(d){Object.keys(CONTENT).forEach(k=>delete CONTENT[k]);Object.assign(CONTENT,d.pages||{});if(d.faq)CONTENT.faq=d.faq;
+function applyContent(d){applyShop(d.shop);Object.keys(CONTENT).forEach(k=>delete CONTENT[k]);Object.assign(CONTENT,d.pages||{});if(d.faq)CONTENT.faq=d.faq;
   FAQS.length=0;(d.faq?parseFaq(d.faq):FAQS_DEF).forEach(f=>FAQS.push(f));if(d.terms_version)TERMS_VERSION=d.terms_version;
   $("terms").innerHTML=PAGES.terms().replace("<h1>","<h2>").replace("</h1>","</h2>")}
 async function loadContent(){try{const r=await Promise.race([fetch("/api/content",{cache:"no-store"}),new Promise((_,j)=>setTimeout(j,3000))]);applyContent(await r.json())}catch(e){}}
@@ -746,6 +764,33 @@ $("abody").addEventListener("click",async e=>{const b=e.target.closest("[data-x]
    case "cssave":await J("PUT","/api/admin/company",{name:$("cs_n").value,owner:$("cs_o").value,address:$("cs_a").value,email:$("cs_e").value,phone:$("cs_p").value,gstin:$("cs_g").value,pan:$("cs_pan").value});toast("Saved. Invoices now use these details.","ok");break;
    case "cpsave":{const k=$("cpSel").value,t=$("cpText").value;if(!t.trim()){toast("Please write some text first","err");break}await J("PUT","/api/admin/content",{key:k,text:t,reaccept:k==="terms"&&$("cpRe").checked});await loadContent();toast("Saved. The website shows it now.","ok");break}
    case "cpreset":if(confirm("Go back to the original text for this page?")){await api("/api/admin/content/"+$("cpSel").value,{method:"DELETE"});await loadContent();fillPage();toast("Original text restored","ok")}break;
+  }}catch(er){toast(er.message,"err")}});
+
+/* ===== campaign prompt box, shop texts, admin card editor ===== */
+const CP_EX="Example: You are calling people who asked about our fitness classes. Greet them politely and confirm their name. Tell them a new morning batch starts next Monday and ask if they would like to visit for a free trial class. If yes, note the day and time that suits them. If they are busy, offer to call back later. If they are not interested, thank them and end the call. Do not talk about prices; say our team will share the details.";
+function cpReset(){const t=$("cp_prompt");t.value=CP_EX;t.classList.add("ex")}
+$("cp_prompt").addEventListener("beforeinput",e=>{const t=e.target,k=e.inputType||"";if(t.classList.contains("ex")&&(k.startsWith("insert")||k.startsWith("delete"))){t.value="";t.classList.remove("ex")}});
+$("cp_prompt").addEventListener("blur",e=>{if(!e.target.value.trim())cpReset()});cpReset();
+function applyShop(sh){sh=sh||{};$("sh_lt").textContent=sh.line_title||"Get your AI phone number";$("sh_lx").textContent=sh.line_text||"Your own number that answers your customers. Offer prices for a limited time.";$("sh_mt").textContent=sh.min_title||"Buy minutes";$("sh_mx").textContent=sh.min_text||"Calls use minutes, and each call is rounded up to the next full minute. Buy first, then use."}
+const KT={line:"AI number card",minutes:"Minutes card",custom:"Choose-your-hours card"};
+VIEW.pricing=async()=>{PK=(await(await api("/api/admin/packs")).json()).filter(p=>p.kind!=="calls");const sh=await(await api("/api/admin/shop")).json();
+  const f=(l,id,v,t)=>"<div><label>"+l+'</label><input id="'+id+'" type="'+(t||"number")+'" step="any" value="'+(v===null||v===undefined?"":esc(v))+'"></div>';
+  return '<h2>Section texts</h2><p>The headings and sentences above the cards. Leave empty to use the original words.</p><div class="pcard"><div class="pgrid">'+f("Number section title","st_lt",sh.line_title,"text")+f("Number section text","st_lx",sh.line_text,"text")+f("Minutes section title","st_mt",sh.min_title,"text")+f("Minutes section text","st_mx",sh.min_text,"text")+'</div><p><button data-x="shopsave" style="width:auto">Save texts</button></p></div>'+
+  "<h2>Cards</h2><p>Every box can be edited. Change the hours and the minutes follow, change a price and the per-minute rate follows (and the other way round). Click Save on a card and the website shows it straight away.</p>"+
+  PK.map(p=>{const i=p.id,m=p.calls||0,c=p.kind==="custom";return '<div class="pcard"><b>'+KT[p.kind]+'</b><div class="pgrid">'+f("Card name","pn"+i,p.name,"text")+f("Text under the price","pd"+i,p.description,"text")+f("Badge (empty = automatic % OFF)","pb"+i,p.badge,"text")+f("Button text","pt"+i,p.button_text,"text")+
+   f("Hours","ph"+i,m?+(m/60).toFixed(2):"")+f("Minutes"+(c?" (least a client can buy)":""),"pc"+i,m)+f("Actual price","pm"+i,p.mrp)+f("Offer price","pp"+i,p.price)+f("Actual per min","pq"+i,p.mrp&&m?+(p.mrp/m).toFixed(2):"")+f(c?"Rate per minute":"Offer per min","pr"+i,c?p.rate_per_min:(m?+(p.price/m).toFixed(2):""))+f("Order","po"+i,p.sort)+
+   '<div><label>On sale</label><input id="pa'+i+'" type="checkbox" style="width:auto"'+(p.active?" checked":"")+'></div></div><p><button data-x="pcsave" data-id="'+i+'" style="width:auto">Save card</button> <button class="ghost" style="color:var(--err)" data-x="pcdel" data-id="'+i+'">Delete card</button></p></div>'}).join("")+
+  '<h2>Add a new card</h2><div class="pcard"><div class="pgrid"><div><label>Type</label><select id="nw_k"><option value="minutes">Minutes card</option><option value="line">AI number card</option><option value="custom">Choose-your-hours card</option></select></div>'+f("Card name","nw_n","","text")+f("Text under the price","nw_d","","text")+f("Badge (optional)","nw_b","","text")+f("Button text","nw_t","","text")+f("Minutes included (least, for hours card)","nw_c","")+f("Actual price (optional)","nw_m","")+f("Offer price","nw_p","")+f("Rate per minute (hours card only)","nw_r","")+'</div><p><button data-x="pcnew" style="width:auto">Add card</button></p></div>'};
+$("abody").addEventListener("click",async e=>{const b=e.target.closest("[data-x]");if(!b)return;const x=b.dataset.x,id=b.dataset.id;
+  try{switch(x){
+   case "pcsave":{const i=id,v=k=>$("p"+k+i).value,custom=PK.find(p=>p.id===i).kind==="custom",mn=Math.round(+v("c")||0),rate=Math.round(+v("r")||0);
+     await J("PUT","/api/admin/packs/"+i,{name:v("n"),description:v("d")||null,badge:v("b")||null,button_text:v("t")||null,calls:mn,price:custom?mn*rate:Math.round(+v("p")||0),mrp:Math.round(+v("m"))||null,rate_per_min:custom?rate:null,active:$("pa"+i).checked,sort:Math.round(+v("o"))||0});
+     b.textContent="Saved";toast("Saved. Clients see it now.","ok");refreshPacks();break}
+   case "pcdel":if(confirm("Delete this card for good? Clients will no longer see it.")){await api("/api/admin/packs/"+id,{method:"DELETE"});toast("Card deleted","ok");adminTab("pricing");refreshPacks()}break;
+   case "pcnew":{const v=k=>$("nw_"+k).value,kind=v("k"),mn=Math.round(+v("c")||0),rate=Math.round(+v("r")||0);
+     await J("POST","/api/admin/packs",{name:v("n"),kind,description:v("d")||null,badge:v("b")||null,button_text:v("t")||null,calls:mn,price:kind==="custom"?mn*rate:Math.round(+v("p")||0),mrp:Math.round(+v("m"))||null,rate_per_min:kind==="custom"?rate:null});
+     toast("Card added","ok");adminTab("pricing");refreshPacks();break}
+   case "shopsave":await J("PUT","/api/admin/shop",{line_title:$("st_lt").value,line_text:$("st_lx").value,min_title:$("st_mt").value,min_text:$("st_mx").value});await loadContent();toast("Texts saved. Clients see them now.","ok");break;
   }}catch(er){toast(er.message,"err")}});
 loadContent().finally(route);
 </script></body></html>

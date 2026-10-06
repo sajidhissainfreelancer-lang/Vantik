@@ -1,10 +1,10 @@
 """Rnexa backend: website + API (credits, Razorpay payments, Bolna calling). Secrets only in environment variables."""
-import hashlib, hmac, io, json, math, os, re, smtplib, threading
+import hashlib, hmac, io, json, math, os, re, smtplib, threading, uuid
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from typing import Optional
 import pandas as pd, requests
-from fastapi import FastAPI, UploadFile, File, Header, HTTPException, Request
+from fastapi import FastAPI, UploadFile, File, Form, Header, HTTPException, Request
 from fastapi.responses import StreamingResponse, Response, HTMLResponse, JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.gzip import GZipMiddleware
@@ -92,22 +92,35 @@ def credits_of(uid):
 
 def run_campaign(cid, uid):
     client = Bolna(os.environ["BOLNA_API_KEY"], os.environ["BOLNA_AGENT_ID"])
+    camp = db("GET", "campaigns", {"id": f"eq.{cid}"})[0]
+    prof = (db("GET", "profiles", {"id": f"eq.{uid}", "select": "company_name"}) or [{}])[0]
+    extra = {"ai_name": camp.get("ai_name") or "Riya", "client_instructions": camp.get("prompt") or "",
+             "company_name": prof.get("company_name") or "", "business_name": prof.get("company_name") or ""}
     db("PATCH", "campaigns", {"id": f"eq.{cid}"}, {"status": "running"})
-    done = refund = 0
+    done, stopped = 0, False
     for lead in db("GET", "leads", {"campaign_id": f"eq.{cid}", "order": "idx"}):
+        if stopped or (rpc("get_minutes", {"p_user": uid}) or 0) <= 0:
+            stopped = True
+            db("PATCH", "leads", {"id": f"eq.{lead['id']}"}, {"status": "skipped", "result": {"call_status": "skipped (no minutes left)"}})
+            done += 1
+            db("PATCH", "campaigns", {"id": f"eq.{cid}"}, {"done": done})
+            continue
         try:
-            res = process_row(client, pd.Series(lead["row"]), "phone_number")
+            res = process_row(client, pd.Series(lead["row"]), "phone_number", extra=extra)
         except Exception as e:
             res = {"call_status": f"error: {e}"}
-        s = str(res.get("call_status"))
-        if s in FAIL or s.startswith("error") or s in ("invalid phone number", "timeout"):
-            refund += 1                       # calls that never connected are given back
+        dur = int(float(res.get("duration_sec") or 0))
+        mins = max(1, math.ceil(dur / 60)) if dur > 0 else 0
+        res["minutes_used"] = mins
+        if mins:
+            left = rpc("use_minutes", {"p_user": uid, "p_n": mins})
+            if left is not None and left <= LOW_MIN < left + mins:
+                send_mail(email_of(uid), "Your Rnexa minutes are running low",
+                          f"You have {left} minutes left. Buy more at {SITE_URL}/app/billing so your calls keep going.\n\nRnexa")
         done += 1
-        db("PATCH", "leads", {"id": f"eq.{lead['id']}"}, {"status": s, "result": res})
+        db("PATCH", "leads", {"id": f"eq.{lead['id']}"}, {"status": str(res.get("call_status")), "result": res})
         db("PATCH", "campaigns", {"id": f"eq.{cid}"}, {"done": done})
-    if refund:
-        rpc("add_credits", {"p_user": uid, "p_n": refund})
-    db("PATCH", "campaigns", {"id": f"eq.{cid}"}, {"status": "finished"})
+    db("PATCH", "campaigns", {"id": f"eq.{cid}"}, {"status": "stopped: out of minutes" if stopped else "finished"})
 
 
 @app.get("/api/packs")
@@ -122,8 +135,13 @@ def me(authorization: str = Header(None)):
 
 
 @app.post("/api/campaigns")
-async def create_campaign(file: UploadFile = File(...), authorization: str = Header(None)):
+async def create_campaign(file: UploadFile = File(...), prompt: str = Form(""), ai_name: str = Form(""), consent: str = Form(""),
+                          authorization: str = Header(None)):
     uid = current_user(authorization)
+    if consent != "yes":
+        raise HTTPException(400, "Please confirm you have permission to call these people")
+    if len(prompt.strip()) < 20 or not ai_name.strip():
+        raise HTTPException(400, "Please give the AI a name and tell it how to speak")
     raw = await file.read()
     try:
         df = pd.read_csv(io.BytesIO(raw)) if file.filename.lower().endswith(".csv") else pd.read_excel(io.BytesIO(raw))
@@ -131,17 +149,14 @@ async def create_campaign(file: UploadFile = File(...), authorization: str = Hea
         raise HTTPException(400, "Could not read this file")
     if "phone_number" not in df.columns:
         raise HTTPException(400, "Your file needs a column named phone_number")
-    have = credits_of(uid)
-    if have <= 0:
-        raise HTTPException(402, "You have no credits left. Please buy a pack.")
-    n = min(len(df), have, MAX_CALLS)
+    if (rpc("get_minutes", {"p_user": uid}) or 0) <= 0:
+        raise HTTPException(402, "You have no minutes left. Please buy minutes first.")
+    n = min(len(df), MAX_CALLS)
     limited = n < len(df)
     df = df.head(n).fillna("").astype(str)
-    if rpc("use_credits", {"p_user": uid, "p_n": n}) is None:
-        raise HTTPException(402, "Not enough credits. Please buy a pack.")
-    camp = db("POST", "campaigns", json={"user_id": uid, "name": file.filename, "total": n, "status": "queued"})[0]
-    db("POST", "leads", json=[{"campaign_id": camp["id"], "user_id": uid, "idx": i, "row": r}
-                              for i, r in enumerate(df.to_dict("records"))])
+    camp = db("POST", "campaigns", json={"user_id": uid, "name": file.filename, "total": n, "status": "queued",
+                                         "prompt": prompt.strip()[:4000], "ai_name": ai_name.strip()[:30]})[0]
+    db("POST", "leads", json=[{"campaign_id": camp["id"], "user_id": uid, "idx": i, "row": r} for i, r in enumerate(df.to_dict("records"))])
     threading.Thread(target=run_campaign, args=(camp["id"], uid), daemon=True).start()
     return {**camp, "limited": limited, "limit": n}
 
@@ -300,6 +315,9 @@ class PackEdit(BaseModel):
     mrp: Optional[int] = None
     rate_per_min: Optional[int] = None
     sort: Optional[int] = None
+    description: Optional[str] = None
+    badge: Optional[str] = None
+    button_text: Optional[str] = None
 
 
 class TicketEdit(BaseModel):
@@ -884,7 +902,7 @@ class ContentIn(BaseModel):
 def public_content():
     c = get_setting("content", {}) or {}
     return JSONResponse({"pages": {k: c[k] for k in ("terms", "privacy", "refund", "contact") if c.get(k)}, "faq": c.get("faq"),
-                         "terms_version": c.get("terms_version")}, headers={"Cache-Control": "no-store"})
+                         "terms_version": c.get("terms_version"), "shop": get_setting("shop", {}) or {}}, headers={"Cache-Control": "no-store"})
 
 
 @app.put("/api/admin/content")
@@ -987,6 +1005,61 @@ def admin_list_notifications(authorization: str = Header(None)):
 def admin_delete_notification(nid: str, authorization: str = Header(None)):
     current_admin(authorization)
     db("DELETE", "notifications", {"id": f"eq.{nid}"})
+    return {"ok": True}
+
+
+class PackNew(BaseModel):
+    name: str
+    kind: str
+    calls: int = 0
+    price: int = 0
+    mrp: Optional[int] = None
+    rate_per_min: Optional[int] = None
+    description: Optional[str] = None
+    badge: Optional[str] = None
+    button_text: Optional[str] = None
+
+
+@app.post("/api/admin/packs")
+def admin_new_pack(b: PackNew, authorization: str = Header(None)):
+    current_admin(authorization)
+    if b.kind not in ("line", "minutes", "custom") or not b.name.strip():
+        raise HTTPException(400, "Please choose a type and write a name")
+    price = b.calls * (b.rate_per_min or 0) if b.kind == "custom" else b.price
+    if price < 1 or (b.kind != "line" and b.calls < 1):
+        raise HTTPException(400, "Minutes and price must be above zero")
+    pid = (re.sub(r"[^a-z0-9]+", "-", b.name.lower()).strip("-")[:20] or "card") + "-" + uuid.uuid4().hex[:4]
+    top = max([p.get("sort") or 0 for p in db("GET", "packs", {"select": "sort"})] + [0])
+    row = db("POST", "packs", json={"id": pid, "name": b.name.strip()[:80], "kind": b.kind, "calls": b.calls, "price": price, "mrp": b.mrp,
+                                    "rate_per_min": b.rate_per_min if b.kind == "custom" else None, "description": b.description, "badge": b.badge,
+                                    "button_text": b.button_text, "active": True, "sort": top + 1})
+    return {"ok": True, "pack": row[0] if row else None}
+
+
+@app.delete("/api/admin/packs/{pid}")
+def admin_delete_pack(pid: str, authorization: str = Header(None)):
+    current_admin(authorization)
+    db("DELETE", "packs", {"id": f"eq.{pid}"})
+    return {"ok": True}
+
+
+class ShopIn(BaseModel):
+    line_title: str = ""
+    line_text: str = ""
+    min_title: str = ""
+    min_text: str = ""
+
+
+@app.get("/api/admin/shop")
+def admin_get_shop(authorization: str = Header(None)):
+    current_admin(authorization)
+    return get_setting("shop", {}) or {}
+
+
+@app.put("/api/admin/shop")
+def admin_set_shop(b: ShopIn, authorization: str = Header(None)):
+    current_admin(authorization)
+    set_setting("shop", {k: v.strip()[:300] for k, v in b.dict().items()})
     return {"ok": True}
 
 

@@ -78,12 +78,16 @@ class Bolna:
         return {"status": "timeout"}
 
 
-def process_row(client, row, phone_col, on_status=None):
+def process_row(client, row, phone_col, on_status=None, extra=None):
     """Call one lead, return dict of result columns."""
     phone = clean_phone(row[phone_col])
     if not phone:
         return {"call_status": "invalid phone number"}
     user_data = {k: ("" if pd.isna(v) else str(v)) for k, v in row.items() if k != phone_col}
+    for k, v in (extra or {}).items():
+        user_data.setdefault(k, v)
+    if not user_data.get("customer_name"):
+        user_data["customer_name"] = "there"
     try:
         eid = client.start_call(phone, user_data)
         ex = client.wait_result(eid)
