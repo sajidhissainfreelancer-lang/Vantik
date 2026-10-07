@@ -219,6 +219,10 @@ html{overflow-x:visible!important}body{overflow-x:clip!important}
 textarea.ex{color:#9aa086}
 .pcard{border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0;background:#fff;box-shadow:0 6px 16px rgba(25,35,7,.08)}
 .pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:2px 12px}.pgrid label{margin-top:8px}
+
+.pedit{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:16px;align-items:start}
+.pvbox{position:sticky;top:12px;background:#f4f6ee;border-radius:14px;padding:12px}.pvbox .card{box-shadow:none;margin:8px 0 0}.pvbox small{color:var(--mut)}
+@media (max-width:900px){.pedit{grid-template-columns:1fr}.pvbox{position:static}}
 </style></head><body>
 
 <div id="home" class="hide">
@@ -683,8 +687,8 @@ $("plist").onclick=async e=>{const id=e.target.dataset.inv;if(!id)return;const w
 
 /* ===== shop rules, notifications, admin tools, editable pages ===== */
 const AFTER={};let TK=[],PY=[],PK=[];
-const _rp=renderPacks;renderPacks=function(L){_rp(L);const c=$("buyLine")&&$("buyLine").closest(".card");if(!c)return;if(window.HAS_NUM===undefined){$("buyLine").innerHTML='<div class="spin"></div>';c.style.display=""}else c.style.display=window.HAS_NUM?"none":""};$("rc_buy").innerHTML='<div class="spin"></div>';
-async function refreshPacks(){try{const r=await fetch("/api/packs",{cache:"no-store"});renderPacks(await r.json())}catch(e){}}
+const _rp=renderPacks;renderPacks=function(L){window.ALLP_SIG=JSON.stringify(L);_rp(L);const c=$("buyLine")&&$("buyLine").closest(".card");if(!c)return;if(window.HAS_NUM===undefined){$("buyLine").innerHTML='<div class="spin"></div>';c.style.display=""}else c.style.display=window.HAS_NUM?"none":""};$("rc_buy").innerHTML='<div class="spin"></div>';
+async function refreshPacks(){try{const r=await fetch("/api/packs",{cache:"no-store"}),L=await r.json();if(JSON.stringify(L)!==window.ALLP_SIG)renderPacks(L)}catch(e){}}
 function setBadge(n){["nbadge","nbadge2"].forEach(id=>{const b=$(id);b.textContent=n>9?"9+":n;b.classList.toggle("hide",!n)})}
 const NI={ticket:"Ticket",offer:"Offer",event:"Event",message:"Message"},dtt=d=>new Date(d).toLocaleString("en-IN");
 async function loadNotifs(){$("nlist").innerHTML='<div class="spin"></div>';
@@ -792,5 +796,26 @@ $("abody").addEventListener("click",async e=>{const b=e.target.closest("[data-x]
      toast("Card added","ok");adminTab("pricing");refreshPacks();break}
    case "shopsave":await J("PUT","/api/admin/shop",{line_title:$("st_lt").value,line_text:$("st_lx").value,min_title:$("st_mt").value,min_text:$("st_mx").value});await loadContent();toast("Texts saved. Clients see them now.","ok");break;
   }}catch(er){toast(er.message,"err")}});
+
+/* ===== pricing: edit boxes on the left, the real client card on the right ===== */
+VIEW.pricing=async()=>{PK=(await(await api("/api/admin/packs")).json()).filter(p=>p.kind!=="calls");const sh=await(await api("/api/admin/shop")).json();
+  const f=(l,id,v,t)=>"<div><label>"+l+'</label><input id="'+id+'" type="'+(t||"number")+'" step="any" value="'+(v===null||v===undefined?"":esc(v))+'"></div>';
+  const box=(i,p,c,m)=>'<div class="pedit"><div><div class="pgrid">'+f("Card name","pn"+i,p.name,"text")+f("Text under the price","pd"+i,p.description,"text")+f("Badge (empty = automatic % OFF)","pb"+i,p.badge,"text")+f("Button text","pt"+i,p.button_text,"text")+
+   f("Hours","ph"+i,m?+(m/60).toFixed(2):"")+f("Minutes"+(c?" (least a client can buy)":""),"pc"+i,m)+f("Actual price","pm"+i,p.mrp)+f("Offer price","pp"+i,p.price)+f("Actual per min","pq"+i,p.mrp&&m?+(p.mrp/m).toFixed(2):"")+f(c?"Rate per minute":"Offer per min","pr"+i,c?p.rate_per_min:(m?+(p.price/m).toFixed(2):""))+f("Order","po"+i,p.sort)+
+   '<div><label>On sale</label><input id="pa'+i+'" type="checkbox" style="width:auto"'+(p.active?" checked":"")+"></div></div>";
+  return '<h2>Section texts</h2><p>The headings and sentences above the cards. Leave empty to use the original words.</p><div class="pcard"><div class="pgrid">'+f("Number section title","st_lt",sh.line_title,"text")+f("Number section text","st_lx",sh.line_text,"text")+f("Minutes section title","st_mt",sh.min_title,"text")+f("Minutes section text","st_mx",sh.min_text,"text")+'</div><p><button data-x="shopsave" style="width:auto">Save texts</button></p></div>'+
+  "<h2>Cards</h2><p>Edit the boxes on the left. The card on the right is exactly what clients see. Change the hours and the minutes follow, change a price and the per-minute rate follows. Click <b>Save card</b> and every dashboard, the home page and new clients' dashboards show it.</p>"+
+  PK.map(p=>{const i=p.id,m=p.calls||0,c=p.kind==="custom";return '<div class="pcard"><b>'+KT[p.kind]+"</b>"+box(i,p,c,m)+'<p><button data-x="pcsave" data-id="'+i+'" style="width:auto">Save card</button> <button class="ghost" style="color:var(--err)" data-x="pcdel" data-id="'+i+'">Delete card</button></p></div><div class="pvbox"><small>What clients see</small><div id="pv'+i+'"></div><small id="pvs'+i+'"></small></div></div></div>'}).join("")+
+  '<h2>Add a new card</h2><div class="pcard"><div class="pedit"><div><div class="pgrid"><div><label>Type</label><select id="nw_k"><option value="minutes">Minutes card</option><option value="line">AI number card</option><option value="custom">Choose-your-hours card</option></select></div>'+f("Card name","nw_n","","text")+f("Text under the price","nw_d","","text")+f("Badge (optional)","nw_b","","text")+f("Button text","nw_t","","text")+f("Minutes included (least, for hours card)","nw_c","")+f("Actual price (optional)","nw_m","")+f("Offer price","nw_p","")+f("Rate per minute (hours card only)","nw_r","")+'</div><p><button data-x="pcnew" style="width:auto">Add card</button></p></div><div class="pvbox"><small>What clients will see</small><div id="pv_new"></div></div></div></div>'};
+const nz=x=>Math.round(+x||0);
+function pvDraw(i){const p=PK.find(x=>x.id===i);if(!p||!$("pv"+i))return;const v=k=>$("p"+k+i).value,c=p.kind==="custom";
+  $("pv"+i).innerHTML=packCard({id:i,kind:p.kind,name:v("n")||"Card name",description:v("d")||null,badge:v("b")||null,button_text:v("t")||null,calls:nz(v("c")),price:c?nz(v("c"))*nz(v("r")):nz(v("p")),mrp:nz(v("m"))||null,rate_per_min:c?nz(v("r")):null}).replace(/<button data-pk[^>]*>/,'<button type="button" disabled>');
+  $("pvs"+i).textContent=$("pa"+i).checked?"":"Not on sale: clients cannot see this card."}
+function pvNew(){if(!$("pv_new"))return;const v=k=>$("nw_"+k).value,kind=v("k"),c=kind==="custom";
+  $("pv_new").innerHTML=packCard({id:"new",kind,name:v("n")||"Card name",description:v("d")||null,badge:v("b")||null,button_text:v("t")||null,calls:nz(v("c")),price:c?nz(v("c"))*nz(v("r")):nz(v("p")),mrp:nz(v("m"))||null,rate_per_min:c?nz(v("r")):null}).replace(/<button data-pk[^>]*>/,'<button type="button" disabled>')}
+AFTER.pricing=()=>{PK.forEach(p=>pvDraw(p.id));pvNew()};
+$("abody").addEventListener("input",e=>{const id=e.target.id||"";if(id.startsWith("nw_"))return pvNew();const i=id.slice(2);if(/^p[a-z]/.test(id)&&PK.some(p=>p.id===i))pvDraw(i)});
+$("abody").addEventListener("change",e=>{const id=e.target.id||"";if(id.startsWith("nw_"))pvNew()});
+setInterval(()=>{if(!$("dash").classList.contains("hide"))refreshPacks()},45000);
 loadContent().finally(route);
 </script></body></html>
