@@ -1,5 +1,5 @@
 """Rnexa backend: website + API (credits, Razorpay payments, Bolna calling). Secrets only in environment variables."""
-import hashlib, hmac, io, json, math, os, re, smtplib, threading, uuid
+import hashlib, hmac, io, json, math, os, re, smtplib, threading, time, uuid
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from typing import Optional
@@ -1061,6 +1061,137 @@ def admin_set_shop(b: ShopIn, authorization: str = Header(None)):
     current_admin(authorization)
     set_setting("shop", {k: v.strip()[:300] for k, v in b.dict().items()})
     return {"ok": True}
+
+
+# ---------- analytics, online users, page views ----------
+NUMBER_COST = float(os.getenv("NUMBER_COST_INR", "420"))       # what one AI phone number costs you each month
+COST_PER_MIN = float(os.getenv("COST_PER_MIN_INR", "5.5"))     # what one minute of AI calling costs you
+FEE_PCT = float(os.getenv("PAYMENT_FEE_PERCENT", "2"))         # Razorpay fee, in percent
+_trk = {"m": 0, "n": 0}
+
+
+class TrackIn(BaseModel):
+    path: str
+
+
+@app.post("/api/track")
+def track_view(b: TrackIn):
+    now = int(time.time() // 60)
+    if _trk["m"] != now:
+        _trk["m"], _trk["n"] = now, 0
+    _trk["n"] += 1
+    p = b.path.split("?")[0][:80]
+    if _trk["n"] > 300 or not re.fullmatch(r"/[a-zA-Z0-9/_-]*", p) or p.startswith("/admin"):
+        return {"ok": True}
+    try:
+        db("POST", "page_views", json={"path": p})
+    except HTTPException:
+        pass
+    return {"ok": True}
+
+
+@app.post("/api/ping")
+def ping(authorization: str = Header(None)):
+    uid = auth_user(authorization)["id"]
+    now = datetime.now(timezone.utc)
+    try:
+        r = db("GET", "presence", {"user_id": f"eq.{uid}"})
+        if not r:
+            db("POST", "presence", json={"user_id": uid, "last_seen": now.isoformat(), "last_log": now.isoformat()})
+            db("POST", "pings", json={"user_id": uid})
+        else:
+            f = {"last_seen": now.isoformat()}
+            last = r[0].get("last_log")
+            if not last or now - datetime.fromisoformat(last.replace("Z", "+00:00")) > timedelta(minutes=10):
+                f["last_log"] = now.isoformat()
+                db("POST", "pings", json={"user_id": uid})
+            db("PATCH", "presence", {"user_id": f"eq.{uid}"}, f)
+    except HTTPException:
+        pass
+    return {"ok": True}
+
+
+def _safe(fn, default):
+    try:
+        return fn()
+    except HTTPException:
+        return default
+
+
+def _day(ts):
+    return datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone(IST).date()
+
+
+@app.get("/api/admin/analytics")
+def admin_analytics(days: int = 30, authorization: str = Header(None)):
+    current_admin(authorization)
+    days = max(7, min(days, 90))
+    today = datetime.now(IST).date()
+    keys = [today - timedelta(days=i) for i in range(days - 1, -1, -1)]
+    ix = {k: i for i, k in enumerate(keys)}
+    z = lambda: [0.0] * days
+    sn, sm, cost, unew, views, usage = z(), z(), z(), z(), z(), z()
+    packs = db("GET", "packs", {"select": "id,kind,calls,price"})
+    base = min([p["price"] for p in packs if p["kind"] == "line" and not p["calls"]] or [999])
+    kinds = {p["id"]: p["kind"] for p in packs}
+    t = {"sales_number": 0.0, "sales_minutes": 0.0, "numbers_sold": 0, "minutes_sold": 0, "minutes_used": 0.0}
+    for p in db("GET", "payments", {"status": "eq.paid", "select": "created_at,amount_paise,pack,kind,calls", "limit": "5000"}):
+        amt = (p["amount_paise"] or 0) / 100
+        kind = p.get("kind") or kinds.get(p["pack"], "calls")
+        num = min(amt, base) if kind == "line" else 0.0
+        t["sales_number"] += num
+        t["sales_minutes"] += amt - num
+        t["numbers_sold"] += 1 if kind == "line" else 0
+        t["minutes_sold"] += p.get("calls") or 0
+        d = _day(p["created_at"])
+        if d in ix:
+            i = ix[d]
+            sn[i] += num
+            sm[i] += amt - num
+            cost[i] += (NUMBER_COST if kind == "line" else 0) + amt * FEE_PCT / 100
+
+    def used(day, mins):
+        t["minutes_used"] += mins
+        if day in ix:
+            usage[ix[day]] += mins
+            cost[ix[day]] += mins * COST_PER_MIN
+
+    for c in _safe(lambda: db("GET", "calls", {"select": "created_at,minutes", "limit": "10000"}), []):
+        used(_day(c["created_at"]), c.get("minutes") or 0)
+    camps = {c["id"]: _day(c["created_at"]) for c in db("GET", "campaigns", {"select": "id,created_at", "limit": "3000"})}
+    for l in db("GET", "leads", {"select": "campaign_id,result", "limit": "10000"}):
+        mins = (l.get("result") or {}).get("minutes_used") or 0
+        if mins and l["campaign_id"] in camps:
+            used(camps[l["campaign_id"]], mins)
+    profs = [_day(p["created_at"]) for p in db("GET", "profiles", {"select": "created_at", "limit": "10000"})]
+    before = sum(1 for d in profs if d < keys[0])
+    for d in profs:
+        if d in ix:
+            unew[ix[d]] += 1
+    users_total, run = [], before
+    for i in range(days):
+        run += unew[i]
+        users_total.append(run)
+    start = datetime.combine(keys[0], datetime.min.time(), tzinfo=IST).isoformat()
+    for v in _safe(lambda: db("GET", "page_views", {"created_at": f"gte.{start}", "select": "created_at", "limit": "20000"}), []):
+        d = _day(v["created_at"])
+        if d in ix:
+            views[ix[d]] += 1
+    now = datetime.now(timezone.utc)
+    online_now = len(_safe(lambda: db("GET", "presence", {"last_seen": f"gte.{(now - timedelta(minutes=2)).isoformat()}", "select": "user_id"}), []))
+    hours = [(datetime.now(IST).replace(minute=0, second=0, microsecond=0) - timedelta(hours=h)) for h in range(23, -1, -1)]
+    seen = {h: set() for h in hours}
+    for pg in _safe(lambda: db("GET", "pings", {"created_at": f"gte.{(now - timedelta(hours=24)).isoformat()}", "select": "user_id,created_at", "limit": "20000"}), []):
+        h = datetime.fromisoformat(pg["created_at"].replace("Z", "+00:00")).astimezone(IST).replace(minute=0, second=0, microsecond=0)
+        if h in seen:
+            seen[h].add(pg["user_id"])
+    total_sales = t["sales_number"] + t["sales_minutes"]
+    c_num, c_min, c_fee = t["numbers_sold"] * NUMBER_COST, t["minutes_used"] * COST_PER_MIN, total_sales * FEE_PCT / 100
+    t.update({"sales_total": total_sales, "cost_numbers": c_num, "cost_minutes": c_min, "cost_fees": c_fee, "cost_total": c_num + c_min + c_fee,
+              "profit": total_sales - c_num - c_min - c_fee, "users": len(profs)})
+    return {"labels": [k.strftime("%d %b") for k in keys], "sales_number": sn, "sales_minutes": sm, "profit": [round(sn[i] + sm[i] - cost[i], 2) for i in range(days)],
+            "users_total": users_total, "users_new": unew, "views": views, "usage": usage, "online_now": online_now,
+            "online_labels": [h.strftime("%I %p").lstrip("0") for h in hours], "online_counts": [len(seen[h]) for h in hours], "totals": t}
 
 
 app.mount("/", StaticFiles(directory="static", html=True), name="site")

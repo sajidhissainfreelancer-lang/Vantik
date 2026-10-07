@@ -410,7 +410,7 @@ terms:()=>`<h1>Terms &amp; Conditions</h1><p>${upd} By creating an account you a
 +sec("13. Contact",`Questions about these terms: ${SITE.email} or ${SITE.phone}.`),
 privacy:()=>`<h1>Privacy Policy</h1><p>${upd}</p>`
 +sec("What we collect","Account details (email, name, phone); company details (company name, industry, city, billing address, and PAN or GST number if you add them); the business information you give the AI; lead lists you upload; call data (caller phone number, recording, written transcript, summary and call length); payment records (Razorpay keeps your card details, we do not); and your support messages.")
-+sec("Why we use it","To run your account and the AI phone service, answer and make calls for you, show your call history, take payments and create invoices, send the service emails listed in our Terms, give support, and keep the service safe.")
++sec("Why we use it","To run your account and the AI phone service, answer and make calls for you, show your call history, take payments and create invoices, send the service emails listed in our Terms, give support, count visits to our pages (without personal details), and keep the service safe.")
 +sec("PAN and GST","These are optional and are used only to print on your invoices. They are not shown to anyone else.")
 +sec("Who helps us process data","We use trusted services to run Rnexa: Supabase (database and sign-in), Render (hosting), Bolna and its telephony partners (calls, voice and recordings), AI language models (to understand and answer callers), Razorpay (payments) and our email service. They handle data only to provide the service.")
 +sec("People who call your AI number","Callers are told the call is recorded. Their phone number and conversation are shown to you in your dashboard. You are responsible for using this information properly.")
@@ -475,7 +475,7 @@ async function loadCamps(){if($("dash").classList.contains("hide"))return;
 $("camps").onclick=async e=>{const id=e.target.dataset.id;if(!id)return;
   const b=await(await api("/api/campaigns/"+id+"/download")).blob();const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="rnexa_results.xlsx";a.click()};
 
-async function loadCredits(){try{const m=await(await api("/api/me")).json();$("cr").textContent="Minutes left: "+m.minutes;setBadge(m.unread||0);const pv=window.HAS_NUM;window.HAS_NUM=m.has_number;if(pv!==m.has_number&&window.ALLP)renderPacks(window.ALLP)}catch(e){}}
+async function loadCredits(){try{const m=await(await api("/api/me")).json();$("cr").textContent="Minutes left: "+m.minutes;setBadge(m.unread||0);const pv=window.HAS_NUM;window.HAS_NUM=m.has_number;if(pv!==m.has_number&&window.ALLP)renderPacks(window.ALLP);if(document.visibilityState==="visible")api("/api/ping",{method:"POST"}).catch(()=>{})}catch(e){}}
 
 const J=async(m,p,b)=>await(await api(p,{method:m,headers:{"Content-Type":"application/json"},body:JSON.stringify(b)})).json();
 const inr=n=>"\u20b9"+Number(n).toLocaleString("en-IN");
@@ -593,7 +593,7 @@ function packCard(p,home){const off=p.mrp&&p.mrp>p.price?Math.round((1-p.price/p
  if(p.kind==="custom")return '<div class="card pk">'+tag+"<h3>"+esc(p.name)+'</h3><div class="pp"><b>'+inr(p.rate_per_min)+"</b> <small>per minute</small></div>"+(desc||"<p>Choose the hours you need. Minimum "+dur(p.calls)+".</p>")+
   (home?"":'<label>Hours</label><input class="cm_h" type="number" min="'+Math.ceil(p.calls/60)+'" step="1" value="'+Math.ceil(p.calls/60)+'" data-rate="'+p.rate_per_min+'"><p class="cm_t"></p>')+act+"</div>";
  const gives=p.kind==="line"?(p.calls?"Includes "+dur(p.calls)+" of calls":"Number only. Minutes are bought separately."):dur(p.calls)+" of calls";
- return '<div class="card pk">'+tag+"<h3>"+esc(p.name)+'</h3><div class="pp">'+(off?"<s>"+inr(p.mrp)+"</s> ":"")+"<b>"+inr(p.price)+"</b>"+(p.kind==="line"?" <small>/month</small>":"")+"</div>"+(desc||"<p>"+gives+"</p>")+(p.calls?"<small>"+inr(Math.round(p.price/p.calls))+" per minute</small>":"")+act+"</div>"}
+ return '<div class="card pk">'+tag+"<h3>"+esc(p.name)+'</h3><div class="pp">'+(off?"<s>"+inr(p.mrp)+"</s> ":"")+"<b>"+inr(p.price)+"</b>"+(p.kind==="line"?" <small>/month</small>":"")+"</div>"+(desc||"<p>"+gives+"</p>")+(p.calls?"<small>"+perMinText(p)+"</small>":"")+act+"</div>"}
 function updCustom(i){const h=Math.max(parseFloat(i.value)||0,0),mn=Math.round(h*60),t=i.parentElement.querySelector(".cm_t");t.textContent=mn+" minutes ("+dur(mn)+") for "+inr(mn*(+i.dataset.rate))}
 document.addEventListener("input",e=>{if(e.target.classList&&e.target.classList.contains("cm_h"))updCustom(e.target)});
 async function loadOverview(){try{const d=await(await api("/api/line")).json(),n=(d.line&&d.line.phone_number)||"Not set up";window.HAS_NUM=d.has_number;$("bl_note").classList.toggle("hide",!d.has_number);if(window.ALLP)renderPacks(window.ALLP);$("stC").textContent=d.minutes;$("stK").textContent=d.calls_today;$("stL").textContent=n;$("bl_min").textContent=d.minutes;$("bl_num").textContent=n}catch(e){}}
@@ -687,7 +687,7 @@ $("plist").onclick=async e=>{const id=e.target.dataset.inv;if(!id)return;const w
 
 /* ===== shop rules, notifications, admin tools, editable pages ===== */
 const AFTER={};let TK=[],PY=[],PK=[];
-const _rp=renderPacks;renderPacks=function(L){window.ALLP_SIG=JSON.stringify(L);_rp(L);const c=$("buyLine")&&$("buyLine").closest(".card");if(!c)return;if(window.HAS_NUM===undefined){$("buyLine").innerHTML='<div class="spin"></div>';c.style.display=""}else c.style.display=window.HAS_NUM?"none":""};$("rc_buy").innerHTML='<div class="spin"></div>';
+const _rp=renderPacks;renderPacks=function(L){window.ALLP_SIG=JSON.stringify(L);window.NUM_BASE=numBase(L);_rp(L);const c=$("buyLine")&&$("buyLine").closest(".card");if(!c)return;if(window.HAS_NUM===undefined){$("buyLine").innerHTML='<div class="spin"></div>';c.style.display=""}else c.style.display=window.HAS_NUM?"none":""};$("rc_buy").innerHTML='<div class="spin"></div>';
 async function refreshPacks(){try{const r=await fetch("/api/packs",{cache:"no-store"}),L=await r.json();if(JSON.stringify(L)!==window.ALLP_SIG)renderPacks(L)}catch(e){}}
 function setBadge(n){["nbadge","nbadge2"].forEach(id=>{const b=$(id);b.textContent=n>9?"9+":n;b.classList.toggle("hide",!n)})}
 const NI={ticket:"Ticket",offer:"Offer",event:"Event",message:"Message"},dtt=d=>new Date(d).toLocaleString("en-IN");
@@ -798,17 +798,17 @@ $("abody").addEventListener("click",async e=>{const b=e.target.closest("[data-x]
   }}catch(er){toast(er.message,"err")}});
 
 /* ===== pricing: edit boxes on the left, the real client card on the right ===== */
-VIEW.pricing=async()=>{PK=(await(await api("/api/admin/packs")).json()).filter(p=>p.kind!=="calls");const sh=await(await api("/api/admin/shop")).json();
+VIEW.pricing=async()=>{PK=(await(await api("/api/admin/packs")).json()).filter(p=>p.kind!=="calls");const NB=numBase(PK),sh=await(await api("/api/admin/shop")).json();
   const f=(l,id,v,t)=>"<div><label>"+l+'</label><input id="'+id+'" type="'+(t||"number")+'" step="any" value="'+(v===null||v===undefined?"":esc(v))+'"></div>';
   const box=(i,p,c,m)=>'<div class="pedit"><div><div class="pgrid">'+f("Card name","pn"+i,p.name,"text")+f("Text under the price","pd"+i,p.description,"text")+f("Badge (empty = automatic % OFF)","pb"+i,p.badge,"text")+f("Button text","pt"+i,p.button_text,"text")+
-   f("Hours","ph"+i,m?+(m/60).toFixed(2):"")+f("Minutes"+(c?" (least a client can buy)":""),"pc"+i,m)+f("Actual price","pm"+i,p.mrp)+f("Offer price","pp"+i,p.price)+f("Actual per min","pq"+i,p.mrp&&m?+(p.mrp/m).toFixed(2):"")+f(c?"Rate per minute":"Offer per min","pr"+i,c?p.rate_per_min:(m?+(p.price/m).toFixed(2):""))+f("Order","po"+i,p.sort)+
+   f("Hours","ph"+i,m?+(m/60).toFixed(2):"")+f("Minutes"+(c?" (least a client can buy)":""),"pc"+i,m)+f("Actual price","pm"+i,p.mrp)+f("Offer price","pp"+i,p.price)+f("Actual per min","pq"+i,p.mrp&&m?+((p.mrp-(p.kind==="line"?NB.mrp:0))/m).toFixed(2):"")+f(c?"Rate per minute":"Offer per min","pr"+i,c?p.rate_per_min:(m?+((p.price-(p.kind==="line"?NB.price:0))/m).toFixed(2):""))+f("Order","po"+i,p.sort)+
    '<div><label>On sale</label><input id="pa'+i+'" type="checkbox" style="width:auto"'+(p.active?" checked":"")+"></div></div>";
   return '<h2>Section texts</h2><p>The headings and sentences above the cards. Leave empty to use the original words.</p><div class="pcard"><div class="pgrid">'+f("Number section title","st_lt",sh.line_title,"text")+f("Number section text","st_lx",sh.line_text,"text")+f("Minutes section title","st_mt",sh.min_title,"text")+f("Minutes section text","st_mx",sh.min_text,"text")+'</div><p><button data-x="shopsave" style="width:auto">Save texts</button></p></div>'+
   "<h2>Cards</h2><p>Edit the boxes on the left. The card on the right is exactly what clients see. Change the hours and the minutes follow, change a price and the per-minute rate follows. Click <b>Save card</b> and every dashboard, the home page and new clients' dashboards show it.</p>"+
   PK.map(p=>{const i=p.id,m=p.calls||0,c=p.kind==="custom";return '<div class="pcard"><b>'+KT[p.kind]+"</b>"+box(i,p,c,m)+'<p><button data-x="pcsave" data-id="'+i+'" style="width:auto">Save card</button> <button class="ghost" style="color:var(--err)" data-x="pcdel" data-id="'+i+'">Delete card</button></p></div><div class="pvbox"><small>What clients see</small><div id="pv'+i+'"></div><small id="pvs'+i+'"></small></div></div></div>'}).join("")+
   '<h2>Add a new card</h2><div class="pcard"><div class="pedit"><div><div class="pgrid"><div><label>Type</label><select id="nw_k"><option value="minutes">Minutes card</option><option value="line">AI number card</option><option value="custom">Choose-your-hours card</option></select></div>'+f("Card name","nw_n","","text")+f("Text under the price","nw_d","","text")+f("Badge (optional)","nw_b","","text")+f("Button text","nw_t","","text")+f("Minutes included (least, for hours card)","nw_c","")+f("Actual price (optional)","nw_m","")+f("Offer price","nw_p","")+f("Rate per minute (hours card only)","nw_r","")+'</div><p><button data-x="pcnew" style="width:auto">Add card</button></p></div><div class="pvbox"><small>What clients will see</small><div id="pv_new"></div></div></div></div>'};
 const nz=x=>Math.round(+x||0);
-function pvDraw(i){const p=PK.find(x=>x.id===i);if(!p||!$("pv"+i))return;const v=k=>$("p"+k+i).value,c=p.kind==="custom";
+function pvDraw(i){window.NUM_BASE=numBase(PK);const p=PK.find(x=>x.id===i);if(!p||!$("pv"+i))return;const v=k=>$("p"+k+i).value,c=p.kind==="custom";
   $("pv"+i).innerHTML=packCard({id:i,kind:p.kind,name:v("n")||"Card name",description:v("d")||null,badge:v("b")||null,button_text:v("t")||null,calls:nz(v("c")),price:c?nz(v("c"))*nz(v("r")):nz(v("p")),mrp:nz(v("m"))||null,rate_per_min:c?nz(v("r")):null}).replace(/<button data-pk[^>]*>/,'<button type="button" disabled>');
   $("pvs"+i).textContent=$("pa"+i).checked?"":"Not on sale: clients cannot see this card."}
 function pvNew(){if(!$("pv_new"))return;const v=k=>$("nw_"+k).value,kind=v("k"),c=kind==="custom";
@@ -817,5 +817,37 @@ AFTER.pricing=()=>{PK.forEach(p=>pvDraw(p.id));pvNew()};
 $("abody").addEventListener("input",e=>{const id=e.target.id||"";if(id.startsWith("nw_"))return pvNew();const i=id.slice(2);if(/^p[a-z]/.test(id)&&PK.some(p=>p.id===i))pvDraw(i)});
 $("abody").addEventListener("change",e=>{const id=e.target.id||"";if(id.startsWith("nw_"))pvNew()});
 setInterval(()=>{if(!$("dash").classList.contains("hide"))refreshPacks()},45000);
+
+/* ===== per-minute rule for number + minutes cards, sales and traffic graphs ===== */
+function numBase(L){const n=(L||[]).filter(p=>p.kind==="line"&&!p.calls&&p.active!==false).sort((a,b)=>a.price-b.price)[0];return n?{price:n.price,mrp:n.mrp||n.price}:{price:999,mrp:1500}}
+function perMinText(p){const B=window.NUM_BASE||{price:999,mrp:1500},x=p.kind==="line"?(p.price-B.price)/p.calls:p.price/p.calls;if(!(x>0))return"";return"\u20b9"+(+x.toFixed(2))+" per minute"+(p.kind==="line"?" (after the AI number)":"")}
+$("abody").addEventListener("input",e=>{const m=/^p([hcmpqr])(.+)$/.exec(e.target.id||"");if(!m)return;const f=m[1],i=m[2],p=PK.find(x=>x.id===i);if(!p||p.kind!=="line")return;
+  const g=x=>parseFloat($("p"+x+i).value),s=(x,v)=>{$("p"+x+i).value=isFinite(v)&&v>0?+v.toFixed(2):""},mn=g("c");if(!(mn>0))return;const B=numBase(PK);
+  if(f==="r")s("p",Math.round(B.price+g("r")*mn));if(f==="q")s("m",Math.round(B.mrp+g("q")*mn));
+  if(f!=="r")s("r",(g("p")-B.price)/mn);if(f!=="q")s("q",(g("m")-B.mrp)/mn);pvDraw(i)});
+let _lt="",_lts=0;function trackView(){const p=location.pathname;if(p.startsWith("/admin")||(p===_lt&&Date.now()-_lts<5000))return;_lt=p;_lts=Date.now();try{fetch("/api/track",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({path:p}),keepalive:true}).catch(()=>{})}catch(e){}}
+const _seo=seo;seo=function(){_seo();trackView()};
+function chartSVG(labels,series,stack){const W=620,H=200,L=46,R=8,T=10,B=26,n=labels.length,iw=W-L-R,ih=H-T-B;let all=[];series.forEach(s=>all.push(...s.vals));
+  let mx=Math.max(1,...all),mn=Math.min(0,...all);if(stack){const tot=labels.map((_,i)=>series.filter(s=>s.t==="bar").reduce((a,s)=>a+s.vals[i],0));mx=Math.max(mx,...tot)}
+  const Y=v=>T+ih-((v-mn)/((mx-mn)||1))*ih,bw=Math.max(2,iw/n*.7),X=i=>L+(i+.5)*iw/n;let g="";
+  for(let k=0;k<=4;k++){const v=mn+(mx-mn)*k/4,y=Y(v);g+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" stroke="#e3e7d4"/><text x="'+(L-5)+'" y="'+(y+3)+'" text-anchor="end" font-size="10" fill="#5b6648">'+(Math.abs(v)>=1000?(v/1000).toFixed(1)+"k":Math.round(v))+"</text>"}
+  const base=new Array(n).fill(0);
+  series.forEach(s=>{if(s.t==="bar")s.vals.forEach((v,i)=>{const b0=stack?base[i]:0,y0=Y(b0),y1=Y(b0+v);g+='<rect x="'+(X(i)-bw/2)+'" y="'+Math.min(y0,y1)+'" width="'+bw+'" height="'+Math.max(1,Math.abs(y0-y1))+'" rx="2" fill="'+s.c+'"/>';if(stack)base[i]+=v});
+   else g+='<polyline fill="none" stroke="'+s.c+'" stroke-width="2.5" points="'+s.vals.map((v,i)=>X(i)+","+Y(v)).join(" ")+'"/>'});
+  [0,Math.floor((n-1)/2),n-1].forEach(i=>g+='<text x="'+X(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="#5b6648">'+esc(labels[i])+"</text>");
+  return '<svg viewBox="0 0 '+W+" "+H+'" width="100%" role="img">'+g+"</svg>"}
+const chartBox=(t,labels,series,stack)=>'<div class="pcard"><b>'+t+"</b>"+chartSVG(labels,series,stack)+'<small style="color:var(--mut)">'+series.map(s=>'<span style="color:'+s.c+'">&#9632;</span> '+s.n).join(" &nbsp; ")+"</small></div>";
+const _ov=VIEW.overview;VIEW.overview=async()=>(await _ov())+'<div id="an"><div class="spin"></div></div>';
+AFTER.overview=async()=>{try{const a=await(await api("/api/admin/analytics?days=30")).json(),t=a.totals,
+  card=(l,v,n)=>'<div class="stat"><b>'+v+"</b>"+l+(n?'<br><small style="color:var(--mut)">'+n+"</small>":"")+"</div>";
+  $("an").innerHTML='<h2 style="margin-top:22px">Sales and profit (all time)</h2><div class="grid">'+card("AI number sales",inr(t.sales_number),t.numbers_sold+" numbers sold")+card("Minutes sales",inr(t.sales_minutes),t.minutes_sold+" minutes sold")+card("Total sales",inr(t.sales_total),"numbers + minutes")+
+   card("Total cost (estimate)",inr(t.cost_total),"Numbers "+inr(t.cost_numbers)+", calls "+inr(t.cost_minutes)+", payment fees "+inr(t.cost_fees))+card("Profit (estimate)",inr(t.profit),t.sales_total?Math.round(t.profit/t.sales_total*100)+"% of sales":"")+card("Online now",a.online_now,"clients in the last 2 minutes")+card("Total clients",t.users,"")+card("Minutes used",Math.round(t.minutes_used),"all calls")+
+   '</div><p>Costs are estimates from the numbers set in Render (number cost, cost per minute, payment fee). In a combo card the AI number is counted at the AI number price and the rest as minutes.</p><h2>Graphs (last 30 days)</h2><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr))">'+
+   chartBox("Sales per day (INR)",a.labels,[{n:"AI numbers",c:"#506022",t:"bar",vals:a.sales_number},{n:"Minutes",c:"#aab58a",t:"bar",vals:a.sales_minutes}],true)+
+   chartBox("Profit per day (INR, estimate)",a.labels,[{n:"Profit",c:"#2e7d32",t:"line",vals:a.profit}])+
+   chartBox("Clients (total)",a.labels,[{n:"Total clients",c:"#506022",t:"line",vals:a.users_total},{n:"New per day",c:"#f5a623",t:"bar",vals:a.users_new}])+
+   chartBox("Online clients by hour (last 24 hours)",a.online_labels,[{n:"Clients online",c:"#77814B",t:"bar",vals:a.online_counts}])+
+   chartBox("Page views per day",a.labels,[{n:"Views",c:"#192307",t:"bar",vals:a.views}])+
+   chartBox("Minutes used per day",a.labels,[{n:"Minutes used",c:"#e07a10",t:"bar",vals:a.usage}])+"</div>"}catch(e){$("an").innerHTML='<div class="msg">Graphs could not load: '+esc(e.message)+" (run analytics_update.sql in Supabase if you have not)</div>"}};
 loadContent().finally(route);
 </script></body></html>
