@@ -201,10 +201,12 @@ def credit_order(order_id, payment_id):
         r0, kind = rows[0], rows[0].get("kind") or "calls"
         if kind == "calls":
             rpc("add_credits", {"p_user": r0["user_id"], "p_n": r0["calls"]})
+        elif kind == "renew":
+            extend_line(r0["user_id"])
         else:
             rpc("add_minutes", {"p_user": r0["user_id"], "p_n": r0["calls"]})
             if kind == "line":
-                db("PATCH", "lines", {"user_id": f"eq.{r0['user_id']}"}, {"paid_until": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()})
+                db("PATCH", "lines", {"user_id": f"eq.{r0['user_id']}"}, {"paid_until": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(), "reminded_for": None, "expired_at": None, "released_at": None})
                 threading.Thread(target=provision, args=(r0["user_id"],), daemon=True).start()
             else:
                 threading.Thread(target=relink, args=(r0["user_id"],), daemon=True).start()
@@ -222,6 +224,8 @@ def create_order(b: OrderIn, authorization: str = Header(None)):
     kind = p.get("kind", "calls")
     if kind == "line" and has_number(uid):
         raise HTTPException(400, "You already have an AI number. Please buy minutes instead.")
+    if kind == "renew" and not has_number(uid):
+        raise HTTPException(400, "Please buy an AI number first")
     if kind == "line" and not db("GET", "lines", {"user_id": f"eq.{uid}", "select": "id"}):
         raise HTTPException(400, "Please save your business details first")
     price, units = p["price"], p["calls"]
@@ -232,13 +236,16 @@ def create_order(b: OrderIn, authorization: str = Header(None)):
         price = units * int(p.get("rate_per_min") or 0)
     if price < 1:
         raise HTTPException(400, "This pack is not available")
+    total, cg, sg, rate, gstin = with_tax(price * 100)
     r = requests.post("https://api.razorpay.com/v1/orders", auth=(RZP_ID, RZP_SECRET), timeout=30,
-                      json={"amount": price * 100, "currency": "INR", "receipt": f"rx{uid[:8]}"})
+                      json={"amount": total, "currency": "INR", "receipt": f"rx{uid[:8]}"})
     if not r.ok:
         raise HTTPException(502, "Could not start the payment. Please try again.")
     o = r.json()
     db("POST", "payments", json={"user_id": uid, "razorpay_order_id": o["id"], "pack": p["id"],
-                                 "calls": units, "amount_paise": o["amount"], "kind": kind})
+                                 "calls": units, "amount_paise": o["amount"], "kind": kind,
+                                 "base_paise": price * 100 if rate else None, "cgst_paise": cg if rate else None, "sgst_paise": sg if rate else None,
+                                 "gst_rate": rate, "gstin_snapshot": gstin})
     return {"order_id": o["id"], "amount": o["amount"], "key_id": RZP_ID, "description": f'{p["name"]} - {units} minutes' if units else p["name"]}
 
 
@@ -262,9 +269,15 @@ async def razorpay_webhook(request: Request):
     if not RZP_WEBHOOK or not hmac.compare_digest(expected, request.headers.get("x-razorpay-signature", "")):
         raise HTTPException(400, "Bad signature")
     ev = json.loads(body)
-    if ev.get("event") in ("payment.captured", "order.paid"):
+    name = ev.get("event")
+    if name in ("payment.captured", "order.paid"):
         pay = ev["payload"]["payment"]["entity"]
-        credit_order(pay["order_id"], pay["id"])
+        if pay.get("order_id"):
+            credit_order(pay["order_id"], pay["id"])
+    elif name == "subscription.charged":
+        handle_sub_charged(ev["payload"])
+    elif name in ("subscription.cancelled", "subscription.halted", "subscription.completed"):
+        handle_sub_ended(name, ev["payload"]["subscription"]["entity"])
     return {"ok": True}
 
 
@@ -452,6 +465,9 @@ SITE_URL = os.getenv("SITE_URL", "https://rnexa.in")
 AUTO = os.getenv("AUTO_PROVISION", "on").lower() == "on"      # "off" = you approve every line yourself in the admin panel
 MAX_LINES_PER_DAY = int(os.getenv("MAX_LINES_PER_DAY", "3"))   # safety limit on automatic number purchases
 LOW_MIN = int(os.getenv("LOW_MINUTES", "20"))
+GRACE_DAYS = int(os.getenv("RENEW_GRACE_DAYS", "3"))          # days after the due date before the number is switched off
+RELEASE_DAYS = int(os.getenv("RELEASE_AFTER_DAYS", "15"))     # days after switch-off before the number is released
+REMIND_DAYS = 7
 NUM_PROVIDER = os.getenv("NUMBER_PROVIDER", "vobiz")
 IST = timezone(timedelta(hours=5, minutes=30))
 
@@ -641,7 +657,8 @@ def my_line(authorization: str = Header(None)):
     start = datetime.now(IST).replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
     n = len(db("GET", "calls", {"user_id": f"eq.{uid}", "created_at": f"gte.{start}", "select": "execution_id"}))
     return {"business": line["business"] if line else None, "minutes": rpc("get_minutes", {"p_user": uid}), "calls_today": n,
-            "line": {k: line[k] for k in ("status", "phone_number", "paid_until")} if line else None, "has_number": line_has_number(line)}
+            "line": {k: line.get(k) for k in ("status", "phone_number", "paid_until", "autopay_status", "autopay_needs_update")} if line else None, "has_number": line_has_number(line),
+            "renew_amount": renew_amount_paise() / 100, "gst_rate": gst_info()["rate"]}
 
 
 @app.post("/api/line")
@@ -694,7 +711,9 @@ def admin_release_line(uid: str, authorization: str = Header(None)):
 @app.get("/api/whoami")
 def whoami(authorization: str = Header(None)):
     u = auth_user(authorization)
-    return {"email": u.get("email"), "is_admin": (u.get("email") or "").lower() in ADMINS and bool(u.get("email_confirmed_at"))}
+    adm = (u.get("email") or "").lower() in ADMINS and bool(u.get("email_confirmed_at"))
+    unread = len(_safe(lambda: db("GET", "admin_alerts", {"read": "eq.false", "select": "id"}), [])) if adm else 0
+    return {"email": u.get("email"), "is_admin": adm, "alerts_unread": unread}
 
 
 @app.get("/api/invoice/{pid}")
@@ -760,7 +779,7 @@ async def http_error(request: Request, exc: StarletteHTTPException):
 
 # ---------- settings store, company details, invoices ----------
 DEFAULT_COMPANY = {"name": "Rnexa", "owner": "Sajid Hussain", "address": "162/80 Nethaji Nagar 5th Street, Tondiarpet, Chennai, Tamil Nadu 600081, India",
-                   "email": "ss@rnexa.in", "phone": "+91 7358145522", "gstin": "", "pan": ""}
+                   "email": "ss@rnexa.in", "phone": "+91 7358145522", "gstin": "", "pan": "", "gst_rate": 18, "gst_from": ""}
 
 
 def get_setting(key, default=None):
@@ -787,26 +806,35 @@ def invoice_inner(p):
     prof = (db("GET", "profiles", {"id": f"eq.{p['user_id']}"}) or [{}])[0]
     pk = db("GET", "packs", {"id": f"eq.{p['pack']}"})
     item = p.get("item_text") or (pk[0]["name"] if pk else p["pack"])
-    if not p.get("item_text") and p.get("calls") and p.get("kind") != "line":
+    if not p.get("item_text") and p.get("calls") and p.get("kind") not in ("line", "renew"):
         item += f" ({p['calls']} minutes)"
     co = company()
+    taxed = p.get("cgst_paise") is not None
     when = datetime.fromisoformat(p["created_at"].replace("Z", "+00:00")).astimezone(IST)
     no = f"RNX-{when:%Y%m}-{p['id'][:6].upper()}"
-    amt = f"{(p['amount_paise'] or 0) / 100:,.2f}"
+    total = (p["amount_paise"] or 0) / 100
+    amt = f"{total:,.2f}"
     buyer = "<br>".join(e(x) for x in [prof.get("company_name"), prof.get("contact_name"), prof.get("billing_address"), prof.get("city")] if x)
     ids = "".join(f"<br>{k}: {e(v)}" for k, v in (("PAN", prof.get("pan")), ("GSTIN", prof.get("gstin"))) if v)
-    sid = f"<br>GSTIN: {e(co['gstin'])}" if co.get("gstin") else "<br>GSTIN: Not registered"
+    sid = f"<br>GSTIN: {e(p.get('gstin_snapshot') or co.get('gstin') or '')}" if taxed else "<br>GSTIN: Not registered"
     if co.get("pan"):
         sid += f"<br>PAN: {e(co['pan'])}"
-    note = "" if co.get("gstin") else "GST: not applicable, the seller is not registered under GST. "
+    note = "" if taxed else "GST: not applicable, the seller is not registered under GST. "
     th = "border-bottom:1px solid #dde2cc;padding:10px;text-align:left"
+    r_ = f"{th};text-align:right"
+    if taxed:
+        half = float(p.get("gst_rate") or 0) / 2
+        rows = (f'<tr><td style="{th}">{e(item)}</td><td style="{r_}">1</td><td style="{r_}">{(p["base_paise"] or 0) / 100:,.2f}</td></tr>'
+                f'<tr><td colspan="2" style="{r_}">CGST @ {half:g}%</td><td style="{r_}">{(p["cgst_paise"] or 0) / 100:,.2f}</td></tr>'
+                f'<tr><td colspan="2" style="{r_}">SGST @ {half:g}%</td><td style="{r_}">{(p["sgst_paise"] or 0) / 100:,.2f}</td></tr>')
+    else:
+        rows = f'<tr><td style="{th}">{e(item)}</td><td style="{r_}">1</td><td style="{r_}">{amt}</td></tr>'
     inner = (f'<div style="font-family:Segoe UI,Arial,sans-serif;color:#192307;max-width:720px;margin:auto">'
-             f'<h1 style="color:#506022;margin:0">{e(co["name"])}</h1><p><b>INVOICE</b> {no}<br>Date: {when:%d %b %Y}</p>'
+             f'<h1 style="color:#506022;margin:0">{e(co["name"])}</h1><p><b>{"TAX INVOICE" if taxed else "INVOICE"}</b> {no}<br>Date: {when:%d %b %Y}</p>'
              f'<table width="100%" style="margin-top:14px"><tr><td valign="top"><small style="color:#5b6648">From</small><br><b>{e(co["name"])}</b><br>{e(co["owner"])}<br>{e(co["address"])}<br>{e(co["email"])} &middot; {e(co["phone"])}{sid}</td>'
              f'<td valign="top"><small style="color:#5b6648">Billed to</small><br>{buyer}{ids}</td></tr></table>'
-             f'<table width="100%" style="border-collapse:collapse;margin:22px 0"><tr><th style="{th}">Description</th><th style="{th};text-align:right">Qty</th><th style="{th};text-align:right">Amount (INR)</th></tr>'
-             f'<tr><td style="{th}">{e(item)}</td><td style="{th};text-align:right">1</td><td style="{th};text-align:right">{amt}</td></tr>'
-             f'<tr><td colspan="2" style="{th};text-align:right"><b>Total paid</b></td><td style="{th};text-align:right"><b>{amt}</b></td></tr></table>'
+             f'<table width="100%" style="border-collapse:collapse;margin:22px 0"><tr><th style="{th}">Description</th><th style="{r_}">Qty</th><th style="{r_}">Amount (INR)</th></tr>{rows}'
+             f'<tr><td colspan="2" style="{r_}"><b>Total paid</b></td><td style="{r_}"><b>{amt}</b></td></tr></table>'
              f'<p style="font-size:12px;color:#5b6648">{note}Paid online through Razorpay (payment {e(p.get("razorpay_payment_id") or "")}). This is a computer-generated invoice and needs no signature.</p></div>')
     return inner, no, amt, prof
 
@@ -840,6 +868,7 @@ class CompanyIn(BaseModel):
     phone: str = ""
     gstin: str = ""
     pan: str = ""
+    gst_rate: float = 18
 
 
 @app.get("/api/admin/company")
@@ -854,7 +883,16 @@ def admin_set_company(b: CompanyIn, authorization: str = Header(None)):
     g = b.gstin.strip().upper()
     if g and not re.fullmatch(r"[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][A-Z0-9]Z[A-Z0-9]", g):
         raise HTTPException(400, "GSTIN looks wrong. It must be 15 characters.")
-    set_setting("company", {**b.dict(), "gstin": g, "pan": b.pan.strip().upper()})
+    old = company()
+    gf = old.get("gst_from") or ""
+    if g and not old.get("gstin"):
+        gf = datetime.now(timezone.utc).isoformat()
+    if not g:
+        gf = ""
+    rate = b.gst_rate if 0 <= b.gst_rate <= 40 else 18
+    set_setting("company", {**b.dict(), "gstin": g, "pan": b.pan.strip().upper(), "gst_rate": rate, "gst_from": gf})
+    if g and not old.get("gstin"):
+        threading.Thread(target=gst_switched_on, daemon=True).start()
     return {"ok": True}
 
 
@@ -874,6 +912,11 @@ def admin_edit_payment(pid: str, b: PayEdit, authorization: str = Header(None)):
         if b.amount < 0:
             raise HTTPException(400, "Amount cannot be negative")
         f["amount_paise"] = int(round(b.amount * 100))
+        cur = (db("GET", "payments", {"id": f"eq.{pid}"}) or [{}])[0]
+        if cur.get("gst_rate"):
+            base = int(round(f["amount_paise"] / (1 + float(cur["gst_rate"]) / 100)))
+            tax = f["amount_paise"] - base
+            f.update({"base_paise": base, "cgst_paise": tax // 2, "sgst_paise": tax - tax // 2})
     if b.date:
         try:
             f["created_at"] = datetime.fromisoformat(b.date).replace(hour=12, tzinfo=IST).isoformat()
@@ -902,7 +945,7 @@ class ContentIn(BaseModel):
 def public_content():
     c = get_setting("content", {}) or {}
     return JSONResponse({"pages": {k: c[k] for k in ("terms", "privacy", "refund", "contact") if c.get(k)}, "faq": c.get("faq"),
-                         "terms_version": c.get("terms_version"), "shop": get_setting("shop", {}) or {}}, headers={"Cache-Control": "no-store"})
+                         "terms_version": c.get("terms_version"), "shop": get_setting("shop", {}) or {}, "gst": gst_info()["rate"], "renew": int((next((p for p in load_packs() if p.get("kind") == "renew"), {}) or {}).get("price") or 0)}, headers={"Cache-Control": "no-store"})
 
 
 @app.put("/api/admin/content")
@@ -952,6 +995,8 @@ def unread_count(uid):
 
 
 def line_has_number(line):
+    if line and line.get("status") in ("released", "cancelled"):
+        return False
     return bool(line and (line.get("phone_number") or line.get("paid_until") or line.get("status") in ("active", "paused", "provisioning")))
 
 
@@ -1134,21 +1179,23 @@ def admin_analytics(days: int = 30, authorization: str = Header(None)):
     packs = db("GET", "packs", {"select": "id,kind,calls,price"})
     base = min([p["price"] for p in packs if p["kind"] == "line" and not p["calls"]] or [999])
     kinds = {p["id"]: p["kind"] for p in packs}
-    t = {"sales_number": 0.0, "sales_minutes": 0.0, "numbers_sold": 0, "minutes_sold": 0, "minutes_used": 0.0}
-    for p in db("GET", "payments", {"status": "eq.paid", "select": "created_at,amount_paise,pack,kind,calls", "limit": "5000"}):
-        amt = (p["amount_paise"] or 0) / 100
+    t = {"gst_collected": 0.0, "renewals": 0, "sales_number": 0.0, "sales_minutes": 0.0, "numbers_sold": 0, "minutes_sold": 0, "minutes_used": 0.0}
+    for p in db("GET", "payments", {"status": "eq.paid", "select": "created_at,amount_paise,base_paise,cgst_paise,sgst_paise,pack,kind,calls", "limit": "5000"}):
+        amt = ((p.get("base_paise") or p["amount_paise"]) or 0) / 100
+        t["gst_collected"] += ((p.get("cgst_paise") or 0) + (p.get("sgst_paise") or 0)) / 100
         kind = p.get("kind") or kinds.get(p["pack"], "calls")
-        num = min(amt, base) if kind == "line" else 0.0
+        num = min(amt, base) if kind == "line" else (amt if kind == "renew" else 0.0)
         t["sales_number"] += num
         t["sales_minutes"] += amt - num
         t["numbers_sold"] += 1 if kind == "line" else 0
+        t["renewals"] += 1 if kind == "renew" else 0
         t["minutes_sold"] += p.get("calls") or 0
         d = _day(p["created_at"])
         if d in ix:
             i = ix[d]
             sn[i] += num
             sm[i] += amt - num
-            cost[i] += (NUMBER_COST if kind == "line" else 0) + amt * FEE_PCT / 100
+            cost[i] += (NUMBER_COST if kind in ("line", "renew") else 0) + amt * FEE_PCT / 100
 
     def used(day, mins):
         t["minutes_used"] += mins
@@ -1186,12 +1233,285 @@ def admin_analytics(days: int = 30, authorization: str = Header(None)):
         if h in seen:
             seen[h].add(pg["user_id"])
     total_sales = t["sales_number"] + t["sales_minutes"]
-    c_num, c_min, c_fee = t["numbers_sold"] * NUMBER_COST, t["minutes_used"] * COST_PER_MIN, total_sales * FEE_PCT / 100
+    c_num, c_min, c_fee = (t["numbers_sold"] + t["renewals"]) * NUMBER_COST, t["minutes_used"] * COST_PER_MIN, total_sales * FEE_PCT / 100
     t.update({"sales_total": total_sales, "cost_numbers": c_num, "cost_minutes": c_min, "cost_fees": c_fee, "cost_total": c_num + c_min + c_fee,
               "profit": total_sales - c_num - c_min - c_fee, "users": len(profs)})
     return {"labels": [k.strftime("%d %b") for k in keys], "sales_number": sn, "sales_minutes": sm, "profit": [round(sn[i] + sm[i] - cost[i], 2) for i in range(days)],
             "users_total": users_total, "users_new": unew, "views": views, "usage": usage, "online_now": online_now,
             "online_labels": [h.strftime("%I %p").lstrip("0") for h in hours], "online_counts": [len(seen[h]) for h in hours], "totals": t}
+
+
+# ---------- GST, number renewal, auto-pay, alerts ----------
+def parse_ts(x):
+    return datetime.fromisoformat(x.replace("Z", "+00:00"))
+
+
+def gst_info():
+    co = company()
+    if co.get("gstin") and co.get("gst_from"):
+        return {"active": True, "rate": float(co.get("gst_rate") or 18), "gstin": co["gstin"], "from": co["gst_from"]}
+    return {"active": False, "rate": 0, "gstin": "", "from": ""}
+
+
+def with_tax(base_paise):
+    """Returns total, cgst, sgst, rate, gstin. Without a GSTIN nothing is added."""
+    g = gst_info()
+    if not g["active"]:
+        return base_paise, 0, 0, None, None
+    tax = int(round(base_paise * g["rate"] / 100))
+    return base_paise + tax, tax // 2, tax - tax // 2, g["rate"], g["gstin"]
+
+
+def renew_amount_paise():
+    pk = next((p for p in load_packs() if p.get("kind") == "renew"), None)
+    return with_tax(int((pk or {}).get("price") or 799) * 100)[0]
+
+
+def alert_admin(kind, title, body=""):
+    try:
+        db("POST", "admin_alerts", json={"kind": kind, "title": title[:140], "body": body[:600]})
+    except Exception as ex:
+        print("alert error:", ex)
+    for a in ADMINS:
+        threading.Thread(target=send_mail, args=(a, title, body or title), daemon=True).start()
+
+
+def company_name_of(uid):
+    r = db("GET", "profiles", {"id": f"eq.{uid}", "select": "company_name"})
+    return r[0]["company_name"] if r else "A client"
+
+
+def extend_line(uid):
+    rows = db("GET", "lines", {"user_id": f"eq.{uid}"})
+    if not rows:
+        return
+    l, now = rows[0], datetime.now(timezone.utc)
+    cur = parse_ts(l["paid_until"]) if l.get("paid_until") else now
+    db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"paid_until": (max(cur, now) + timedelta(days=30)).isoformat(), "reminded_for": None, "expired_at": None})
+    if l["status"] == "expired":
+        threading.Thread(target=reactivate, args=(uid,), daemon=True).start()
+
+
+def reactivate(uid):
+    rows = db("GET", "lines", {"user_id": f"eq.{uid}"})
+    if not rows:
+        return
+    l = rows[0]
+    try:
+        if rpc("get_minutes", {"p_user": uid}) > 0:
+            link(l["agent_id"], l["phone_number_id"])
+            db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"status": "active", "error": None})
+        else:
+            db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"status": "paused"})
+        notify(uid, "Your AI number is switched on again", "Thank you for renewing. Your AI number is working again.", "message")
+    except Exception as ex:
+        db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"error": str(ex)[:300]})
+
+
+def inr_txt(paise):
+    return f"Rs. {paise / 100:,.2f}"
+
+
+def lifecycle():
+    """Reminds, switches off and releases AI numbers whose monthly fee is not paid. Runs every hour."""
+    now = datetime.now(timezone.utc)
+    for l in db("GET", "lines", {"phone_number_id": "not.is.null", "paid_until": "not.is.null", "status": "in.(active,paused,expired)"}):
+        uid, due = l["user_id"], parse_ts(l["paid_until"])
+        try:
+            if l["status"] in ("active", "paused"):
+                if now > due + timedelta(days=GRACE_DAYS):
+                    requests.post(f"{BOLNA}/inbound/unlink", headers=bh(), json={"phone_number_id": l["phone_number_id"]}, timeout=20)
+                    db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"status": "expired", "expired_at": now.isoformat()})
+                    msg = (f"Your AI number {l['phone_number']} was not renewed, so it is switched off and the AI has stopped answering. "
+                           f"Renew in Minutes & billing within {RELEASE_DAYS} days to keep this number. After that it is released and you would need a new, different number.")
+                    notify(uid, "Your AI number is switched off", msg, "message")
+                    send_mail(email_of(uid), "Your Rnexa AI number is switched off", msg + f"\n\n{SITE_URL}/app/billing\n\nRnexa")
+                    alert_admin("number_expired", f"{company_name_of(uid)}: AI number switched off", f"Not renewed. It will be released in {RELEASE_DAYS} days.")
+                elif due - now <= timedelta(days=REMIND_DAYS) and l.get("reminded_for") != l["paid_until"]:
+                    ap = l.get("autopay_status") == "active"
+                    msg = (f"Your AI number {l['phone_number']} renews on {due.astimezone(IST):%d %b %Y}. "
+                           + (f"{inr_txt(renew_amount_paise())} will be taken automatically through auto-pay." if ap
+                              else f"Please renew for {inr_txt(renew_amount_paise())} in Minutes & billing, or turn on auto-pay, so it keeps working."))
+                    notify(uid, "Your AI number renews soon", msg, "message")
+                    send_mail(email_of(uid), "Your Rnexa AI number renews soon", msg + f"\n\n{SITE_URL}/app/billing\n\nRnexa")
+                    db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"reminded_for": l["paid_until"]})
+            elif l["status"] == "expired":
+                exp = parse_ts(l["expired_at"]) if l.get("expired_at") else due
+                if now > exp + timedelta(days=RELEASE_DAYS):
+                    rr = requests.delete(f"{BOLNA}/phone-numbers/{l['phone_number_id']}", headers=bh(), timeout=30)
+                    if not rr.ok:
+                        db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"error": f"Release failed: {rr.text[:120]}"})
+                        continue
+                    if l.get("autopay_id") and l.get("autopay_status") in ("active", "pending"):
+                        try:
+                            rzp("POST", f"subscriptions/{l['autopay_id']}/cancel", json={"cancel_at_cycle_end": 0})
+                        except HTTPException:
+                            pass
+                    db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"status": "released", "phone_number_id": None, "phone_number": None, "released_at": now.isoformat(), "autopay_status": "cancelled"})
+                    msg = (f"Your AI number {l['phone_number']} was released because the monthly fee was not paid. If you want an AI number again, buy a new one in Minutes & billing. "
+                           "It will be a different number (first month Rs. 999, then Rs. 799 a month). Please remove the old call forwarding from your phone and set it up again for the new number. Your unused minutes are kept.")
+                    notify(uid, "Your AI number was released", msg, "message")
+                    send_mail(email_of(uid), "Your Rnexa AI number was released", msg + "\n\nRnexa")
+                    alert_admin("number_released", f"{company_name_of(uid)}: AI number released", "Monthly fee not paid. The number was deleted from Bolna, so you no longer pay for it.")
+        except Exception as ex:
+            print("lifecycle error:", uid, ex)
+
+
+def _lifecycle_loop():
+    while True:
+        try:
+            lifecycle()
+        except Exception as ex:
+            print("lifecycle loop error:", ex)
+        time.sleep(3600)
+
+
+@app.on_event("startup")
+def _start_background():
+    threading.Thread(target=_lifecycle_loop, daemon=True).start()
+
+
+@app.post("/api/admin/run-checks")
+def admin_run_checks(authorization: str = Header(None)):
+    current_admin(authorization)
+    lifecycle()
+    return {"ok": True}
+
+
+def rzp(method, path, **kw):
+    r = requests.request(method, f"https://api.razorpay.com/v1/{path}", auth=(RZP_ID, RZP_SECRET), timeout=30, **kw)
+    if not r.ok:
+        try:
+            why = r.json().get("error", {}).get("description", "")
+        except ValueError:
+            why = r.text[:120]
+        raise HTTPException(502, f"Razorpay says: {why}")
+    return r.json()
+
+
+def plan_id_for(amount_paise):
+    plans = get_setting("plans", {}) or {}
+    k = str(amount_paise)
+    if k not in plans:
+        plans[k] = rzp("POST", "plans", json={"period": "monthly", "interval": 1, "item": {"name": "Rnexa AI number (monthly)", "amount": amount_paise, "currency": "INR"}})["id"]
+        set_setting("plans", plans)
+    return plans[k]
+
+
+@app.post("/api/autopay/start")
+def autopay_start(authorization: str = Header(None)):
+    uid = current_user(authorization)
+    if not (RZP_ID and RZP_WEBHOOK):
+        raise HTTPException(400, "Auto-pay is not switched on yet. Please renew by hand for now.")
+    rows = db("GET", "lines", {"user_id": f"eq.{uid}"})
+    l = rows[0] if rows else None
+    if not l or not line_has_number(l):
+        raise HTTPException(400, "Please buy an AI number first")
+    if l.get("autopay_id") and l.get("autopay_status") in ("active", "pending"):
+        try:
+            rzp("POST", f"subscriptions/{l['autopay_id']}/cancel", json={"cancel_at_cycle_end": 0})
+        except HTTPException:
+            pass
+    body = {"plan_id": plan_id_for(renew_amount_paise()), "total_count": 120, "customer_notify": 1, "notes": {"user_id": uid}}
+    if l.get("paid_until") and parse_ts(l["paid_until"]) - datetime.now(timezone.utc) > timedelta(hours=2):
+        body["start_at"] = int(parse_ts(l["paid_until"]).timestamp())
+    sub = rzp("POST", "subscriptions", json=body)
+    db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"autopay_id": sub["id"], "autopay_status": "pending", "autopay_needs_update": False})
+    return {"subscription_id": sub["id"], "key_id": RZP_ID}
+
+
+class AutoVerify(BaseModel):
+    razorpay_payment_id: str
+    razorpay_subscription_id: str
+    razorpay_signature: str
+
+
+@app.post("/api/autopay/verify")
+def autopay_verify(b: AutoVerify, authorization: str = Header(None)):
+    uid = current_user(authorization)
+    sig = hmac.new(RZP_SECRET.encode(), f"{b.razorpay_payment_id}|{b.razorpay_subscription_id}".encode(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(sig, b.razorpay_signature):
+        raise HTTPException(400, "Could not confirm auto-pay")
+    if not db("PATCH", "lines", {"user_id": f"eq.{uid}", "autopay_id": f"eq.{b.razorpay_subscription_id}"}, {"autopay_status": "active"}):
+        raise HTTPException(404, "Auto-pay not found")
+    notify(uid, "Auto-pay is on", f"Your AI number will renew by itself each month for {inr_txt(renew_amount_paise())}. You can cancel any time in Minutes & billing.", "message")
+    return {"ok": True}
+
+
+@app.post("/api/autopay/cancel")
+def autopay_cancel(authorization: str = Header(None)):
+    uid = current_user(authorization)
+    rows = db("GET", "lines", {"user_id": f"eq.{uid}"})
+    l = rows[0] if rows else None
+    if not l or not l.get("autopay_id") or l.get("autopay_status") == "cancelled":
+        return {"ok": True}
+    try:
+        rzp("POST", f"subscriptions/{l['autopay_id']}/cancel", json={"cancel_at_cycle_end": 0})
+    except HTTPException:
+        pass
+    db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"autopay_status": "cancelled"})
+    due = parse_ts(l["paid_until"]).astimezone(IST) if l.get("paid_until") else None
+    notify(uid, "Auto-pay cancelled", f"Your AI number stays on until {due:%d %b %Y}. Renew by hand before then to keep it." if due else "Auto-pay is off.", "message")
+    alert_admin("autopay_cancelled", f"{company_name_of(uid)} cancelled auto-pay", f"Their number {l.get('phone_number')} is paid until {due:%d %b %Y}." if due else "")
+    return {"ok": True}
+
+
+def handle_sub_charged(payload):
+    sub, pay = payload["subscription"]["entity"], payload["payment"]["entity"]
+    rows = db("GET", "lines", {"autopay_id": f"eq.{sub['id']}"})
+    if not rows or db("GET", "payments", {"razorpay_payment_id": f"eq.{pay['id']}", "select": "id"}):
+        return
+    uid, total, g = rows[0]["user_id"], pay["amount"], gst_info()
+    row = {"user_id": uid, "razorpay_order_id": pay.get("order_id") or "sub-" + pay["id"], "razorpay_payment_id": pay["id"], "pack": "renew",
+           "calls": 0, "amount_paise": total, "status": "paid", "kind": "renew"}
+    if g["active"]:      # a charge on the old amount is treated as already including GST
+        base = int(round(total / (1 + g["rate"] / 100)))
+        tax = total - base
+        row.update({"base_paise": base, "cgst_paise": tax // 2, "sgst_paise": tax - tax // 2, "gst_rate": g["rate"], "gstin_snapshot": g["gstin"]})
+    p = db("POST", "payments", json=row)[0]
+    db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"autopay_status": "active"})
+    extend_line(uid)
+    threading.Thread(target=email_invoice, args=(p,), daemon=True).start()
+    notify(uid, "Your AI number was renewed", f"We took {inr_txt(total)} through auto-pay and renewed your AI number for another month. Your invoice was emailed to you.", "message")
+
+
+def handle_sub_ended(name, sub):
+    rows = db("GET", "lines", {"autopay_id": f"eq.{sub['id']}"})
+    if not rows:
+        return
+    l, uid = rows[0], rows[0]["user_id"]
+    if name == "subscription.halted":
+        db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"autopay_status": "halted"})
+        notify(uid, "Auto-pay payment failed", "We could not take your monthly payment. Please renew in Minutes & billing so your AI number keeps working.", "message")
+        alert_admin("autopay_failed", f"{company_name_of(uid)}: auto-pay payment failed", f"Number {l.get('phone_number')}. Auto-pay was stopped after failed payments.")
+    elif l.get("autopay_status") not in ("cancelled",):
+        db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"autopay_status": "cancelled"})
+        notify(uid, "Auto-pay stopped", "Your auto-pay was cancelled. Please renew in Minutes & billing before your number expires.", "message")
+        alert_admin("autopay_cancelled", f"{company_name_of(uid)} cancelled auto-pay", f"Number {l.get('phone_number')}. Cancelled from their bank or Razorpay.")
+
+
+def gst_switched_on():
+    """The admin saved a GSTIN: GST starts now. Clients on auto-pay are asked to confirm the new monthly amount."""
+    try:
+        for l in db("GET", "lines", {"autopay_status": "eq.active"}):
+            db("PATCH", "lines", {"user_id": f"eq.{l['user_id']}"}, {"autopay_needs_update": True})
+            notify(l["user_id"], "GST now applies to your monthly fee", f"From today Rnexa adds GST (CGST and SGST). Your monthly amount becomes {inr_txt(renew_amount_paise())}. Please open Minutes & billing and confirm auto-pay again.", "message")
+        alert_admin("gst_on", "GST started", "New payments now include CGST and SGST. Clients with auto-pay were asked to confirm the new amount.")
+    except Exception as ex:
+        print("gst switch error:", ex)
+
+
+@app.get("/api/admin/alerts")
+def admin_alerts(authorization: str = Header(None)):
+    current_admin(authorization)
+    return db("GET", "admin_alerts", {"order": "created_at.desc", "limit": "100"})
+
+
+@app.post("/api/admin/alerts/read")
+def admin_alerts_read(authorization: str = Header(None)):
+    current_admin(authorization)
+    db("PATCH", "admin_alerts", {"read": "eq.false"}, {"read": True})
+    return {"ok": True}
 
 
 app.mount("/", StaticFiles(directory="static", html=True), name="site")

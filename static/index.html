@@ -334,6 +334,7 @@ textarea.ex{color:#9aa086}
   <div class="card"><h2>Recent calls</h2><div id="rc_calls"><p>No calls yet.</p></div></div></section>
   <section data-sec="camps" class="hide"><div class="card"><h2>Your campaigns</h2><div id="camps"><p>No campaigns yet.</p></div></div></section>
   <section data-sec="billing" class="hide">
+   <div class="card hide" id="numcard"></div>
    <div class="card"><h2>Your balance</h2><div class="grid"><div class="stat"><b id="bl_min">-</b>Minutes left</div><div class="stat"><b id="bl_num" style="font-size:17px">-</b>AI number</div></div><p id="bl_note" class="hide">You already have your AI number, so only minutes are sold to you. Buy minutes below.</p></div>
    <div class="card"><h2 id="sh_lt">Get your AI phone number</h2><p id="sh_lx">Your own number that answers your customers. Offer prices for a limited time.</p><div class="grid" id="buyLine"></div></div>
    <div class="card"><h2 id="sh_mt">Buy minutes</h2><p id="sh_mx">Calls use minutes, and each call is rounded up to the next full minute. Buy first, then use.</p><div class="grid" id="buyMin"></div><div id="payMsg" class="msg"></div></div>
@@ -355,7 +356,7 @@ textarea.ex{color:#9aa086}
  <p><button class="ghost" id="suspOut">Log out</button></p></div></div>
 
 <script>
-let TERMS_VERSION = "2.0";
+let TERMS_VERSION = "3.0";
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const $ = id => document.getElementById(id);
 document.querySelectorAll("[data-email]").forEach(e=>{e.href="mailto:"+SITE.email});
@@ -400,14 +401,14 @@ terms:()=>`<h1>Terms &amp; Conditions</h1><p>${upd} By creating an account you a
 +sec("3. AI Receptionist","We give your business an AI phone number. When your customers call it, or when you forward missed calls to it, an AI assistant answers using the business details you provide. The AI can make mistakes, so please check your instructions and call summaries regularly. Calls are recorded and written down so you can review them. You must tell callers the call is recorded, and our AI says this at the start of each call.")
 +sec("4. Call forwarding","Setting up call forwarding on your own phone is your responsibility. Your phone company may charge for forwarded calls. Rnexa is not responsible for charges from your phone company, or for calls that are not forwarded because of your phone settings or network.")
 +sec("5. Outbound calling","If you use our AI to call people, you must have their consent or a lawful right to call them, and you must follow TRAI and DND rules and any other Indian law. Do not use the service to cheat, threaten or mislead anyone.")
-+sec("6. Minutes, credits and payment","AI calls use prepaid minutes, and each call is rounded up to the next full minute. The AI phone line has a monthly fee shown with the price. When your minutes finish, the AI stops answering until you buy more. Prices are in Indian rupees and are shown before you pay. Payments are handled by Razorpay.")
-+sec("7. Invoices","After each payment you can download an invoice from Credits &amp; billing. We use the company name, PAN, GST number and billing address you saved, so please keep them correct. Rnexa is currently not registered for GST, so no GST is charged on our invoices.")
-+sec("8. Emails we send you","We send emails only about your account and service: (a) confirm your email address; (b) reset your password or confirm a changed email; (c) tell you when your AI phone number is ready; (d) warn you when you have 20 minutes or fewer left; (e) tell you when your AI is paused because your minutes ended; (f) replies to your support tickets; (g) your invoice by email after each purchase; (h) a notice if your account is suspended or switched back on; (i) important notices about these terms or your account. We do not send advertising emails without your permission.")
++sec("6. Minutes and payment","AI calls use prepaid minutes, and each call is rounded up to the next full minute. Unused minutes stay in your account. When your minutes finish, the AI stops answering until you buy more. Prices are in Indian rupees and are shown before you pay. Payments are handled by Razorpay.")
++sec("7. Invoices and GST","After each payment you can download an invoice from Minutes &amp; billing, and we also email it to you. We use the company name, PAN, GST number and billing address you saved, so please keep them correct. Rnexa is not registered for GST at the moment, so no GST is charged and invoices say GST is not applicable. From the day Rnexa registers for GST, GST is added to new payments at the rate shown at checkout, and our invoices show CGST and SGST separately. Invoices issued before that day stay unchanged.")
++sec("8. Emails we send you","We send emails only about your account and service: (a) confirm your email address; (b) reset your password or confirm a changed email; (c) tell you when your AI phone number is ready; (d) warn you when you have 20 minutes or fewer left; (e) tell you when your AI is paused because your minutes ended; (f) replies to your support tickets; (g) your invoice by email after each purchase; (h) reminders and notices about your AI number (renewal, auto-pay, switch-off and release); (i) a notice if your account is suspended or switched back on; (j) important notices about these terms or your account. We do not send advertising emails without your permission.")
 +sec("9. Rules of use","You may not use the service for anything illegal, harmful or misleading, to call people who asked not to be called, or to share other people's private data without the right to do so. We may suspend or close an account that breaks these terms. A suspended account can contact us to sort things out.")
 +sec("10. Your data","You own your business details, lead lists and call content. We use them only to run the service for you, as explained in our Privacy Policy.")
 +sec("11. Our responsibility","We work hard to keep the service running, but we cannot promise it will never stop or never make mistakes. To the extent the law allows, Rnexa is not responsible for lost business or indirect losses.")
 +sec("12. Changes","We may update these terms. If a change is important, we will ask you to accept the new version when you next sign in.")
-+sec("13. Contact",`Questions about these terms: ${SITE.email} or ${SITE.phone}.`),
++sec("13. AI number: monthly fee, renewal, auto-pay and release","Your AI phone number is rented for you each month. The first month costs Rs. 999 and every month after that costs Rs. 799 (plus GST once we are registered for it). You can renew by paying in Minutes &amp; billing, or you can turn on auto-pay so the amount is taken from your account every month. Auto-pay is your choice and you can cancel it at any time; we are told when you cancel. If GST starts while you are on auto-pay, we will ask you to confirm the new monthly amount. If the fee is not paid by the renewal date, you have 3 more days to renew. After that your number is switched off and the AI stops answering. If it is still not renewed 15 days later, the number is released and cannot be given back. If you want an AI number again, you buy a new number, which will be a different number, and the first month of the new number is Rs. 999 and later months are Rs. 799. When your number changes you must remove the old call forwarding from your phone and set up forwarding to the new number. We send you reminders before renewal and notices when your number is switched off or released.")+sec("14. Contact",`Questions about these terms: ${SITE.email} or ${SITE.phone}.`),
 privacy:()=>`<h1>Privacy Policy</h1><p>${upd}</p>`
 +sec("What we collect","Account details (email, name, phone); company details (company name, industry, city, billing address, and PAN or GST number if you add them); the business information you give the AI; lead lists you upload; call data (caller phone number, recording, written transcript, summary and call length); payment records (Razorpay keeps your card details, we do not); and your support messages.")
 +sec("Why we use it","To run your account and the AI phone service, answer and make calls for you, show your call history, take payments and create invoices, send the service emails listed in our Terms, give support, count visits to our pages (without personal details), and keep the service safe.")
@@ -434,7 +435,7 @@ async function route(){
   if(recovering||(session&&location.search.includes("reset=1"))){show("reset");return}
   $("navLogin").style.display=session?"none":"";$("navCta").textContent=session?"My dashboard":"Sign up";$("navCta").href=session?"/app":"/signup";
   if(h==="#/login"||h==="#/signup"){ if(session){go("/app");return} setMode(h==="#/signup");$("authH").textContent=h==="#/signup"?"Create your account":"Log in";show("auth");return}
-  if(h==="#/admin"){if(!session){go("/login");return}const w=await who();if(!w.is_admin){show("denied");return}show("admin");adminTab(TABS[location.pathname.split("/")[2]]?location.pathname.split("/")[2]:"overview");return}
+  if(h==="#/admin"){if(!session){go("/login");return}const w=await who();if(!w.is_admin){show("denied");return}window.A_UNREAD=w.alerts_unread||0;show("admin");adminTab(TABS[location.pathname.split("/")[2]]?location.pathname.split("/")[2]:"overview");return}
   if(h==="#/app"){
     if(!session){go("/login");return}
     const {data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
@@ -495,7 +496,7 @@ const VIEW={
  async payments(){const L=await(await api("/api/admin/payments")).json();return "<table><tr><th>Date</th><th>Client</th><th>Pack</th><th>Amount</th><th>Status</th></tr>"+L.map(p=>"<tr><td>"+new Date(p.created_at).toLocaleString("en-IN")+"</td><td>"+esc(p.email||"")+"</td><td>"+esc(p.pack)+"</td><td>"+inr(p.amount_paise/100)+"</td><td>"+esc(p.status)+"</td></tr>").join("")+"</table>"},
  async account(){return '<h2>Change my admin login</h2><label>New email (a confirmation link is sent)</label><input id="ne" type="email"><label>New password (8+ characters)</label><input id="np" type="password"><button id="ago" style="width:auto">Update</button><div id="amsg" class="msg"></div>'}
 };
-async function adminTab(t){urlSet("/admin/"+t);$("atabs").innerHTML=Object.keys(TABS).map(k=>'<button data-t="'+k+'"'+(k===t?' class="on"':'')+'>'+TABS[k]+"</button>").join(" ");
+async function adminTab(t){urlSet("/admin/"+t);$("atabs").innerHTML=Object.keys(TABS).map(k=>'<button data-t="'+k+'"'+(k===t?' class="on"':'')+'>'+TABS[k]+(k==="alerts"&&window.A_UNREAD?'<span class="nbadge">'+window.A_UNREAD+"</span>":"")+"</button>").join(" ");
   $("abody").innerHTML="Loading...";try{$("abody").innerHTML=await VIEW[t]();if(AFTER[t])await AFTER[t]()}catch(e){$("abody").innerHTML='<div class="msg">'+esc(e.message)+"</div>"}}
 $("atabs").onclick=e=>{if(e.target.dataset.t)adminTab(e.target.dataset.t)};
 $("abody").onclick=async e=>{const a=e.target.dataset.a,id=e.target.dataset.id;if(!a)return;const c=CL.find(x=>x.id===id);
@@ -591,12 +592,12 @@ function packCard(p,home){const off=p.mrp&&p.mrp>p.price?Math.round((1-p.price/p
  act=home?'<a class="cta p" href="/signup" style="margin:0">'+esc(p.button_text||"Get started")+"</a>":'<button data-pk="'+p.id+'"'+(p.kind==="custom"?' data-custom="1"':"")+">"+esc(p.button_text||"Buy")+"</button>",
  desc=p.description?"<p>"+esc(p.description)+"</p>":"";
  if(p.kind==="custom")return '<div class="card pk">'+tag+"<h3>"+esc(p.name)+'</h3><div class="pp"><b>'+inr(p.rate_per_min)+"</b> <small>per minute</small></div>"+(desc||"<p>Choose the hours you need. Minimum "+dur(p.calls)+".</p>")+
-  (home?"":'<label>Hours</label><input class="cm_h" type="number" min="'+Math.ceil(p.calls/60)+'" step="1" value="'+Math.ceil(p.calls/60)+'" data-rate="'+p.rate_per_min+'"><p class="cm_t"></p>')+act+"</div>";
- const gives=p.kind==="line"?(p.calls?"Includes "+dur(p.calls)+" of calls":"Number only. Minutes are bought separately."):dur(p.calls)+" of calls";
- return '<div class="card pk">'+tag+"<h3>"+esc(p.name)+'</h3><div class="pp">'+(off?"<s>"+inr(p.mrp)+"</s> ":"")+"<b>"+inr(p.price)+"</b>"+(p.kind==="line"?" <small>/month</small>":"")+"</div>"+(desc||"<p>"+gives+"</p>")+(p.calls?"<small>"+perMinText(p)+"</small>":"")+act+"</div>"}
+  (home?"":'<label>Hours</label><input class="cm_h" type="number" min="'+Math.ceil(p.calls/60)+'" step="1" value="'+Math.ceil(p.calls/60)+'" data-rate="'+p.rate_per_min+'"><p class="cm_t"></p>')+gstNote()+act+"</div>";
+ const gives=p.kind==="renew"?"Keeps your AI number on for another month":p.kind==="line"?(p.calls?"Includes "+dur(p.calls)+" of calls":"Number only. Minutes are bought separately."):dur(p.calls)+" of calls";
+ return '<div class="card pk">'+tag+"<h3>"+esc(p.name)+'</h3><div class="pp">'+(off?"<s>"+inr(p.mrp)+"</s> ":"")+"<b>"+inr(p.price)+"</b>"+(p.kind==="line"?(window.RENEW_PRICE?" <small>first month, then "+inr(window.RENEW_PRICE)+" a month</small>":" <small>/month</small>"):"")+"</div>"+(desc||"<p>"+gives+"</p>")+(p.calls?"<small>"+perMinText(p)+"</small>":"")+gstNote()+act+"</div>"}
 function updCustom(i){const h=Math.max(parseFloat(i.value)||0,0),mn=Math.round(h*60),t=i.parentElement.querySelector(".cm_t");t.textContent=mn+" minutes ("+dur(mn)+") for "+inr(mn*(+i.dataset.rate))}
 document.addEventListener("input",e=>{if(e.target.classList&&e.target.classList.contains("cm_h"))updCustom(e.target)});
-async function loadOverview(){try{const d=await(await api("/api/line")).json(),n=(d.line&&d.line.phone_number)||"Not set up";window.HAS_NUM=d.has_number;$("bl_note").classList.toggle("hide",!d.has_number);if(window.ALLP)renderPacks(window.ALLP);$("stC").textContent=d.minutes;$("stK").textContent=d.calls_today;$("stL").textContent=n;$("bl_min").textContent=d.minutes;$("bl_num").textContent=n}catch(e){}}
+async function loadOverview(){try{const d=await(await api("/api/line")).json(),n=(d.line&&d.line.phone_number)||"Not set up";window.HAS_NUM=d.has_number;$("bl_note").classList.toggle("hide",!d.has_number);if(window.ALLP)renderPacks(window.ALLP);$("stC").textContent=d.minutes;$("stK").textContent=d.calls_today;$("stL").textContent=n;$("bl_min").textContent=d.minutes;$("bl_num").textContent=n;renderNumCard(d)}catch(e){}}
 function payClick(e,msgId){const b=e.target.closest("[data-pk]");if(!b)return;let mins;if(b.dataset.custom){const i=b.closest(".pk").querySelector(".cm_h");if(i)mins=Math.round(parseFloat(i.value)*60)}
  startPay(b.dataset.pk,$(msgId),()=>{loadReception();loadCredits();loadOverview()},mins)}
 $("buyLine").onclick=e=>payClick(e,"payMsg");$("buyMin").onclick=e=>payClick(e,"payMsg");$("rc_buy").onclick=e=>payClick(e,"rc_pay");
@@ -687,7 +688,7 @@ $("plist").onclick=async e=>{const id=e.target.dataset.inv;if(!id)return;const w
 
 /* ===== shop rules, notifications, admin tools, editable pages ===== */
 const AFTER={};let TK=[],PY=[],PK=[];
-const _rp=renderPacks;renderPacks=function(L){window.ALLP_SIG=JSON.stringify(L);window.NUM_BASE=numBase(L);_rp(L);const c=$("buyLine")&&$("buyLine").closest(".card");if(!c)return;if(window.HAS_NUM===undefined){$("buyLine").innerHTML='<div class="spin"></div>';c.style.display=""}else c.style.display=window.HAS_NUM?"none":""};$("rc_buy").innerHTML='<div class="spin"></div>';
+const _rp=renderPacks;renderPacks=function(L){window.ALLP_SIG=JSON.stringify(L);window.NUM_BASE=numBase(L);_rp(L.filter(p=>p.kind!=="renew"));const c=$("buyLine")&&$("buyLine").closest(".card");if(!c)return;if(window.HAS_NUM===undefined){$("buyLine").innerHTML='<div class="spin"></div>';c.style.display=""}else c.style.display=window.HAS_NUM?"none":""};$("rc_buy").innerHTML='<div class="spin"></div>';
 async function refreshPacks(){try{const r=await fetch("/api/packs",{cache:"no-store"}),L=await r.json();if(JSON.stringify(L)!==window.ALLP_SIG)renderPacks(L)}catch(e){}}
 function setBadge(n){["nbadge","nbadge2"].forEach(id=>{const b=$(id);b.textContent=n>9?"9+":n;b.classList.toggle("hide",!n)})}
 const NI={ticket:"Ticket",offer:"Offer",event:"Event",message:"Message"},dtt=d=>new Date(d).toLocaleString("en-IN");
@@ -707,13 +708,13 @@ function textToHtml(t){const link=x=>x.replace(/(https?:\/\/[^\s<]+)/g,'<a href=
 function htmlToText(h){const d=new DOMParser().parseFromString(h,"text/html");return [...d.body.children].map(e=>e.tagName==="H1"?"# "+e.textContent:e.tagName==="H2"?"## "+e.textContent:e.textContent).filter(Boolean).join("\n\n")}
 function parseFaq(t){return t.split(/\n\s*\n/).map(b=>{const q=/^Q:\s*(.*)$/m.exec(b),a=/^A:\s*([\s\S]*)$/m.exec(b);return q&&a?[q[1].trim(),a[1].trim()]:null}).filter(Boolean)}
 function faqText(L){return L.map(f=>"Q: "+f[0]+"\nA: "+f[1]).join("\n\n")}
-function applyContent(d){applyShop(d.shop);Object.keys(CONTENT).forEach(k=>delete CONTENT[k]);Object.assign(CONTENT,d.pages||{});if(d.faq)CONTENT.faq=d.faq;
+function applyContent(d){applyShop(d.shop);const gr=d.gst||0,rp=d.renew||0;if(window.GST_RATE!==gr||window.RENEW_PRICE!==rp){window.GST_RATE=gr;window.RENEW_PRICE=rp;if(window.ALLP)renderPacks(window.ALLP)}Object.keys(CONTENT).forEach(k=>delete CONTENT[k]);Object.assign(CONTENT,d.pages||{});if(d.faq)CONTENT.faq=d.faq;
   FAQS.length=0;(d.faq?parseFaq(d.faq):FAQS_DEF).forEach(f=>FAQS.push(f));if(d.terms_version)TERMS_VERSION=d.terms_version;
   $("terms").innerHTML=PAGES.terms().replace("<h1>","<h2>").replace("</h1>","</h2>")}
 async function loadContent(){try{const r=await Promise.race([fetch("/api/content",{cache:"no-store"}),new Promise((_,j)=>setTimeout(j,3000))]);applyContent(await r.json())}catch(e){}}
 
 /* admin: tabs order */
-const LB={overview:"Overview",clients:"Clients",tickets:"Tickets",notifs:"Notifications",pricing:"Pricing",payments:"Invoices",pages:"Pages",settings:"Settings",lines:"AI Lines",account:"My account"};
+const LB={overview:"Overview",alerts:"Alerts",clients:"Clients",tickets:"Tickets",notifs:"Notifications",pricing:"Pricing",payments:"Invoices",pages:"Pages",settings:"Settings",lines:"AI Lines",account:"My account"};
 Object.keys(TABS).forEach(k=>delete TABS[k]);Object.keys(LB).forEach(k=>TABS[k]=LB[k]);
 
 /* admin: tickets (list, then a page for each ticket) */
@@ -745,8 +746,8 @@ function fillPage(){const k=$("cpSel").value;$("cpText").value=pageText(k);$("cp
 AFTER.pages=()=>{$("cpSel").onchange=fillPage;fillPage()};
 
 /* admin: company details used on every invoice */
-VIEW.settings=async()=>'<h2>Company details on invoices</h2><p>These details print on every invoice and invoice email, old ones too. Add your GSTIN when you register and it will appear on the invoices.</p><label>Company name</label><input id="cs_n"><label>Owner name</label><input id="cs_o"><label>Address</label><input id="cs_a"><label>Email</label><input id="cs_e"><label>Phone</label><input id="cs_p"><label>GSTIN (empty if not registered)</label><input id="cs_g" maxlength="15"><label>PAN (optional)</label><input id="cs_pan" maxlength="10"><p><button data-x="cssave" style="width:auto">Save details</button></p>';
-AFTER.settings=async()=>{const c=await(await api("/api/admin/company")).json();[["cs_n","name"],["cs_o","owner"],["cs_a","address"],["cs_e","email"],["cs_p","phone"],["cs_g","gstin"],["cs_pan","pan"]].forEach(x=>$(x[0]).value=c[x[1]]||"")};
+VIEW.settings=async()=>'<h2>Company details on invoices</h2><p>These details print on every invoice and invoice email, old ones too. Add your GSTIN when you register and it will appear on the invoices.</p><label>Company name</label><input id="cs_n"><label>Owner name</label><input id="cs_o"><label>Address</label><input id="cs_a"><label>Email</label><input id="cs_e"><label>Phone</label><input id="cs_p"><label>GSTIN (empty if not registered)</label><input id="cs_g" maxlength="15"><label>PAN (optional)</label><input id="cs_pan" maxlength="10"><label>GST rate in % (used from the day you save a GSTIN)</label><input id="cs_r" type="number" step="0.5"><p id="cs_gst" style="color:var(--mut)"></p><p><button data-x="cssave" style="width:auto">Save details</button></p>';
+AFTER.settings=async()=>{const c=await(await api("/api/admin/company")).json();[["cs_n","name"],["cs_o","owner"],["cs_a","address"],["cs_e","email"],["cs_p","phone"],["cs_g","gstin"],["cs_pan","pan"],["cs_r","gst_rate"]].forEach(x=>$(x[0]).value=c[x[1]]||"");$("cs_gst").textContent=c.gst_from?"GST is ON since "+new Date(c.gst_from).toLocaleString("en-IN")+". New payments get CGST and SGST on top. Older invoices stay without GST.":"GST is OFF. When you save a GSTIN, GST starts from that moment: new payments get CGST and SGST on top, and older invoices stay without GST."};
 
 /* admin: actions for the new screens */
 $("abody").addEventListener("click",async e=>{const b=e.target.closest("[data-x]");if(!b)return;const x=b.dataset.x,id=b.dataset.id;
@@ -765,7 +766,7 @@ $("abody").addEventListener("click",async e=>{const b=e.target.closest("[data-x]
      b.textContent="Saved";toast("Saved. Clients see the new price now.","ok");refreshPacks();break}
    case "ntsend":await J("POST","/api/admin/notifications",{kind:$("nt_k").value,target:$("nt_t").value,title:$("nt_h").value,body:$("nt_b").value});toast("Notification sent","ok");$("nt_h").value="";$("nt_b").value="";ntList();break;
    case "ntdel":if(confirm("Delete this notification?")){await api("/api/admin/notifications/"+id,{method:"DELETE"});ntList()}break;
-   case "cssave":await J("PUT","/api/admin/company",{name:$("cs_n").value,owner:$("cs_o").value,address:$("cs_a").value,email:$("cs_e").value,phone:$("cs_p").value,gstin:$("cs_g").value,pan:$("cs_pan").value});toast("Saved. Invoices now use these details.","ok");break;
+   case "cssave":await J("PUT","/api/admin/company",{name:$("cs_n").value,owner:$("cs_o").value,address:$("cs_a").value,email:$("cs_e").value,phone:$("cs_p").value,gstin:$("cs_g").value,pan:$("cs_pan").value,gst_rate:parseFloat($("cs_r").value)||18});toast("Saved. Invoices now use these details.","ok");break;
    case "cpsave":{const k=$("cpSel").value,t=$("cpText").value;if(!t.trim()){toast("Please write some text first","err");break}await J("PUT","/api/admin/content",{key:k,text:t,reaccept:k==="terms"&&$("cpRe").checked});await loadContent();toast("Saved. The website shows it now.","ok");break}
    case "cpreset":if(confirm("Go back to the original text for this page?")){await api("/api/admin/content/"+$("cpSel").value,{method:"DELETE"});await loadContent();fillPage();toast("Original text restored","ok")}break;
   }}catch(er){toast(er.message,"err")}});
@@ -776,7 +777,7 @@ function cpReset(){const t=$("cp_prompt");t.value=CP_EX;t.classList.add("ex")}
 $("cp_prompt").addEventListener("beforeinput",e=>{const t=e.target,k=e.inputType||"";if(t.classList.contains("ex")&&(k.startsWith("insert")||k.startsWith("delete"))){t.value="";t.classList.remove("ex")}});
 $("cp_prompt").addEventListener("blur",e=>{if(!e.target.value.trim())cpReset()});cpReset();
 function applyShop(sh){sh=sh||{};$("sh_lt").textContent=sh.line_title||"Get your AI phone number";$("sh_lx").textContent=sh.line_text||"Your own number that answers your customers. Offer prices for a limited time.";$("sh_mt").textContent=sh.min_title||"Buy minutes";$("sh_mx").textContent=sh.min_text||"Calls use minutes, and each call is rounded up to the next full minute. Buy first, then use."}
-const KT={line:"AI number card",minutes:"Minutes card",custom:"Choose-your-hours card"};
+const KT={line:"AI number card",minutes:"Minutes card",custom:"Choose-your-hours card",renew:"Number renewal card (shown only to clients who own a number)"};
 VIEW.pricing=async()=>{PK=(await(await api("/api/admin/packs")).json()).filter(p=>p.kind!=="calls");const sh=await(await api("/api/admin/shop")).json();
   const f=(l,id,v,t)=>"<div><label>"+l+'</label><input id="'+id+'" type="'+(t||"number")+'" step="any" value="'+(v===null||v===undefined?"":esc(v))+'"></div>';
   return '<h2>Section texts</h2><p>The headings and sentences above the cards. Leave empty to use the original words.</p><div class="pcard"><div class="pgrid">'+f("Number section title","st_lt",sh.line_title,"text")+f("Number section text","st_lx",sh.line_text,"text")+f("Minutes section title","st_mt",sh.min_title,"text")+f("Minutes section text","st_mx",sh.min_text,"text")+'</div><p><button data-x="shopsave" style="width:auto">Save texts</button></p></div>'+
@@ -841,7 +842,7 @@ const _ov=VIEW.overview;VIEW.overview=async()=>(await _ov())+'<div id="an"><div 
 AFTER.overview=async()=>{try{const a=await(await api("/api/admin/analytics?days=30")).json(),t=a.totals,
   card=(l,v,n)=>'<div class="stat"><b>'+v+"</b>"+l+(n?'<br><small style="color:var(--mut)">'+n+"</small>":"")+"</div>";
   $("an").innerHTML='<h2 style="margin-top:22px">Sales and profit (all time)</h2><div class="grid">'+card("AI number sales",inr(t.sales_number),t.numbers_sold+" numbers sold")+card("Minutes sales",inr(t.sales_minutes),t.minutes_sold+" minutes sold")+card("Total sales",inr(t.sales_total),"numbers + minutes")+
-   card("Total cost (estimate)",inr(t.cost_total),"Numbers "+inr(t.cost_numbers)+", calls "+inr(t.cost_minutes)+", payment fees "+inr(t.cost_fees))+card("Profit (estimate)",inr(t.profit),t.sales_total?Math.round(t.profit/t.sales_total*100)+"% of sales":"")+card("Online now",a.online_now,"clients in the last 2 minutes")+card("Total clients",t.users,"")+card("Minutes used",Math.round(t.minutes_used),"all calls")+
+   card("Total cost (estimate)",inr(t.cost_total),"Numbers "+inr(t.cost_numbers)+", calls "+inr(t.cost_minutes)+", payment fees "+inr(t.cost_fees))+card("Profit (estimate)",inr(t.profit),t.sales_total?Math.round(t.profit/t.sales_total*100)+"% of sales":"")+card("Online now",a.online_now,"clients in the last 2 minutes")+card("Total clients",t.users,"")+card("Number renewals",t.renewals,"monthly fees")+card("GST collected",inr(t.gst_collected),"to pay to the government")+card("Minutes used",Math.round(t.minutes_used),"all calls")+
    '</div><p>Costs are estimates from the numbers set in Render (number cost, cost per minute, payment fee). In a combo card the AI number is counted at the AI number price and the rest as minutes.</p><h2>Graphs (last 30 days)</h2><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr))">'+
    chartBox("Sales per day (INR)",a.labels,[{n:"AI numbers",c:"#506022",t:"bar",vals:a.sales_number},{n:"Minutes",c:"#aab58a",t:"bar",vals:a.sales_minutes}],true)+
    chartBox("Profit per day (INR, estimate)",a.labels,[{n:"Profit",c:"#2e7d32",t:"line",vals:a.profit}])+
@@ -849,5 +850,23 @@ AFTER.overview=async()=>{try{const a=await(await api("/api/admin/analytics?days=
    chartBox("Online clients by hour (last 24 hours)",a.online_labels,[{n:"Clients online",c:"#77814B",t:"bar",vals:a.online_counts}])+
    chartBox("Page views per day",a.labels,[{n:"Views",c:"#192307",t:"bar",vals:a.views}])+
    chartBox("Minutes used per day",a.labels,[{n:"Minutes used",c:"#e07a10",t:"bar",vals:a.usage}])+"</div>"}catch(e){$("an").innerHTML='<div class="msg">Graphs could not load: '+esc(e.message)+" (run analytics_update.sql in Supabase if you have not)</div>"}};
+
+/* ===== AI number card: renew, auto-pay, GST note, admin alerts ===== */
+function gstNote(){return window.GST_RATE?"<small>+ "+window.GST_RATE+"% GST (CGST + SGST) at checkout</small>":""}
+function renderNumCard(d){const c=$("numcard"),l=d.line;if(!l||!d.has_number){c.classList.add("hide");return}c.classList.remove("hide");
+  const due=l.paid_until?new Date(l.paid_until).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}):"-",amt=inr(d.renew_amount),ap=l.autopay_status,
+   st={active:"On",pending:"Waiting for your approval",cancelled:"Off",halted:"Stopped (payment failed)"}[ap]||"Off",
+   gst=d.gst_rate?"This includes "+d.gst_rate+"% GST (CGST + SGST).":"GST is not applicable now. If Rnexa registers for GST, GST will be added and you will be asked to confirm the new amount.";
+  c.innerHTML="<h2>Your AI number</h2><p><b>"+esc(l.phone_number||"")+"</b> &middot; paid until <b>"+due+"</b></p>"+(l.status==="expired"?'<p class="msg">Your number is switched off because the monthly fee was not paid. Renew to switch it back on.</p>':"")+
+   "<p>Monthly renewal: <b>"+amt+"</b> a month. "+gst+"</p><p>Auto-pay: <b>"+st+"</b></p>"+(l.autopay_needs_update?'<p class="msg">GST now applies, so your monthly amount is '+amt+". Please confirm auto-pay again.</p>":"")+
+   '<p><button data-nc="renew" style="width:auto">Renew now '+amt+"</button> "+(ap==="active"&&!l.autopay_needs_update?'<button class="ghost" data-nc="apoff">Cancel auto-pay</button>':'<button class="ghost" data-nc="apon">'+(ap==="active"?"Confirm the new amount":"Turn on auto-pay")+"</button>")+"</p>"+
+   '<small style="color:var(--mut)">If you turn on auto-pay, Rnexa takes '+amt+" from your account every month until you cancel. You can cancel any time here. If your number is not renewed, it is switched off after 3 days and released after 15 more days.</small>"+'<div id="ncMsg" class="msg"></div>'}
+$("numcard").onclick=async e=>{const b=e.target.closest("[data-nc]");if(!b)return;const m=$("ncMsg"),k=b.dataset.nc;m.className="msg";m.textContent="";
+  if(k==="renew")startPay("renew",m,()=>{loadOverview();loadCredits()});
+  else if(k==="apon"){try{const o=await J("POST","/api/autopay/start",{});await loadScript(RZP);new Razorpay({key:o.key_id,subscription_id:o.subscription_id,name:"Rnexa",description:"AI number monthly auto-pay",handler:async r=>{try{await J("POST","/api/autopay/verify",r);toast("Auto-pay is on","ok");loadOverview()}catch(er){m.textContent=er.message}}}).open()}catch(er){m.textContent=er.message}}
+  else if(k==="apoff"&&confirm("Cancel auto-pay? Your number stays on until the paid-until date. After that you must renew by hand.")){try{await J("POST","/api/autopay/cancel",{});toast("Auto-pay cancelled","ok");loadOverview()}catch(er){m.textContent=er.message}}};
+VIEW.alerts=async()=>{const L=await(await api("/api/admin/alerts")).json();return '<p>Important events about your clients: auto-pay cancelled, payment failed, numbers switched off or released, GST started. You also get these by email.</p><p><button class="ghost" data-x="runchecks">Run number checks now</button></p>'+(L.length?"<table><tr><th>Date</th><th>Event</th><th>Details</th></tr>"+L.map(a=>"<tr"+(a.read?"":' style="font-weight:700"')+"><td>"+dtt(a.created_at)+"</td><td>"+esc(a.title)+"</td><td>"+esc(a.body||"")+"</td></tr>").join("")+"</table>":"<p>No alerts yet.</p>")};
+AFTER.alerts=async()=>{try{await api("/api/admin/alerts/read",{method:"POST"});window.A_UNREAD=0;document.querySelectorAll("#atabs .nbadge").forEach(x=>x.remove())}catch(e){}};
+$("abody").addEventListener("click",async e=>{const b=e.target.closest('[data-x="runchecks"]');if(!b)return;b.textContent="Checking...";try{await J("POST","/api/admin/run-checks",{});toast("Checks done","ok");adminTab("alerts")}catch(er){toast(er.message,"err");b.textContent="Run number checks now"}});
 loadContent().finally(route);
 </script></body></html>
