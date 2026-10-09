@@ -820,7 +820,7 @@ def invoice_inner(p):
     if co.get("pan"):
         sid += f"<br>PAN: {e(co['pan'])}"
     note = "" if taxed else "GST: not applicable, the seller is not registered under GST. "
-    th = "border-bottom:1px solid #dde2cc;padding:10px;text-align:left"
+    th = "border-bottom:1px solid #eef1e2;padding:8px 10px;text-align:left"
     r_ = f"{th};text-align:right"
     if taxed:
         half = float(p.get("gst_rate") or 0) / 2
@@ -829,21 +829,32 @@ def invoice_inner(p):
                 f'<tr><td colspan="2" style="{r_}">SGST @ {half:g}%</td><td style="{r_}">{(p["sgst_paise"] or 0) / 100:,.2f}</td></tr>')
     else:
         rows = f'<tr><td style="{th}">{e(item)}</td><td style="{r_}">1</td><td style="{r_}">{amt}</td></tr>'
-    inner = (f'<div style="font-family:Segoe UI,Arial,sans-serif;color:#192307;max-width:720px;margin:auto">'
-             f'<h1 style="color:#506022;margin:0">{e(co["name"])}</h1><p><b>{"TAX INVOICE" if taxed else "INVOICE"}</b> {no}<br>Date: {when:%d %b %Y}</p>'
-             f'<table width="100%" style="margin-top:14px"><tr><td valign="top"><small style="color:#5b6648">From</small><br><b>{e(co["name"])}</b><br>{e(co["owner"])}<br>{e(co["address"])}<br>{e(co["email"])} &middot; {e(co["phone"])}{sid}</td>'
-             f'<td valign="top"><small style="color:#5b6648">Billed to</small><br>{buyer}{ids}</td></tr></table>'
-             f'<table width="100%" style="border-collapse:collapse;margin:22px 0"><tr><th style="{th}">Description</th><th style="{r_}">Qty</th><th style="{r_}">Amount (INR)</th></tr>{rows}'
-             f'<tr><td colspan="2" style="{r_}"><b>Total paid</b></td><td style="{r_}"><b>{amt}</b></td></tr></table>'
-             f'<p style="font-size:12px;color:#5b6648">{note}Paid online through Razorpay (payment {e(p.get("razorpay_payment_id") or "")}). This is a computer-generated invoice and needs no signature.</p></div>')
+    lab = "font-size:10px;letter-spacing:1px;color:#5b6648;text-transform:uppercase;margin-bottom:3px"
+    hd = "padding:8px 10px;border-bottom:1px solid #dde2cc;font-size:11px;color:#5b6648;background:#f1f4e6"
+    inner = (f'<div style="font-family:Segoe UI,Arial,sans-serif;color:#192307;font-size:12px;line-height:1.5;width:100%;max-width:760px;margin:auto">'
+             f'<table width="100%" style="border-collapse:collapse"><tr><td valign="middle"><img src="{SITE_URL}/logo-mark.png" width="34" height="34" alt="Rnexa logo" style="vertical-align:middle;margin-right:8px">'
+             f'<span style="font-size:20px;font-weight:700;color:#506022;vertical-align:middle">{e(co["name"])}</span></td>'
+             f'<td align="right" valign="middle"><div style="font-size:16px;font-weight:700;letter-spacing:1px">{"TAX INVOICE" if taxed else "INVOICE"}</div>'
+             f'<div style="color:#5b6648">No: <b style="color:#192307">{no}</b><br>Date: <b style="color:#192307">{when:%d %b %Y}</b></div></td></tr></table>'
+             f'<div style="border-top:2px solid #506022;margin:12px 0 16px"></div>'
+             f'<table width="100%" style="border-collapse:collapse"><tr><td valign="top" width="50%" style="padding-right:14px"><div style="{lab}">From</div><b>{e(co["name"])}</b><br>{e(co["owner"])}<br>{e(co["address"])}<br>{e(co["email"])} &middot; {e(co["phone"])}{sid}</td>'
+             f'<td valign="top" width="50%"><div style="{lab}">Billed to</div>{buyer}{ids}</td></tr></table>'
+             f'<table width="100%" style="border-collapse:collapse;margin:20px 0 10px;border:1px solid #dde2cc"><tr><th align="left" style="{hd}">Description</th><th align="right" style="{hd};width:50px">Qty</th><th align="right" style="{hd};width:130px">Amount (INR)</th></tr>{rows}</table>'
+             f'<table align="right" style="border-collapse:collapse;min-width:230px"><tr><td style="padding:8px 10px;font-weight:700;border-top:2px solid #506022">Total paid (INR)</td><td align="right" style="padding:8px 10px;font-weight:700;border-top:2px solid #506022">{amt}</td></tr></table><div style="clear:both"></div>'
+             f'<p style="margin:28px 0 4px;font-size:10px;color:#5b6648">{note}Paid online through Razorpay (payment ID {e(p.get("razorpay_payment_id") or "")}). This is a computer-generated invoice and needs no signature.</p>'
+             f'<p style="margin:0;font-size:11px;color:#5b6648">Thank you for choosing {e(co["name"])}.</p></div>')
     return inner, no, amt, prof
 
 
 def invoice_html(p):
     inner, no, _, _ = invoice_inner(p)
-    return (f'<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Invoice {no}</title><style>body{{margin:30px 20px}}'
-            f'button{{background:#506022;color:#fff;border:0;padding:10px 18px;border-radius:8px;cursor:pointer;margin-bottom:14px}}@media print{{button{{display:none}}}}</style></head>'
-            f'<body><div style="max-width:720px;margin:auto;text-align:right"><button onclick="window.print()">Print / Save as PDF</button></div>{inner}</body></html>')
+    return ('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Invoice ' + no + '</title>'
+            '<style>@page{size:A4;margin:0}html,body{margin:0;background:#e9ecdf}'
+            '.bar{max-width:210mm;margin:12px auto 0;text-align:right}.bar button{background:#506022;color:#fff;border:0;padding:9px 16px;border-radius:8px;cursor:pointer;font-size:13px}'
+            '.sheet{width:210mm;min-height:296mm;margin:12px auto;padding:16mm 15mm;box-sizing:border-box;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.15)}'
+            '@media print{html,body{background:#fff}.bar{display:none}.sheet{margin:0;box-shadow:none}}'
+            '@media (max-width:800px){.sheet{width:auto;min-height:0;padding:14px}.bar{margin-right:10px}}</style></head>'
+            '<body><div class="bar"><button onclick="window.print()">Print / Save as PDF</button></div><div class="sheet">' + inner + '</div></body></html>')
 
 
 def email_invoice(p):
