@@ -421,7 +421,7 @@ def admin_edit_pack(pid: str, b: PackEdit, authorization: str = Header(None)):
 def admin_payments(authorization: str = Header(None)):
     current_admin(authorization)
     em = {x["user_id"]: x["email"] for x in db("GET", "account_status")}
-    return [{**p, "email": em.get(p["user_id"])} for p in db("GET", "payments", {"order": "created_at.desc", "limit": "100"})]
+    return [{**p, "email": em.get(p["user_id"])} for p in db("GET", "payments", {"status": "eq.paid", "order": "created_at.desc", "limit": "100"})]
 
 
 @app.get("/api/admin/tickets")
@@ -728,7 +728,7 @@ def invoice(pid: str, authorization: str = Header(None)):
 @app.get("/api/admin/invoice/{pid}")
 def admin_invoice(pid: str, authorization: str = Header(None)):
     current_admin(authorization)
-    rows = db("GET", "payments", {"id": f"eq.{pid}"})
+    rows = db("GET", "payments", {"id": f"eq.{pid}", "status": "eq.paid"})
     if not rows:
         raise HTTPException(404, "Invoice not found")
     return Response(content=invoice_html(rows[0]), media_type="text/html")
