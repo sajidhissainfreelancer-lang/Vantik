@@ -6,3 +6,4 @@ Disallow: /admin
 Disallow: /reset
 
 Sitemap: https://rnexa.in/sitemap.xml
+Disallow: /sp

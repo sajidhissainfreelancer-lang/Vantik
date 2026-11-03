@@ -223,6 +223,11 @@ textarea.ex{color:#9aa086}
 .pedit{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:16px;align-items:start}
 .pvbox{position:sticky;top:12px;background:#f4f6ee;border-radius:14px;padding:12px}.pvbox .card{box-shadow:none;margin:8px 0 0}.pvbox small{color:var(--mut)}
 @media (max-width:900px){.pedit{grid-template-columns:1fr}.pvbox{position:static}}
+
+.sptabs{display:flex;gap:6px;overflow-x:auto;margin:6px 0 16px;padding-bottom:4px}
+.sptabs button{width:auto;white-space:nowrap;margin:0;padding:9px 16px!important;border-radius:99px!important;border:1px solid var(--line)!important;background:#fff!important;color:var(--pri)!important;box-shadow:none!important}
+.sptabs button.on{background:var(--pri)!important;color:#fff!important}
+#sp .main{padding-top:20px}
 </style></head><body>
 
 <div id="home" class="hide">
@@ -263,6 +268,22 @@ textarea.ex{color:#9aa086}
 <div id="admin" class="hide shell"><aside class="side"><a href="/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a><small style="color:var(--pri);letter-spacing:3px">ADMIN</small><div id="atabs"></div>
  <div class="sidefoot"><a href="/app">Client view</a><button class="ghost" id="aout" style="text-align:left;padding:6px 0">Log out</button></div></aside>
  <main class="main"><div class="card" id="abody" style="overflow:auto"></div></main></div>
+<div id="sp" class="hide">
+ <div id="sp_auth" class="split"><div class="formpane"><div class="fcard">
+  <h2 data-h1 id="spH">Sales partner login</h2><p id="spSub"></p>
+  <div id="sp_su" class="hide"><label>Your name</label><input id="sp_name" autocomplete="name"><label>Mobile number</label><input id="sp_phone" type="tel" autocomplete="tel"></div>
+  <label>Email</label><input id="sp_email" type="email" autocomplete="email"><label>Password</label><input id="sp_pass" type="password" autocomplete="current-password">
+  <label id="sp_tl" class="hide" style="font-weight:400"><input type="checkbox" id="sp_terms" style="width:auto"> I have read and accept the <a href="#" id="sp_tlink">Sales Partner Terms</a>.</label>
+  <button id="sp_btn">Log in</button><div id="sp_msg" class="msg"></div>
+  <button class="ghost" id="sp_fp" style="width:auto;padding:6px 0">Forgot password?</button>
+  <p style="margin-top:14px"><span id="sp_sw">New partner?</span> <button class="ghost" id="sp_swb">Create partner account</button></p>
+  <div id="sp_tbox" class="terms hide" style="height:240px;margin-top:10px"></div>
+ </div></div></div>
+ <div id="sp_dash" class="hide"><div class="bar"><a href="/" class="brand"><img src="/logo-mark.png" alt="Rnexa logo"><span>Rnexa</span></a><span><b id="sp_who"></b> <button class="ghost" id="sp_out">Log out</button></span></div>
+  <div class="main" style="margin:0 auto"><h2 data-h1>Sales partner dashboard</h2><div id="sp_tabs" class="sptabs"></div>
+   <section data-sp="overview" id="sp_ov"></section><section data-sp="clients" id="sp_cl" class="hide"></section><section data-sp="earn" id="sp_ea" class="hide"></section>
+   <section data-sp="pay" id="sp_pa" class="hide"></section><section data-sp="script" id="sp_sc" class="hide"></section><section data-sp="terms" id="sp_te" class="hide"></section></div></div>
+</div>
 <div id="gload"><div class="spin"></div></div>
 <div id="net" class="hide">You are offline. Please check your internet connection.</div>
 <div id="toast"></div>
@@ -279,7 +300,7 @@ textarea.ex{color:#9aa086}
   <label>Email</label><input id="email" type="email" autocomplete="email">
   <label>Password</label><input id="pass" type="password" autocomplete="current-password">
   <button id="authBtn">Log in</button>
-  <div id="authMsg" class="msg"></div><button class="ghost" id="fpBtn" style="width:auto;padding:6px 0">Forgot password?</button>
+  <div id="authMsg" class="msg"></div><button class="ghost" id="fpBtn" style="width:auto;padding:6px 0">Forgot password?</button><button class="ghost hide" id="resendBtn" style="width:auto;padding:6px 0">Resend confirmation email</button>
   <p style="margin-top:14px"><span id="swText">New here?</span> <button class="ghost" id="swBtn">Create account</button></p>
 </div></div></div>
 
@@ -287,7 +308,7 @@ textarea.ex{color:#9aa086}
 <div id="onb" class="split hide"><div class="formpane"><div class="fcard">
  <div id="stepper" class="stepper"></div>
  <h2 data-h1 id="onbH"></h2><p id="onbSub"></p>
- <div class="ostep" data-o="1"><label>Company name *</label><input id="company" autocomplete="organization"><label>Your name *</label><input id="cname" autocomplete="name"><label>Mobile number *</label><input id="phone" type="tel" autocomplete="tel"></div>
+ <div class="ostep" data-o="1"><label>Company name *</label><input id="company" autocomplete="organization"><label>Your name *</label><input id="cname" autocomplete="name"><label>Mobile number *</label><input id="phone" type="tel" autocomplete="tel"><label>Referral code (optional)</label><input id="refcode" maxlength="12" autocomplete="off" style="text-transform:uppercase"></div>
  <div class="ostep hide" data-o="2"><div class="tiles" id="tiles"></div><select id="industry" class="hide"></select></div>
  <div class="ostep hide" data-o="3"><div class="row"><div><label>City</label><input id="city"></div><div><label>Company PAN (optional)</label><input id="pan" maxlength="10"></div></div>
   <div class="row"><div><label>GST number (optional)</label><input id="gstin" maxlength="15"></div><div><label>Billing address</label><input id="baddr"></div></div></div>
@@ -347,7 +368,8 @@ textarea.ex{color:#9aa086}
   <section data-sec="settings" class="hide"><div class="card"><h2>Company details</h2>
    <label>Company name</label><input id="sc"><label>Your name</label><input id="sn"><label>Phone</label><input id="sp"><label>City</label><input id="sy"><label>Company PAN (optional)</label><input id="spn" maxlength="10"><label>GST number (optional)</label><input id="sgs" maxlength="15"><label>Billing address</label><input id="sba">
    <button id="ssave" style="width:auto">Save changes</button> <span id="smsg" class="msg"></span><p style="margin-top:12px">To change your login email or delete your account, raise a ticket in the Help center.</p></div>
-   <div class="card"><h2>Change password</h2><label>New password (8+ characters)</label><input id="spw" type="password"><button id="spwb" style="width:auto">Update password</button> <span id="spm" class="msg"></span></div></section>
+   <div class="card"><h2>Change password</h2><label>New password (8+ characters)</label><input id="spw" type="password"><button id="spwb" style="width:auto">Update password</button> <span id="spm" class="msg"></span></div>
+   <div class="card"><h2>Referral code</h2><p id="refNote">If a Rnexa sales partner helped you, enter their code. You can add it only before your first payment.</p><div id="refForm"><input id="refSet" maxlength="12" autocomplete="off" style="text-transform:uppercase"><button id="refBtn" style="width:auto">Add code</button> <span id="refMsg" class="msg"></span></div></div></section>
  </main>
 </div>
 <div id="susp" class="hide modal"><div class="mbox"><img src="/logo-mark.png" alt="Rnexa logo" style="height:64px"><h2 data-h1>Account suspended</h2>
@@ -367,9 +389,9 @@ $("buyLine").innerHTML=A.filter(p=>p.kind==="line").map(p=>packCard(p)).join("")
 fetch("/api/packs",{cache:"no-store"}).then(r=>r.json()).then(L=>renderPacks(L)).catch(()=>{});
 $("owner").textContent=SITE.owner;$("yr").textContent=new Date().getFullYear();
 let signup = false;
-function show(v){$("gload").style.display="none";$("tourBtn").style.display=v==="dash"?"":"none";$("bell").style.display=v==="dash"?"":"none";["home","auth","onb","dash","legal","admin","reset","nf","denied"].forEach(x=>$(x).classList.toggle("hide",x!==v));normalizeH1(v);seo()}
+function show(v){$("gload").style.display="none";$("tourBtn").style.display=v==="dash"?"":"none";$("bell").style.display=v==="dash"?"":"none";["home","auth","onb","dash","legal","admin","reset","nf","denied","sp"].forEach(x=>$(x).classList.toggle("hide",x!==v));normalizeH1(v);seo()}
 
-function setMode(v){signup=v;paneSet("auth",v?"signup":"login");$("authStepper").classList.toggle("hide",!v);if(v)$("authStepper").innerHTML=stepperHTML(1);$("fpBtn").style.display=signup?"none":"";$("authBtn").textContent=signup?"Create account":"Log in";
+function setMode(v){signup=v;$("resendBtn").classList.add("hide");paneSet("auth",v?"signup":"login");$("authStepper").classList.toggle("hide",!v);if(v)$("authStepper").innerHTML=stepperHTML(1);$("fpBtn").style.display=signup?"none":"";$("authBtn").textContent=signup?"Create account":"Log in";
   $("authSub").textContent=signup?"Create your login. Next, a few quick questions about your business.":"Log in to your client account.";
   $("swText").textContent=signup?"Already have an account?":"New here?";$("swBtn").textContent=signup?"Log in":"Create account";$("authMsg").textContent=""}
 $("swBtn").onclick=()=>{go(signup?"/login":"/signup")};
@@ -381,7 +403,7 @@ $("authBtn").onclick=async()=>{
   const {data,error}=signup?await sb.auth.signUp({email,password}):await sb.auth.signInWithPassword({email,password});
   $("authBtn").disabled=false;
   if(error){m.textContent=error.message;return}
-  if(signup&&!data.session){m.className="msg ok";m.textContent="Check your email and click the confirmation link, then log in.";return}
+  if(signup&&!data.session){m.className="msg ok";m.textContent="We sent a confirmation link to "+email+". Check your inbox and spam folder (it can take a few minutes), click the link, then log in. If you already have an account with this email, just log in or use Forgot password.";$("resendBtn").classList.remove("hide");return}
   go("/app");
 };
 
@@ -433,12 +455,14 @@ contact:()=>`<h1>Contact Us</h1><h2>${SITE.business}</h2><p>Owner: ${SITE.owner}
 async function route(){
   const h=hashOf(),{data:{session}}=await sb.auth.getSession();
   if(recovering||(session&&location.search.includes("reset=1"))){show("reset");return}
+  if(h==="#/sp"){await spRoute(session);return}
   $("navLogin").style.display=session?"none":"";$("navCta").textContent=session?"My dashboard":"Sign up";$("navCta").href=session?"/app":"/signup";
   if(h==="#/login"||h==="#/signup"){ if(session){go("/app");return} setMode(h==="#/signup");$("authH").textContent=h==="#/signup"?"Create your account":"Log in";show("auth");return}
   if(h==="#/admin"){if(!session){go("/login");return}const w=await who();if(!w.is_admin){show("denied");return}window.A_UNREAD=w.alerts_unread||0;show("admin");adminTab(TABS[location.pathname.split("/")[2]]?location.pathname.split("/")[2]:"overview");return}
   if(h==="#/app"){
     if(!session){go("/login");return}
     const {data:p}=await sb.from("profiles").select("*").eq("id",session.user.id).maybeSingle();
+    if(!p){const w=await who();if(w.is_sp){go("/sp/dashboard");return}}
     if(!p||p.terms_version!==TERMS_VERSION){show("onb");obGo(obStep);return}
     $("hello").textContent="Welcome, "+p.company_name;$("who").textContent=session.user.email;show("dash");dashSec(SLUGKEY[location.pathname.split("/")[2]||"overview"]||"overview");tourMaybe();loadCredits();checkAdmin();loadTickets();loadOverview();return}
   const pg=PAGES[h.slice(2)];if(pg){$("legalBody").innerHTML='<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> &rsaquo; <span>'+SEO["/"+h.slice(2)][0].split(" | ")[0].replace("&","&amp;")+"</span></nav>"+pg();show("legal");scrollTo(0,0);return}
@@ -536,7 +560,7 @@ $("ssave").onclick=async()=>{const m=$("smsg");m.className="msg";const {data:{se
 $("spwb").onclick=async()=>{const m=$("spm");m.className="msg";if($("spw").value.length<8){m.textContent="Use 8 or more characters.";return}
   const {error}=await sb.auth.updateUser({password:$("spw").value});if(error)m.textContent=error.message;else{m.className="msg ok";m.textContent="Password updated.";$("spw").value=""}};
 
-const SEO={"/": ["Rnexa | AI Receptionist and Websites for Local Businesses in Chennai", "Rnexa builds fast websites and runs an AI receptionist that answers your missed calls, takes bookings and shows every call in your dashboard."], "/login": ["Log in | Rnexa", "Log in to your Rnexa dashboard to manage your AI receptionist, call history, minutes and invoices."], "/signup": ["Create your account | Rnexa", "Create a Rnexa account to set up your AI receptionist, get an AI phone number and see every call in your dashboard."], "/reset": ["Set a new password | Rnexa", "Choose a new password for your Rnexa account."], "/terms": ["Terms & Conditions | Rnexa", "Read the Rnexa terms for the AI receptionist service: accounts, call forwarding, minutes, invoices and the emails we send."], "/privacy": ["Privacy Policy | Rnexa", "How Rnexa collects, uses and protects your business details, call data and payment records."], "/refund": ["Refund & Cancellation Policy | Rnexa", "Rnexa refund and cancellation rules for minutes, AI phone lines and wrong or double payments."], "/contact": ["Contact Rnexa | Tondiarpet, Chennai", "Contact Rnexa by email, phone or WhatsApp, or visit us at Tondiarpet, Chennai."], "/app": ["Dashboard | Rnexa", "Your Rnexa client dashboard."], "/admin": ["Admin | Rnexa", "Rnexa admin panel."], "404": ["Page not found | Rnexa", "This page does not exist."]},SLUGKEY={notif:"notif",overview:"overview",reception:"reception",new:"new",campaigns:"camps",billing:"billing",help:"help",settings:"settings"};
+const SEO={"/": ["Rnexa | AI Receptionist and Websites for Local Businesses in Chennai", "Rnexa builds fast websites and runs an AI receptionist that answers your missed calls, takes bookings and shows every call in your dashboard."], "/login": ["Log in | Rnexa", "Log in to your Rnexa dashboard to manage your AI receptionist, call history, minutes and invoices."], "/signup": ["Create your account | Rnexa", "Create a Rnexa account to set up your AI receptionist, get an AI phone number and see every call in your dashboard."], "/reset": ["Set a new password | Rnexa", "Choose a new password for your Rnexa account."], "/terms": ["Terms & Conditions | Rnexa", "Read the Rnexa terms for the AI receptionist service: accounts, call forwarding, minutes, invoices and the emails we send."], "/privacy": ["Privacy Policy | Rnexa", "How Rnexa collects, uses and protects your business details, call data and payment records."], "/refund": ["Refund & Cancellation Policy | Rnexa", "Rnexa refund and cancellation rules for minutes, AI phone lines and wrong or double payments."], "/contact": ["Contact Rnexa | Tondiarpet, Chennai", "Contact Rnexa by email, phone or WhatsApp, or visit us at Tondiarpet, Chennai."], "/app": ["Dashboard | Rnexa", "Your Rnexa client dashboard."], "/admin": ["Admin | Rnexa", "Rnexa admin panel."], "/sp": ["Sales partner | Rnexa", "Rnexa sales partner area."], "404": ["Page not found | Rnexa", "This page does not exist."]},SLUGKEY={notif:"notif",overview:"overview",reception:"reception",new:"new",campaigns:"camps",billing:"billing",help:"help",settings:"settings"};
 function hashOf(){const p=location.pathname.replace(/\/+$/,"")||"/";return "#/"+(p.split("/")[1]||"")}
 function urlSet(p){if(location.pathname!==p)history.replaceState(null,"",p+location.search)}
 function go(p){if(location.pathname!==p.split("?")[0])history.pushState(null,"",p);route();scrollTo(0,0)}
@@ -549,7 +573,7 @@ function normalizeH1(v){const c=$(v);document.querySelectorAll("h1").forEach(h=>
 function meta(sel,attr,val,make){let e=document.querySelector(sel);if(!e&&make){e=document.createElement("meta");make(e);document.head.appendChild(e)}if(e)e.setAttribute(attr,val)}
 function seo(){const p=location.pathname.replace(/\/+$/,"")||"/",k=p==="/"?"/":"/"+p.split("/")[1],known=SEO[k]&&k!=="404",d=known?SEO[k]:SEO["404"],url="https://rnexa.in"+(known?k:"/");
   document.title=d[0];meta('meta[name="description"]',"content",d[1]);meta('link[rel="canonical"]',"href",url);meta('meta[property="og:title"]',"content",d[0]);meta('meta[property="og:url"]',"content",url);
-  meta('meta[name="robots"]',"content",["/login","/reset","/app","/admin"].includes(k)||!known?"noindex,nofollow":"index,follow",e=>e.setAttribute("name","robots"))}
+  meta('meta[name="robots"]',"content",["/login","/reset","/app","/admin","/sp"].includes(k)||!known?"noindex,nofollow":"index,follow",e=>e.setAttribute("name","robots"))}
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("#navToggle"),n=document.querySelector("#home .nav");
   if(t){n.classList.toggle("open");t.setAttribute("aria-expanded",n.classList.contains("open"))}else if(e.target.closest&&e.target.closest("#home .links a"))n.classList.remove("open")});
 
@@ -584,6 +608,7 @@ $("obNext").onclick=async()=>{const m=$("onbMsg");m.textContent="";
     pan:$("pan").value.trim().toUpperCase()||null,gstin:$("gstin").value.trim().toUpperCase()||null,billing_address:$("baddr").value.trim()||null,terms_version:TERMS_VERSION,terms_accepted_at:new Date().toISOString()};
   $("obNext").disabled=true;const {error}=await sb.from("profiles").upsert(row);$("obNext").disabled=false;
   if(error){m.textContent=error.message;return}
+  const rc=($("refcode").value||"").trim();if(rc){try{await J("POST","/api/referral",{code:rc})}catch(er){toast("Referral code not added: "+er.message+" You can add it later in Settings.","warn")}}
   toast("Welcome to Rnexa","ok");route()};
 
 const dur=m=>{const h=Math.floor(m/60),r=m%60;return((h?h+" hr"+(h>1?"s":""):"")+(h&&r?" ":"")+(r?r+" min":""))||"0 min"};
@@ -708,13 +733,13 @@ function textToHtml(t){const link=x=>x.replace(/(https?:\/\/[^\s<]+)/g,'<a href=
 function htmlToText(h){const d=new DOMParser().parseFromString(h,"text/html");return [...d.body.children].map(e=>e.tagName==="H1"?"# "+e.textContent:e.tagName==="H2"?"## "+e.textContent:e.textContent).filter(Boolean).join("\n\n")}
 function parseFaq(t){return t.split(/\n\s*\n/).map(b=>{const q=/^Q:\s*(.*)$/m.exec(b),a=/^A:\s*([\s\S]*)$/m.exec(b);return q&&a?[q[1].trim(),a[1].trim()]:null}).filter(Boolean)}
 function faqText(L){return L.map(f=>"Q: "+f[0]+"\nA: "+f[1]).join("\n\n")}
-function applyContent(d){applyShop(d.shop);const gr=d.gst||0,rp=d.renew||0;if(window.GST_RATE!==gr||window.RENEW_PRICE!==rp){window.GST_RATE=gr;window.RENEW_PRICE=rp;if(window.ALLP)renderPacks(window.ALLP)}Object.keys(CONTENT).forEach(k=>delete CONTENT[k]);Object.assign(CONTENT,d.pages||{});if(d.faq)CONTENT.faq=d.faq;
+function applyContent(d){applyShop(d.shop);window.SP_RATES=d.sp||null;window.SP_TERMS_TXT=d.sp_terms||null;const gr=d.gst||0,rp=d.renew||0;if(window.GST_RATE!==gr||window.RENEW_PRICE!==rp){window.GST_RATE=gr;window.RENEW_PRICE=rp;if(window.ALLP)renderPacks(window.ALLP)}Object.keys(CONTENT).forEach(k=>delete CONTENT[k]);Object.assign(CONTENT,d.pages||{});if(d.faq)CONTENT.faq=d.faq;
   FAQS.length=0;(d.faq?parseFaq(d.faq):FAQS_DEF).forEach(f=>FAQS.push(f));if(d.terms_version)TERMS_VERSION=d.terms_version;
   $("terms").innerHTML=PAGES.terms().replace("<h1>","<h2>").replace("</h1>","</h2>")}
 async function loadContent(){try{const r=await Promise.race([fetch("/api/content",{cache:"no-store"}),new Promise((_,j)=>setTimeout(j,3000))]);applyContent(await r.json())}catch(e){}}
 
 /* admin: tabs order */
-const LB={overview:"Overview",alerts:"Alerts",clients:"Clients",tickets:"Tickets",notifs:"Notifications",pricing:"Pricing",payments:"Invoices",pages:"Pages",settings:"Settings",lines:"AI Lines",account:"My account"};
+const LB={overview:"Overview",alerts:"Alerts",clients:"Clients",tickets:"Tickets",notifs:"Notifications",pricing:"Pricing",payments:"Invoices",sales:"Sales team",pages:"Pages",settings:"Settings",lines:"AI Lines",account:"My account"};
 Object.keys(TABS).forEach(k=>delete TABS[k]);Object.keys(LB).forEach(k=>TABS[k]=LB[k]);
 
 /* admin: tickets (list, then a page for each ticket) */
@@ -740,10 +765,10 @@ async function ntList(){const L=await(await api("/api/admin/notifications")).jso
 AFTER.notifs=async()=>{const C=await(await api("/api/admin/clients")).json();$("nt_t").innerHTML='<option value="all">All clients</option>'+C.map(c=>'<option value="'+c.id+'">'+esc(c.email||"")+" - "+esc(c.company_name)+"</option>").join("");await ntList()};
 
 /* admin: editable pages and help center */
-VIEW.pages=async()=>'<h2>Website pages</h2><p>Pick a page, edit the text, and save. The website shows it straight away. Start a heading with ## and leave a blank line between paragraphs.</p><select id="cpSel"><option value="terms">Terms &amp; Conditions</option><option value="privacy">Privacy Policy</option><option value="refund">Refund &amp; Cancellation</option><option value="contact">Contact Us</option><option value="faq">Help center questions</option></select><textarea id="cpText" rows="18" style="margin-top:10px"></textarea><p id="cpHelp"></p><label style="font-weight:400" id="cpReL"><input type="checkbox" id="cpRe" style="width:auto"> Ask all clients to accept the new Terms again</label><p><button data-x="cpsave" style="width:auto">Save page</button> <button class="ghost" data-x="cpreset">Back to original text</button></p>';
-function pageText(k){return k==="faq"?(CONTENT.faq||faqText(FAQS_DEF)):(CONTENT[k]||htmlToText(PG0[k]()))}
-function fillPage(){const k=$("cpSel").value;$("cpText").value=pageText(k);$("cpReL").style.display=k==="terms"?"":"none";$("cpHelp").textContent=k==="faq"?"Write each question as Q: ... and its answer as A: ... with a blank line between questions.":""}
-AFTER.pages=()=>{$("cpSel").onchange=fillPage;fillPage()};
+VIEW.pages=async()=>'<h2>Website pages</h2><p>Pick a page, edit the text, and save. The website shows it straight away. Start a heading with ## and leave a blank line between paragraphs.</p><select id="cpSel"><option value="terms">Terms &amp; Conditions</option><option value="privacy">Privacy Policy</option><option value="refund">Refund &amp; Cancellation</option><option value="contact">Contact Us</option><option value="faq">Help center questions</option><option value="sp_script">Sales partner: script and answers</option><option value="sp_terms">Sales partner terms</option></select><textarea id="cpText" rows="18" style="margin-top:10px"></textarea><p id="cpHelp"></p><label style="font-weight:400" id="cpReL"><input type="checkbox" id="cpRe" style="width:auto"> Ask all clients to accept the new Terms again</label><p><button data-x="cpsave" style="width:auto">Save page</button> <button class="ghost" data-x="cpreset">Back to original text</button></p>';
+function pageText(k){if(k==="sp_script")return ADMC.sp_script||SPD_SCRIPT;if(k==="sp_terms")return ADMC.sp_terms||SPD_TERMS;return k==="faq"?(CONTENT.faq||faqText(FAQS_DEF)):(CONTENT[k]||htmlToText(PG0[k]()))}
+function fillPage(){const k=$("cpSel").value;$("cpText").value=pageText(k);$("cpReL").style.display=k==="terms"?"":"none";$("cpHelp").textContent=k.startsWith("sp_")?"These words in double curly brackets fill in by themselves: {{code}} {{num}} {{combo}} {{combo_minutes}} {{renew}} {{first}} {{renewal_commission}} {{min}} {{gst_text}}. Keep them as they are.":k==="faq"?"Write each question as Q: ... and its answer as A: ... with a blank line between questions.":""}
+AFTER.pages=async()=>{$("cpSel").onchange=fillPage;try{ADMC=await(await api("/api/admin/content")).json()}catch(e){}fillPage()};
 
 /* admin: company details used on every invoice */
 VIEW.settings=async()=>'<h2>Company details on invoices</h2><p>These details print on every invoice and invoice email, old ones too. Add your GSTIN when you register and it will appear on the invoices.</p><label>Company name</label><input id="cs_n"><label>Owner name</label><input id="cs_o"><label>Address</label><input id="cs_a"><label>Email</label><input id="cs_e"><label>Phone</label><input id="cs_p"><label>GSTIN (empty if not registered)</label><input id="cs_g" maxlength="15"><label>PAN (optional)</label><input id="cs_pan" maxlength="10"><label>GST rate in % (used from the day you save a GSTIN)</label><input id="cs_r" type="number" step="0.5"><p id="cs_gst" style="color:var(--mut)"></p><p><button data-x="cssave" style="width:auto">Save details</button></p>';
@@ -767,8 +792,8 @@ $("abody").addEventListener("click",async e=>{const b=e.target.closest("[data-x]
    case "ntsend":await J("POST","/api/admin/notifications",{kind:$("nt_k").value,target:$("nt_t").value,title:$("nt_h").value,body:$("nt_b").value});toast("Notification sent","ok");$("nt_h").value="";$("nt_b").value="";ntList();break;
    case "ntdel":if(confirm("Delete this notification?")){await api("/api/admin/notifications/"+id,{method:"DELETE"});ntList()}break;
    case "cssave":await J("PUT","/api/admin/company",{name:$("cs_n").value,owner:$("cs_o").value,address:$("cs_a").value,email:$("cs_e").value,phone:$("cs_p").value,gstin:$("cs_g").value,pan:$("cs_pan").value,gst_rate:parseFloat($("cs_r").value)||18});toast("Saved. Invoices now use these details.","ok");break;
-   case "cpsave":{const k=$("cpSel").value,t=$("cpText").value;if(!t.trim()){toast("Please write some text first","err");break}await J("PUT","/api/admin/content",{key:k,text:t,reaccept:k==="terms"&&$("cpRe").checked});await loadContent();toast("Saved. The website shows it now.","ok");break}
-   case "cpreset":if(confirm("Go back to the original text for this page?")){await api("/api/admin/content/"+$("cpSel").value,{method:"DELETE"});await loadContent();fillPage();toast("Original text restored","ok")}break;
+   case "cpsave":{const k=$("cpSel").value,t=$("cpText").value;if(!t.trim()){toast("Please write some text first","err");break}await J("PUT","/api/admin/content",{key:k,text:t,reaccept:k==="terms"&&$("cpRe").checked});if(k.startsWith("sp_"))ADMC[k]=t;await loadContent();toast("Saved. The website shows it now.","ok");break}
+   case "cpreset":if(confirm("Go back to the original text for this page?")){await api("/api/admin/content/"+$("cpSel").value,{method:"DELETE"});delete ADMC[$("cpSel").value];await loadContent();fillPage();toast("Original text restored","ok")}break;
   }}catch(er){toast(er.message,"err")}});
 
 /* ===== campaign prompt box, shop texts, admin card editor ===== */
@@ -826,7 +851,7 @@ $("abody").addEventListener("input",e=>{const m=/^p([hcmpqr])(.+)$/.exec(e.targe
   const g=x=>parseFloat($("p"+x+i).value),s=(x,v)=>{$("p"+x+i).value=isFinite(v)&&v>0?+v.toFixed(2):""},mn=g("c");if(!(mn>0))return;const B=numBase(PK);
   if(f==="r")s("p",Math.round(B.price+g("r")*mn));if(f==="q")s("m",Math.round(B.mrp+g("q")*mn));
   if(f!=="r")s("r",(g("p")-B.price)/mn);if(f!=="q")s("q",(g("m")-B.mrp)/mn);pvDraw(i)});
-let _lt="",_lts=0;function trackView(){const p=location.pathname;if(p.startsWith("/admin")||(p===_lt&&Date.now()-_lts<5000))return;_lt=p;_lts=Date.now();try{fetch("/api/track",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({path:p}),keepalive:true}).catch(()=>{})}catch(e){}}
+let _lt="",_lts=0;function trackView(){const p=location.pathname;if(p.startsWith("/admin")||p.startsWith("/sp")||(p===_lt&&Date.now()-_lts<5000))return;_lt=p;_lts=Date.now();try{fetch("/api/track",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({path:p}),keepalive:true}).catch(()=>{})}catch(e){}}
 const _seo=seo;seo=function(){_seo();trackView()};
 function chartSVG(labels,series,stack){const W=620,H=200,L=46,R=8,T=10,B=26,n=labels.length,iw=W-L-R,ih=H-T-B;let all=[];series.forEach(s=>all.push(...s.vals));
   let mx=Math.max(1,...all),mn=Math.min(0,...all);if(stack){const tot=labels.map((_,i)=>series.filter(s=>s.t==="bar").reduce((a,s)=>a+s.vals[i],0));mx=Math.max(mx,...tot)}
@@ -842,7 +867,7 @@ const _ov=VIEW.overview;VIEW.overview=async()=>(await _ov())+'<div id="an"><div 
 AFTER.overview=async()=>{try{const a=await(await api("/api/admin/analytics?days=30")).json(),t=a.totals,
   card=(l,v,n)=>'<div class="stat"><b>'+v+"</b>"+l+(n?'<br><small style="color:var(--mut)">'+n+"</small>":"")+"</div>";
   $("an").innerHTML='<h2 style="margin-top:22px">Sales and profit (all time)</h2><div class="grid">'+card("AI number sales",inr(t.sales_number),t.numbers_sold+" numbers sold")+card("Minutes sales",inr(t.sales_minutes),t.minutes_sold+" minutes sold")+card("Total sales",inr(t.sales_total),"numbers + minutes")+
-   card("Total cost (estimate)",inr(t.cost_total),"Numbers "+inr(t.cost_numbers)+", calls "+inr(t.cost_minutes)+", payment fees "+inr(t.cost_fees))+card("Profit (estimate)",inr(t.profit),t.sales_total?Math.round(t.profit/t.sales_total*100)+"% of sales":"")+card("Online now",a.online_now,"clients in the last 2 minutes")+card("Total clients",t.users,"")+card("Number renewals",t.renewals,"monthly fees")+card("GST collected",inr(t.gst_collected),"to pay to the government")+card("Minutes used",Math.round(t.minutes_used),"all calls")+
+   card("Total cost (estimate)",inr(t.cost_total),"Numbers "+inr(t.cost_numbers)+", calls "+inr(t.cost_minutes)+", payment fees "+inr(t.cost_fees)+", sales commissions "+inr(t.cost_commissions||0))+card("Profit (estimate)",inr(t.profit),t.sales_total?Math.round(t.profit/t.sales_total*100)+"% of sales":"")+card("Online now",a.online_now,"clients in the last 2 minutes")+card("Total clients",t.users,"")+card("Number renewals",t.renewals,"monthly fees")+card("GST collected",inr(t.gst_collected),"to pay to the government")+card("Minutes used",Math.round(t.minutes_used),"all calls")+
    '</div><p>Costs are estimates from the numbers set in Render (number cost, cost per minute, payment fee). In a combo card the AI number is counted at the AI number price and the rest as minutes.</p><h2>Graphs (last 30 days)</h2><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr))">'+
    chartBox("Sales per day (INR)",a.labels,[{n:"AI numbers",c:"#506022",t:"bar",vals:a.sales_number},{n:"Minutes",c:"#aab58a",t:"bar",vals:a.sales_minutes}],true)+
    chartBox("Profit per day (INR, estimate)",a.labels,[{n:"Profit",c:"#2e7d32",t:"line",vals:a.profit}])+
@@ -868,5 +893,183 @@ $("numcard").onclick=async e=>{const b=e.target.closest("[data-nc]");if(!b)retur
 VIEW.alerts=async()=>{const L=await(await api("/api/admin/alerts")).json();return '<p>Important events about your clients: auto-pay cancelled, payment failed, numbers switched off or released, GST started. You also get these by email.</p><p><button class="ghost" data-x="runchecks">Run number checks now</button></p>'+(L.length?"<table><tr><th>Date</th><th>Event</th><th>Details</th></tr>"+L.map(a=>"<tr"+(a.read?"":' style="font-weight:700"')+"><td>"+dtt(a.created_at)+"</td><td>"+esc(a.title)+"</td><td>"+esc(a.body||"")+"</td></tr>").join("")+"</table>":"<p>No alerts yet.</p>")};
 AFTER.alerts=async()=>{try{await api("/api/admin/alerts/read",{method:"POST"});window.A_UNREAD=0;document.querySelectorAll("#atabs .nbadge").forEach(x=>x.remove())}catch(e){}};
 $("abody").addEventListener("click",async e=>{const b=e.target.closest('[data-x="runchecks"]');if(!b)return;b.textContent="Checking...";try{await J("POST","/api/admin/run-checks",{});toast("Checks done","ok");adminTab("alerts")}catch(er){toast(er.message,"err");b.textContent="Run number checks now"}});
+
+$("resendBtn").onclick=async()=>{const m=$("authMsg"),email=$("email").value.trim(),b=$("resendBtn");if(!email)return;b.disabled=true;
+  const {error}=await sb.auth.resend({type:"signup",email});m.className=error?"msg":"msg ok";m.textContent=error?error.message:"Sent again to "+email+". Please check your inbox and spam folder. It can take a few minutes.";
+  setTimeout(()=>{b.disabled=false},60000)};
+
+/* ===== sales partners (separate area: /sp/login, /sp/signup, /sp/dashboard) ===== */
+const SP_V="1.0";let ADMC={},spSignup=false;
+const SPD_SCRIPT=`## Your goal on every call
+Help the business owner understand one thing: an AI receptionist answers the calls they miss, so they do not lose customers. If they are interested, ask them to create an account at rnexa.in and type your referral code {{code}} when it asks for one. You earn when a client you brought pays.
+
+## Before you call
+Call only business phone numbers. Never call a number that asked not to be called, and follow TRAI / DND rules. Be polite, speak clearly, and keep the first call under two minutes. Never promise sales, profit or results.
+
+## Opening
+"Hello sir/madam, good morning. I am [your name] from Rnexa, a Chennai software company. Do you have one minute? I want to show you how to stop losing customers who call when you are busy."
+
+Tamil-English: "Vanakkam sir/madam. Naan [your name], Rnexa software company-la irundhu pesuren. Oru minute pesalama? Neenga busy-a irukkum podhu varra calls-a miss pannaama irukka oru idea sollren."
+
+## Questions to ask
+1. Do you sometimes miss customer calls when you are busy or the shop is closed?
+2. What do customers usually ask on the phone? (timings, price, bookings, location)
+3. Who answers your phone today?
+
+## What to say about Rnexa
+Rnexa gives your business an AI phone number. When you cannot answer, your call is forwarded to that number and the AI answers politely using your own business details. It answers questions about timings, services and prices, takes bookings and messages, and you see every call in your dashboard with a summary, the full conversation and a recording link. Call forwarding works with Airtel, Jio, Vi and BSNL, and the website shows the steps.
+
+## Prices (the live prices are shown above)
+The AI phone number costs Rs. {{num}} for the first month (normal price Rs. {{num_mrp}}), then Rs. {{renew}} a month. There is also a pack with the AI number and {{combo_minutes}} minutes for Rs. {{combo}}. Call minutes are bought separately and used only when the AI is talking, each call rounded up to the next full minute. Unused minutes stay in the account.
+
+## Answers to common questions
+Q: Is it a robot voice?
+A: It is an AI voice that speaks politely and naturally. It tells callers it is an AI assistant if they ask. The best way to judge is to hear it, so offer a demo.
+
+Q: Will it speak Tamil?
+A: English works today. Tamil depends on the voice setup, so say the Rnexa team will test it for their business.
+
+Q: Do I have to buy the number from somewhere?
+A: No. After you create your account and pay on rnexa.in, the website sets up the AI number by itself, usually within a minute. If there is a delay, the Rnexa team fixes it within a day.
+
+Q: What happens when I do not answer a call?
+A: You set call forwarding on your phone to the AI number. The website shows the steps for your phone company. Then missed calls go to the AI.
+
+Q: What if I do not pay next month?
+A: There are 3 days to renew after the due date. After that the number is switched off. If it is still not renewed 15 days later, the number is released, and a new, different number would be needed, with call forwarding set up again. Unused minutes stay in the account. Auto-pay is optional and can be cancelled at any time.
+
+Q: Is GST charged?
+A: {{gst_text}}
+
+Q: Can I cancel or get a refund?
+A: You can stop any time. Minutes that were used are not refundable. If no minutes from a purchase were used, a refund can be asked for within 7 days of payment. If Rnexa cannot set up the number after payment, the client can choose a refund or ask Rnexa to keep trying.
+
+Q: Is my customers' data safe?
+A: Each client sees only their own data. Calls are recorded and written down for the client to review, and the AI tells callers that the call is recorded. The Privacy Policy on rnexa.in explains the details.
+
+Q: Is there a long contract?
+A: No. It is paid month by month and can be cancelled at any time.
+
+Q: What if the AI says something wrong?
+A: The AI answers only from the business details the owner enters. The owner can change them at any time and can review every call in the dashboard.
+
+Q: Can I try it first?
+A: Yes. Ask them to message Rnexa on WhatsApp +91 73581 45522 for a free demo.
+
+## How to close
+"If you like it, you can create your account at rnexa.in. When it asks for a referral code, type {{code}}. It takes about two minutes, and I can stay on the line while you do it."
+
+## Never say or do
+- Do not promise sales, profit or any result, and never say "guaranteed".
+- Do not say the AI is a human.
+- Do not give prices or discounts that are not on rnexa.in.
+- Do not invent clients or reviews.
+- Do not take any payment yourself. All payments are made only on rnexa.in.
+- Do not pressure anyone, and do not call numbers that asked not to be called.`;
+const SPD_TERMS=`## Sales Partner Terms
+Last updated: October 2026. By creating a sales partner account you accept these terms.
+
+## 1. Who you are
+You are an independent sales partner. You are not an employee of Rnexa. You decide when and how you work, and you use your own phone and numbers.
+
+## 2. Your referral code
+You get one personal referral code. A client must enter it when creating an account, or in Settings, before their first payment. A code cannot be added after the client has paid, and it cannot be changed once added.
+
+## 3. Commission
+You earn Rs. {{first}} when a client who used your code pays for their AI number (the first month). You earn Rs. {{renewal_commission}} each time that client pays the monthly renewal, including auto-pay. No commission is paid on minute packs, on failed payments, or on payments that are refunded or reversed. Rates can change, and a change applies only to payments made after the change.
+
+## 4. When commission counts
+Commission is added to your balance only after the client's payment is received and confirmed. Commission for a refunded or reversed payment is cancelled.
+
+## 5. Weekly payout
+You can ask for a payout once every 7 days from your dashboard, when your available balance is at least Rs. {{min}}. Save your UPI ID or bank details first. We pay by UPI or bank transfer, normally within 7 days of your request. You are responsible for any tax on what you earn, and Rnexa may deduct tax if the law requires it.
+
+## 6. What you must do
+Call only business numbers you may lawfully call, and follow TRAI / DND rules. Be honest. Use only the information and prices shown on rnexa.in and in this dashboard. Do not collect payments yourself. All payments are made only on rnexa.in.
+
+## 7. What you must not do
+No false promises or fake reviews. No pretending to be Rnexa staff beyond your partner role. No fake or self-made accounts to earn commission, and no using your own code for yourself or your own family business. No harassing or pressuring anyone. No sharing your login.
+
+## 8. Pausing or closing
+Rnexa can pause or close a partner account that breaks these terms. Commission from fake, refunded or reversed payments is cancelled. You can stop at any time. Commission already confirmed stays payable.
+
+## 9. Data
+We store your name, phone, email, payout details and commission history to run this programme. Clients you bring are shown to you by company name and city only.
+
+## 10. Changes
+We may update these terms and will tell you in your dashboard.
+
+## 11. Contact
+ss@rnexa.in, +91 7358145522.`;
+BP.splogin=["Sales partner login","Log in to see your referral code, your clients and your earnings."];BP.spsignup=["Become a Rnexa sales partner","Get your personal referral code and earn when your clients pay."];
+$("sp_auth").insertAdjacentHTML("afterbegin",paneHTML());
+function spFill(t,d){const p=d.prices||{},r=d.rates||{},gt=p.gst_active?"GST ("+p.gst_rate+"%, CGST + SGST) is added at checkout and shown separately on the invoice.":"Rnexa is not registered for GST at the moment, so no GST is charged and invoices say GST not applicable. After registration, GST will be added at checkout and shown separately on the invoice.",
+ map={num:p.num,num_mrp:p.num_mrp||p.num,combo:p.combo,combo_minutes:p.combo_minutes,renew:p.renew,gst_text:gt,code:d.code,first:r.first,renewal_commission:r.renew,min:r.min_payout};
+ return t.replace(/\{\{(\w+)\}\}/g,(x,k)=>map[k]===undefined||map[k]===null?x:map[k])}
+function spMode(su){spSignup=su;$("sp_su").classList.toggle("hide",!su);$("sp_tl").classList.toggle("hide",!su);$("spH").textContent=su?"Create your sales partner account":"Sales partner login";
+  $("spSub").textContent=su?"Create your account to get your personal referral code.":"Log in to your sales partner dashboard.";$("sp_btn").textContent=su?"Create account":"Log in";
+  $("sp_sw").textContent=su?"Already a partner?":"New partner?";$("sp_swb").textContent=su?"Log in":"Create partner account";$("sp_fp").classList.toggle("hide",su);$("sp_msg").textContent="";paneSet("sp_auth",su?"spsignup":"splogin")}
+async function spRoute(session){const sub=location.pathname.split("/")[2]||"login";
+  if(sub==="dashboard"){if(!session){go("/sp/login");return}show("sp");$("sp_auth").classList.add("hide");$("sp_dash").classList.remove("hide");await spLoad();return}
+  if(session){go("/sp/dashboard");return}
+  show("sp");$("sp_dash").classList.add("hide");$("sp_auth").classList.remove("hide");spMode(sub==="signup")}
+$("sp_swb").onclick=()=>go(spSignup?"/sp/login":"/sp/signup");
+$("sp_tlink").onclick=e=>{e.preventDefault();const b=$("sp_tbox");b.innerHTML=textToHtml(spFill(window.SP_TERMS_TXT||SPD_TERMS,{rates:window.SP_RATES||{first:100,renew:70,min_payout:100},prices:{},code:"your code"}));b.classList.toggle("hide")};
+$("sp_btn").onclick=async()=>{const m=$("sp_msg");m.className="msg";m.textContent="";const email=$("sp_email").value.trim(),pw=$("sp_pass").value,rules=[["sp_email",R.email,"Enter a valid email address"],["sp_pass",R.pw,"Use 8 or more characters"]];
+  if(spSignup)rules.unshift(["sp_name",v=>v.length>1,"Enter your name"],["sp_phone",R.phone,"Enter a valid 10-digit mobile number"]);
+  if(!check(rules))return;if(spSignup&&!$("sp_terms").checked){m.textContent="Please accept the Sales Partner Terms to continue.";return}
+  $("sp_btn").disabled=true;
+  try{if(spSignup){const {data,error}=await sb.auth.signUp({email,password:pw,options:{data:{sp_name:$("sp_name").value.trim(),sp_phone:$("sp_phone").value.trim(),sp_terms:SP_V}}});if(error)throw error;
+      if(!data.session){m.className="msg ok";m.textContent="We sent a confirmation link to "+email+". Check your inbox and spam folder, click the link, then log in here to get your referral code.";return}go("/sp/dashboard")}
+    else{const {error}=await sb.auth.signInWithPassword({email,password:pw});if(error)throw error;go("/sp/dashboard")}}
+  catch(er){m.textContent=er.message}finally{$("sp_btn").disabled=false}};
+$("sp_fp").onclick=async()=>{const m=$("sp_msg"),email=$("sp_email").value.trim();m.className="msg";if(!email){m.textContent="Type your email above first, then click Forgot password.";return}
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+"/?reset=1"});if(error){m.textContent=error.message;return}m.className="msg ok";m.textContent="If this email has an account, a reset link is on its way. Check your inbox and spam folder."};
+const spInr=n=>inr(n||0),spDate=x=>new Date(x).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
+async function spLoad(){let d;try{d=await(await api("/api/sp/me")).json()}catch(e){toast(e.message,"err");return}
+  if(!d.registered){const mt=d.meta||{};
+    if(mt.name&&mt.phone&&mt.terms){try{await J("POST","/api/sp/register",{name:mt.name,phone:mt.phone,terms:true});return spLoad()}catch(er){toast(er.message,"err")}}
+    $("sp_tabs").innerHTML="";document.querySelectorAll("[data-sp]").forEach(x=>x.classList.toggle("hide",x.dataset.sp!=="overview"));
+    $("sp_ov").innerHTML=`<div class="card"><h2>Finish your partner profile</h2><label>Your name</label><input id="sp_cn" value="${esc(mt.name||"")}"><label>Mobile number</label><input id="sp_cp" value="${esc(mt.phone||"")}"><label style="font-weight:400"><input type="checkbox" id="sp_ct" style="width:auto"> I accept the Sales Partner Terms below.</label><button data-spx="finish" style="width:auto">Create my referral code</button><div id="sp_cm" class="msg"></div></div><div class="card">${textToHtml(spFill(window.SP_TERMS_TXT||SPD_TERMS,{rates:window.SP_RATES||{first:100,renew:70,min_payout:100},prices:{},code:"your code"}))}</div>`;return}
+  renderSp(d)}
+function spTab(n){window.SP_TAB=n;document.querySelectorAll("[data-sp]").forEach(x=>x.classList.toggle("hide",x.dataset.sp!==n));document.querySelectorAll("#sp_tabs button").forEach(b=>b.classList.toggle("on",b.dataset.spt===n))}
+function renderSp(d){const b=d.balance,r=d.rates,st=(l,v,n)=>`<div class="stat"><b>${v}</b>${l}${n?`<br><small style="color:var(--mut)">${n}</small>`:""}</div>`;$("sp_who").textContent=d.name;
+  $("sp_tabs").innerHTML=[["overview","Overview"],["clients","My clients"],["earn","Earnings"],["pay","Payouts"],["script","Script and answers"],["terms","Partner terms"]].map(x=>`<button class="ghost" data-spt="${x[0]}">${x[1]}</button>`).join("");
+  $("sp_ov").innerHTML=(d.status!=="active"?'<div class="card"><p class="msg">Your account is paused. Please contact Rnexa.</p></div>':"")+
+   `<div class="card"><h2>Your referral code</h2><div style="font-size:36px;font-weight:800;letter-spacing:4px;color:var(--pri)">${esc(d.code)}</div><p>Ask every client to type this code when they create their account, or in Settings, <b>before their first payment</b>.</p><p><button data-spx="copy" data-v="${esc(d.code)}" style="width:auto">Copy code</button> <button class="ghost" data-spx="copy" data-v="Create your Rnexa account at https://rnexa.in/signup and type my referral code ${esc(d.code)}">Copy message to send</button></p></div>
+   <div class="grid">${st("Clients you brought",d.clients.length)}${st("Total earned",spInr(b.earned))}${st("Paid to you",spInr(b.paid))}${st("Waiting for payment",spInr(b.pending))}${st("Available to redeem",spInr(b.available),"minimum "+spInr(r.min_payout))}</div>
+   <div class="card"><h2>What you earn</h2><p>${spInr(r.first)} when a client you brought pays for their AI number (first month), and ${spInr(r.renew)} every month that client renews. No commission on minute packs.</p></div>`;
+  $("sp_cl").innerHTML=d.clients.length?`<div class="card"><h2>Your clients</h2><table><tr><th>Company</th><th>City</th><th>Joined</th><th>First month paid</th><th>Renewals</th><th>You earned</th></tr>${d.clients.map(c=>`<tr><td>${esc(c.company)}</td><td>${esc(c.city||"")}</td><td>${spDate(c.joined)}</td><td>${c.first_paid?"Yes":"Not yet"}</td><td>${c.renewals}</td><td>${spInr(c.earned)}</td></tr>`).join("")}</table></div>`:`<div class="card"><div class="empty"><b>No clients yet</b><p>Share your code ${esc(d.code)}. Your clients appear here when they use it.</p></div></div>`;
+  $("sp_ea").innerHTML=d.commissions.length?`<div class="card"><h2>Your earnings</h2><table><tr><th>Date</th><th>Client</th><th>For</th><th>Amount</th><th>Status</th></tr>${d.commissions.map(c=>`<tr><td>${spDate(c.created_at)}</td><td>${esc(c.company)}</td><td>${c.kind==="line"?"First month":"Renewal"}</td><td>${spInr(c.amount)}</td><td>${c.status==="earned"?"Earned":"Cancelled"}</td></tr>`).join("")}</table></div>`:`<div class="card"><div class="empty"><b>No earnings yet</b><p>You earn when a client you brought pays.</p></div></div>`;
+  $("sp_pa").innerHTML=`<div class="card"><h2>Redeem your earnings</h2><p>Available: <b>${spInr(b.available)}</b>. You can redeem once a week, minimum ${spInr(r.min_payout)}.${d.next_redeem?" Next time you can redeem: <b>"+spDate(d.next_redeem)+"</b>.":""}</p><button data-spx="redeem" style="width:auto">Redeem ${spInr(b.available)}</button></div>
+   <div class="card"><h2>Where should we pay you?</h2><p>Your UPI ID, or bank details (account name, number and IFSC).</p><input id="sp_pd" maxlength="300" value="${esc(d.payout_details)}"><button data-spx="savepd" style="width:auto">Save</button></div>
+   <div class="card"><h2>Payout history</h2>${d.payouts.length?`<table><tr><th>Asked on</th><th>Amount</th><th>Status</th><th>Reference</th></tr>${d.payouts.map(p=>`<tr><td>${spDate(p.requested_at)}</td><td>${spInr(p.amount)}</td><td>${{requested:"Waiting",paid:"Paid",rejected:"Rejected"}[p.status]||p.status}</td><td>${esc(p.reference||"")}</td></tr>`).join("")}</table>`:"<p>No payouts yet.</p>"}</div>`;
+  const pr=d.prices||{};$("sp_sc").innerHTML=`<div class="card"><h2>Live prices</h2><table><tr><td>AI phone number, first month</td><td><b>${spInr(pr.num)}</b>${pr.num_mrp&&pr.num_mrp>pr.num?" (normal "+spInr(pr.num_mrp)+")":""}</td></tr><tr><td>AI number every month after that</td><td><b>${spInr(pr.renew)}</b></td></tr>${pr.combo?`<tr><td>AI number + ${pr.combo_minutes} minutes</td><td><b>${spInr(pr.combo)}</b></td></tr>`:""}${(pr.minutes||[]).map(x=>`<tr><td>${esc(x.name)}</td><td><b>${x.kind==="custom"?spInr(x.rate)+" per minute":spInr(x.price)}</b></td></tr>`).join("")}</table><p>${pr.gst_active?"GST ("+pr.gst_rate+"%) is added at checkout.":"No GST is charged at the moment."}</p></div><div class="card">${textToHtml(spFill((d.content&&d.content.script)||SPD_SCRIPT,d))}</div>`;
+  $("sp_te").innerHTML=`<div class="card">${textToHtml(spFill((d.content&&d.content.terms)||SPD_TERMS,d))}</div>`;spTab(window.SP_TAB||"overview")}
+$("sp_dash").addEventListener("click",async e=>{const b=e.target.closest("[data-spx],[data-spt]");if(!b)return;if(b.dataset.spt){spTab(b.dataset.spt);return}
+  const x=b.dataset.spx;try{
+   if(x==="copy"){await navigator.clipboard.writeText(b.dataset.v);toast("Copied","ok")}
+   else if(x==="redeem"){await J("POST","/api/sp/redeem",{});toast("Payout requested. We will pay you soon.","ok");spLoad()}
+   else if(x==="savepd"){await J("PUT","/api/sp/payout-details",{details:$("sp_pd").value});toast("Saved","ok")}
+   else if(x==="finish"){const m=$("sp_cm");m.className="msg";if(!$("sp_ct").checked){m.textContent="Please accept the Sales Partner Terms.";return}await J("POST","/api/sp/register",{name:$("sp_cn").value,phone:$("sp_cp").value,terms:true});spLoad()}
+  }catch(er){toast(er.message,"err")}});
+$("sp_out").onclick=async()=>{await sb.auth.signOut();go("/sp/login")};
+/* referral code in the client's Settings */
+const _lsets=loadSettings;loadSettings=async function(){await _lsets();try{const r=await(await api("/api/referral")).json();if(r.code){$("refNote").textContent="Referral code added: "+r.code+". Thank you.";$("refForm").classList.add("hide")}else $("refForm").classList.remove("hide")}catch(e){}};
+$("refBtn").onclick=async()=>{const m=$("refMsg");m.className="msg";m.textContent="";try{await J("POST","/api/referral",{code:$("refSet").value});toast("Referral code added","ok");loadSettings()}catch(e){m.textContent=e.message}};
+/* admin: sales team */
+VIEW.sales=async()=>{const d=await(await api("/api/admin/sales")).json(),r=d.rates,reqs=d.payouts.filter(p=>p.status==="requested");
+  return `<h2>Sales partner pay rates</h2><p>New rates apply to payments made after you save.</p><div class="pgrid"><div><label>First month (INR)</label><input id="sr_f" type="number" value="${r.first}"></div><div><label>Each renewal (INR)</label><input id="sr_r" type="number" value="${r.renew}"></div><div><label>Minimum to redeem (INR)</label><input id="sr_m" type="number" value="${r.min_payout}"></div></div><p><button data-x="spratesave" style="width:auto">Save rates</button></p>
+  <h2>Payout requests</h2>${reqs.length?`<table><tr><th>Asked on</th><th>Partner</th><th>Amount</th><th>Pay to</th><th></th></tr>${reqs.map(p=>`<tr><td>${dtt(p.requested_at)}</td><td>${esc(p.name)}</td><td><b>${inr(p.amount)}</b></td><td>${esc(p.details||"")}</td><td><button class="ghost" data-x="popaid" data-id="${p.id}">Mark as paid</button> <button class="ghost" style="color:var(--err)" data-x="porej" data-id="${p.id}">Reject</button></td></tr>`).join("")}</table>`:"<p>No requests waiting.</p>"}
+  <h2>Sales partners</h2>${d.people.length?`<table><tr><th>Name</th><th>Phone</th><th>Code</th><th>Clients</th><th>Earned</th><th>Paid</th><th>Waiting</th><th>Available</th><th>Status</th><th></th></tr>${d.people.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.phone||"")}</td><td><b>${esc(p.code)}</b></td><td>${p.clients}</td><td>${inr(p.earned)}</td><td>${inr(p.paid)}</td><td>${inr(p.pending)}</td><td>${inr(p.available)}</td><td>${esc(p.status)}</td><td><button class="ghost" data-x="${p.status==="active"?"sppause":"spact"}" data-id="${p.id}">${p.status==="active"?"Pause":"Activate"}</button></td></tr>`).join("")}</table>`:"<p>No sales partners yet. Send them /sp/signup.</p>"}
+  <h2>Recent commissions</h2>${d.commissions.length?`<table><tr><th>Date</th><th>Partner</th><th>Client</th><th>For</th><th>Amount</th><th>Status</th><th></th></tr>${d.commissions.map(c=>`<tr><td>${dtt(c.created_at)}</td><td>${esc(c.name)}</td><td>${esc(c.company)}</td><td>${c.kind==="line"?"First month":"Renewal"}</td><td>${inr(c.amount)}</td><td>${esc(c.status)}</td><td>${c.status==="earned"?`<button class="ghost" style="color:var(--err)" data-x="comcancel" data-id="${c.id}">Cancel</button>`:""}</td></tr>`).join("")}</table>`:"<p>No commissions yet.</p>"}`};
+$("abody").addEventListener("click",async e=>{const b=e.target.closest("[data-x]");if(!b)return;const x=b.dataset.x,id=b.dataset.id;
+  try{switch(x){
+   case "spratesave":await J("PUT","/api/admin/sales/rates",{first:(+$("sr_f").value)||0,renew:(+$("sr_r").value)||0,min_payout:(+$("sr_m").value)||0});toast("Rates saved","ok");break;
+   case "sppause":case "spact":await J("PATCH","/api/admin/sales/"+id,{status:x==="sppause"?"paused":"active"});adminTab("sales");break;
+   case "popaid":{const ref=prompt("Payment reference (for example the UPI transaction ID). You can leave it empty.");if(ref===null)break;await J("POST","/api/admin/payouts/"+id+"/paid",{reference:ref});toast("Marked as paid. The partner was emailed.","ok");adminTab("sales");break}
+   case "porej":if(confirm("Reject this request? The money goes back to the partner's balance.")){await J("POST","/api/admin/payouts/"+id+"/reject",{});adminTab("sales")}break;
+   case "comcancel":if(confirm("Cancel this commission?")){await J("POST","/api/admin/commissions/"+id+"/cancel",{});adminTab("sales")}break;
+  }}catch(er){toast(er.message,"err")}});
 loadContent().finally(route);
 </script></body></html>

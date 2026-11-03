@@ -1,5 +1,5 @@
 """Rnexa backend: website + API (credits, Razorpay payments, Bolna calling). Secrets only in environment variables."""
-import hashlib, hmac, io, json, math, os, re, smtplib, threading, time, uuid
+import hashlib, hmac, io, json, math, os, re, secrets, smtplib, threading, time, uuid
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from typing import Optional
@@ -211,6 +211,7 @@ def credit_order(order_id, payment_id):
             else:
                 threading.Thread(target=relink, args=(r0["user_id"],), daemon=True).start()
         threading.Thread(target=email_invoice, args=(r0,), daemon=True).start()
+        threading.Thread(target=record_commission, args=(r0,), daemon=True).start()
         notify(r0["user_id"], "Payment received", f"We received Rs. {(r0['amount_paise'] or 0) / 100:,.2f}. Your invoice was sent to your email and is in Minutes & billing.", "message")
     return bool(rows)
 
@@ -713,7 +714,7 @@ def whoami(authorization: str = Header(None)):
     u = auth_user(authorization)
     adm = (u.get("email") or "").lower() in ADMINS and bool(u.get("email_confirmed_at"))
     unread = len(_safe(lambda: db("GET", "admin_alerts", {"read": "eq.false", "select": "id"}), [])) if adm else 0
-    return {"email": u.get("email"), "is_admin": adm, "alerts_unread": unread}
+    return {"email": u.get("email"), "is_admin": adm, "alerts_unread": unread, "is_sp": bool(_safe(lambda: sp_for_user(u["id"]), None))}
 
 
 @app.get("/api/invoice/{pid}")
@@ -735,8 +736,8 @@ def admin_invoice(pid: str, authorization: str = Header(None)):
 
 
 # ---------- clean URLs, per-page search tags, 404 ----------
-SEO = {"/": ["Rnexa | AI Receptionist and Websites for Local Businesses in Chennai", "Rnexa builds fast websites and runs an AI receptionist that answers your missed calls, takes bookings and shows every call in your dashboard."], "/login": ["Log in | Rnexa", "Log in to your Rnexa dashboard to manage your AI receptionist, call history, minutes and invoices."], "/signup": ["Create your account | Rnexa", "Create a Rnexa account to set up your AI receptionist, get an AI phone number and see every call in your dashboard."], "/reset": ["Set a new password | Rnexa", "Choose a new password for your Rnexa account."], "/terms": ["Terms & Conditions | Rnexa", "Read the Rnexa terms for the AI receptionist service: accounts, call forwarding, minutes, invoices and the emails we send."], "/privacy": ["Privacy Policy | Rnexa", "How Rnexa collects, uses and protects your business details, call data and payment records."], "/refund": ["Refund & Cancellation Policy | Rnexa", "Rnexa refund and cancellation rules for minutes, AI phone lines and wrong or double payments."], "/contact": ["Contact Rnexa | Tondiarpet, Chennai", "Contact Rnexa by email, phone or WhatsApp, or visit us at Tondiarpet, Chennai."], "/app": ["Dashboard | Rnexa", "Your Rnexa client dashboard."], "/admin": ["Admin | Rnexa", "Rnexa admin panel."], "404": ["Page not found | Rnexa", "This page does not exist."]}
-PRIVATE = {"/login", "/reset", "/app", "/admin"}
+SEO = {"/": ["Rnexa | AI Receptionist and Websites for Local Businesses in Chennai", "Rnexa builds fast websites and runs an AI receptionist that answers your missed calls, takes bookings and shows every call in your dashboard."], "/login": ["Log in | Rnexa", "Log in to your Rnexa dashboard to manage your AI receptionist, call history, minutes and invoices."], "/signup": ["Create your account | Rnexa", "Create a Rnexa account to set up your AI receptionist, get an AI phone number and see every call in your dashboard."], "/reset": ["Set a new password | Rnexa", "Choose a new password for your Rnexa account."], "/terms": ["Terms & Conditions | Rnexa", "Read the Rnexa terms for the AI receptionist service: accounts, call forwarding, minutes, invoices and the emails we send."], "/privacy": ["Privacy Policy | Rnexa", "How Rnexa collects, uses and protects your business details, call data and payment records."], "/refund": ["Refund & Cancellation Policy | Rnexa", "Rnexa refund and cancellation rules for minutes, AI phone lines and wrong or double payments."], "/contact": ["Contact Rnexa | Tondiarpet, Chennai", "Contact Rnexa by email, phone or WhatsApp, or visit us at Tondiarpet, Chennai."], "/app": ["Dashboard | Rnexa", "Your Rnexa client dashboard."], "/admin": ["Admin | Rnexa", "Rnexa admin panel."], "/sp": ["Sales partner | Rnexa", "Rnexa sales partner area."], "404": ["Page not found | Rnexa", "This page does not exist."]}
+PRIVATE = {"/login", "/reset", "/app", "/admin", "/sp"}
 LEGAL = {"/terms", "/privacy", "/refund", "/contact"}
 try:
     INDEX = open("static/index.html", encoding="utf-8").read()
@@ -771,7 +772,7 @@ async def http_error(request: Request, exc: StarletteHTTPException):
     path = request.url.path.rstrip("/") or "/"
     if exc.status_code == 404 and request.method == "GET" and not path.startswith("/api/") and INDEX:
         key = "/" + path.split("/")[1] if path != "/" else "/"
-        if key in SEO and key != "404" and (path == key or key in ("/app", "/admin")):
+        if key in SEO and key != "404" and (path == key or key in ("/app", "/admin", "/sp")):
             return HTMLResponse(page_for(key))
         return HTMLResponse(NOTFOUND, status_code=404)
     return JSONResponse({"detail": exc.detail}, status_code=exc.status_code, headers=getattr(exc, "headers", None))
@@ -956,13 +957,13 @@ class ContentIn(BaseModel):
 def public_content():
     c = get_setting("content", {}) or {}
     return JSONResponse({"pages": {k: c[k] for k in ("terms", "privacy", "refund", "contact") if c.get(k)}, "faq": c.get("faq"),
-                         "terms_version": c.get("terms_version"), "shop": get_setting("shop", {}) or {}, "gst": gst_info()["rate"], "renew": int((next((p for p in load_packs() if p.get("kind") == "renew"), {}) or {}).get("price") or 0)}, headers={"Cache-Control": "no-store"})
+                         "terms_version": c.get("terms_version"), "shop": get_setting("shop", {}) or {}, "gst": gst_info()["rate"], "renew": int((next((p for p in load_packs() if p.get("kind") == "renew"), {}) or {}).get("price") or 0), "sp": sp_rates(), "sp_terms": c.get("sp_terms")}, headers={"Cache-Control": "no-store"})
 
 
 @app.put("/api/admin/content")
 def admin_set_content(b: ContentIn, authorization: str = Header(None)):
     current_admin(authorization)
-    if b.key not in ("terms", "privacy", "refund", "contact", "faq") or not b.text.strip():
+    if b.key not in ("terms", "privacy", "refund", "contact", "faq", "sp_script", "sp_terms") or not b.text.strip():
         raise HTTPException(400, "Nothing to save")
     c = get_setting("content", {}) or {}
     c[b.key] = b.text.strip()[:30000]
@@ -1221,6 +1222,12 @@ def admin_analytics(days: int = 30, authorization: str = Header(None)):
         mins = (l.get("result") or {}).get("minutes_used") or 0
         if mins and l["campaign_id"] in camps:
             used(camps[l["campaign_id"]], mins)
+    t["commissions"] = 0.0
+    for c in _safe(lambda: db("GET", "commissions", {"status": "eq.earned", "select": "amount,created_at", "limit": "20000"}), []):
+        t["commissions"] += c["amount"]
+        d = _day(c["created_at"])
+        if d in ix:
+            cost[ix[d]] += c["amount"]
     profs = [_day(p["created_at"]) for p in db("GET", "profiles", {"select": "created_at", "limit": "10000"})]
     before = sum(1 for d in profs if d < keys[0])
     for d in profs:
@@ -1245,8 +1252,8 @@ def admin_analytics(days: int = 30, authorization: str = Header(None)):
             seen[h].add(pg["user_id"])
     total_sales = t["sales_number"] + t["sales_minutes"]
     c_num, c_min, c_fee = (t["numbers_sold"] + t["renewals"]) * NUMBER_COST, t["minutes_used"] * COST_PER_MIN, total_sales * FEE_PCT / 100
-    t.update({"sales_total": total_sales, "cost_numbers": c_num, "cost_minutes": c_min, "cost_fees": c_fee, "cost_total": c_num + c_min + c_fee,
-              "profit": total_sales - c_num - c_min - c_fee, "users": len(profs)})
+    t.update({"sales_total": total_sales, "cost_numbers": c_num, "cost_minutes": c_min, "cost_fees": c_fee, "cost_commissions": t["commissions"], "cost_total": c_num + c_min + c_fee + t["commissions"],
+              "profit": total_sales - c_num - c_min - c_fee - t["commissions"], "users": len(profs)})
     return {"labels": [k.strftime("%d %b") for k in keys], "sales_number": sn, "sales_minutes": sm, "profit": [round(sn[i] + sm[i] - cost[i], 2) for i in range(days)],
             "users_total": users_total, "users_new": unew, "views": views, "usage": usage, "online_now": online_now,
             "online_labels": [h.strftime("%I %p").lstrip("0") for h in hours], "online_counts": [len(seen[h]) for h in hours], "totals": t}
@@ -1483,6 +1490,7 @@ def handle_sub_charged(payload):
     db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"autopay_status": "active"})
     extend_line(uid)
     threading.Thread(target=email_invoice, args=(p,), daemon=True).start()
+    threading.Thread(target=record_commission, args=(p,), daemon=True).start()
     notify(uid, "Your AI number was renewed", f"We took {inr_txt(total)} through auto-pay and renewed your AI number for another month. Your invoice was emailed to you.", "message")
 
 
@@ -1522,6 +1530,316 @@ def admin_alerts(authorization: str = Header(None)):
 def admin_alerts_read(authorization: str = Header(None)):
     current_admin(authorization)
     db("PATCH", "admin_alerts", {"read": "eq.false"}, {"read": True})
+    return {"ok": True}
+
+
+# ---------- sales partners: referral code, commission, weekly payout ----------
+SP_TERMS_VERSION = "1.0"
+CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+
+
+def sp_rates():
+    r = get_setting("sp_rates", {}) or {}
+    return {"first": int(r.get("first", 100)), "renew": int(r.get("renew", 70)), "min_payout": int(r.get("min_payout", 100))}
+
+
+def sp_for_user(uid):
+    rows = db("GET", "sales_people", {"user_id": f"eq.{uid}"})
+    return rows[0] if rows else None
+
+
+def current_sp(auth):
+    u = auth_user(auth)
+    sp = sp_for_user(u["id"])
+    if not sp:
+        raise HTTPException(403, "Please finish your sales partner sign-up first")
+    if sp["status"] != "active":
+        raise HTTPException(403, "Your sales partner account is paused. Please contact Rnexa.")
+    return u, sp
+
+
+def new_code():
+    for _ in range(40):
+        c = "RX" + "".join(secrets.choice(CODE_CHARS) for _ in range(5))
+        if not db("GET", "sales_people", {"code": f"eq.{c}", "select": "id"}):
+            return c
+    raise HTTPException(500, "Could not make a referral code. Please try again.")
+
+
+def sp_balance(spid):
+    com = db("GET", "commissions", {"sp_id": f"eq.{spid}", "select": "amount,status", "limit": "20000"})
+    po = db("GET", "payouts", {"sp_id": f"eq.{spid}", "select": "amount,status,requested_at", "limit": "2000"})
+    earned = sum(c["amount"] for c in com if c["status"] == "earned")
+    paid = sum(p["amount"] for p in po if p["status"] == "paid")
+    pending = sum(p["amount"] for p in po if p["status"] == "requested")
+    reqs = [p["requested_at"] for p in po if p["status"] in ("requested", "paid")]
+    return {"earned": earned, "paid": paid, "pending": pending, "available": earned - paid - pending, "last_request": max(reqs) if reqs else None}
+
+
+def next_redeem(last):
+    if not last:
+        return None
+    nxt = parse_ts(last) + timedelta(days=7)
+    return nxt if nxt > datetime.now(timezone.utc) else None
+
+
+def sp_redeem(sp):
+    r, b = sp_rates(), sp_balance(sp["id"])
+    if not (sp.get("payout_details") or "").strip():
+        raise HTTPException(400, "Please save your UPI ID or bank details first")
+    if db("GET", "payouts", {"sp_id": f"eq.{sp['id']}", "status": "eq.requested", "select": "id"}):
+        raise HTTPException(400, "You already have a payout request waiting")
+    nxt = next_redeem(b["last_request"])
+    if nxt:
+        raise HTTPException(400, f"You can redeem once a week. Next time: {nxt.astimezone(IST):%d %b %Y}")
+    if b["available"] < r["min_payout"]:
+        raise HTTPException(400, f"The minimum to redeem is Rs. {r['min_payout']}. You have Rs. {b['available']} available.")
+    p = db("POST", "payouts", json={"sp_id": sp["id"], "amount": b["available"], "details": sp["payout_details"]})[0]
+    alert_admin("payout_requested", f"{sp['name']} asked to be paid Rs. {b['available']}", f"Pay to: {sp['payout_details']}")
+    return p
+
+
+def apply_referral(uid, code):
+    code = (code or "").strip().upper()
+    if not code:
+        raise HTTPException(400, "Please type the referral code")
+    if db("GET", "referrals", {"user_id": f"eq.{uid}"}):
+        raise HTTPException(400, "A referral code is already added to your account")
+    if db("GET", "payments", {"user_id": f"eq.{uid}", "status": "eq.paid", "kind": "in.(line,renew)", "select": "id"}):
+        raise HTTPException(400, "A referral code can only be added before your first payment")
+    sp = db("GET", "sales_people", {"code": f"eq.{code}", "status": "eq.active"})
+    if not sp:
+        raise HTTPException(404, "This referral code was not found")
+    if sp[0]["user_id"] == uid:
+        raise HTTPException(400, "You cannot use your own referral code")
+    db("POST", "referrals", json={"user_id": uid, "sp_id": sp[0]["id"], "code": code})
+    return sp[0]
+
+
+def record_commission(p):
+    """Called after every confirmed payment. Pays the sales partner for AI number payments only."""
+    try:
+        kind = p.get("kind")
+        if kind not in ("line", "renew") or p.get("status") not in (None, "paid"):
+            return
+        ref = db("GET", "referrals", {"user_id": f"eq.{p['user_id']}"})
+        if not ref:
+            return
+        sp = db("GET", "sales_people", {"id": f"eq.{ref[0]['sp_id']}"})
+        if not sp or sp[0]["status"] != "active":
+            return
+        if db("GET", "commissions", {"payment_id": f"eq.{p['id']}", "select": "id"}):
+            return
+        r = sp_rates()
+        amt = r["first"] if kind == "line" else r["renew"]
+        db("POST", "commissions", json={"sp_id": sp[0]["id"], "client_user_id": p["user_id"], "payment_id": p["id"], "kind": kind, "amount": amt})
+        send_mail(email_of(sp[0]["user_id"]), f"You earned Rs. {amt} from Rnexa",
+                  f"A client who used your referral code paid for their AI number. Rs. {amt} was added to your balance.\n\nSee it in your dashboard: {SITE_URL}/sp/dashboard\n\nRnexa")
+    except Exception as ex:
+        print("commission error:", ex)
+
+
+def profiles_map(ids):
+    out = {}
+    ids = [i for i in ids if i]
+    for i in range(0, len(ids), 40):
+        chunk = ids[i:i + 40]
+        for pr in db("GET", "profiles", {"id": f"in.({','.join(chunk)})", "select": "id,company_name,city"}):
+            out[pr["id"]] = pr
+    return out
+
+
+def sp_prices():
+    packs = load_packs()
+    g = gst_info()
+    nums = sorted([p for p in packs if p["kind"] == "line" and not p["calls"]], key=lambda p: p["price"])
+    combo = next((p for p in packs if p["kind"] == "line" and p["calls"]), None)
+    renew = next((p for p in packs if p["kind"] == "renew"), None)
+    return {"num": nums[0]["price"] if nums else None, "num_mrp": nums[0].get("mrp") if nums else None,
+            "combo": combo["price"] if combo else None, "combo_mrp": combo.get("mrp") if combo else None, "combo_minutes": combo["calls"] if combo else None,
+            "renew": renew["price"] if renew else None, "gst_active": g["active"], "gst_rate": g["rate"],
+            "minutes": [{"name": p["name"], "price": p["price"], "calls": p["calls"], "rate": p.get("rate_per_min"), "kind": p["kind"]} for p in packs if p["kind"] in ("minutes", "custom")]}
+
+
+def sp_summary(sp):
+    refs = db("GET", "referrals", {"sp_id": f"eq.{sp['id']}", "order": "created_at.desc", "limit": "300"})
+    com = db("GET", "commissions", {"sp_id": f"eq.{sp['id']}", "order": "created_at.desc", "limit": "500"})
+    pm = profiles_map({r["user_id"] for r in refs} | {c["client_user_id"] for c in com if c.get("client_user_id")})
+    clients = []
+    for rf in refs:
+        mine = [c for c in com if c.get("client_user_id") == rf["user_id"] and c["status"] == "earned"]
+        pr = pm.get(rf["user_id"], {})
+        clients.append({"company": pr.get("company_name") or "New client", "city": pr.get("city"), "joined": rf["created_at"],
+                        "first_paid": any(c["kind"] == "line" for c in mine), "renewals": sum(1 for c in mine if c["kind"] == "renew"),
+                        "earned": sum(c["amount"] for c in mine)})
+    b = sp_balance(sp["id"])
+    nxt = next_redeem(b["last_request"])
+    c = get_setting("content", {}) or {}
+    return {"registered": True, "name": sp["name"], "phone": sp["phone"], "code": sp["code"], "status": sp["status"], "payout_details": sp.get("payout_details") or "",
+            "rates": sp_rates(), "balance": b, "next_redeem": nxt.isoformat() if nxt else None, "clients": clients,
+            "commissions": [{"created_at": x["created_at"], "company": pm.get(x.get("client_user_id"), {}).get("company_name") or "Client", "kind": x["kind"], "amount": x["amount"], "status": x["status"]} for x in com[:200]],
+            "payouts": db("GET", "payouts", {"sp_id": f"eq.{sp['id']}", "order": "requested_at.desc", "limit": "50", "select": "amount,status,requested_at,paid_at,reference"}),
+            "content": {"script": c.get("sp_script"), "terms": c.get("sp_terms")}, "prices": sp_prices()}
+
+
+@app.get("/api/sp/me")
+def sp_me(authorization: str = Header(None)):
+    u = auth_user(authorization)
+    sp = sp_for_user(u["id"])
+    if not sp:
+        meta = u.get("user_metadata") or {}
+        return {"registered": False, "meta": {"name": meta.get("sp_name"), "phone": meta.get("sp_phone"), "terms": meta.get("sp_terms")}}
+    return sp_summary(sp)
+
+
+class SPRegister(BaseModel):
+    name: str
+    phone: str
+    terms: bool = False
+
+
+@app.post("/api/sp/register")
+def sp_register(b: SPRegister, authorization: str = Header(None)):
+    u = auth_user(authorization)
+    if sp_for_user(u["id"]):
+        return {"ok": True}
+    phone = re.sub(r"[\s-]", "", b.phone)
+    if len(b.name.strip()) < 2:
+        raise HTTPException(400, "Please enter your name")
+    if not re.fullmatch(r"(\+?91)?[6-9][0-9]{9}", phone):
+        raise HTTPException(400, "Please enter a valid 10-digit mobile number")
+    if not b.terms:
+        raise HTTPException(400, "Please accept the Sales Partner Terms")
+    code = new_code()
+    db("POST", "sales_people", json={"user_id": u["id"], "name": b.name.strip()[:80], "phone": phone, "code": code,
+                                     "terms_version": SP_TERMS_VERSION, "terms_accepted_at": datetime.now(timezone.utc).isoformat()})
+    send_mail(u.get("email"), "Welcome to the Rnexa sales partner programme",
+              f"Your referral code is {code}.\nAsk every client to type it when they create their account at {SITE_URL}/signup, before their first payment.\n\nYour dashboard: {SITE_URL}/sp/dashboard\n\nRnexa")
+    return {"ok": True, "code": code}
+
+
+class SPDetails(BaseModel):
+    details: str
+
+
+@app.put("/api/sp/payout-details")
+def sp_save_details(b: SPDetails, authorization: str = Header(None)):
+    _, sp = current_sp(authorization)
+    d = b.details.strip()[:300]
+    if len(d) < 5:
+        raise HTTPException(400, "Please enter your UPI ID or bank details")
+    db("PATCH", "sales_people", {"id": f"eq.{sp['id']}"}, {"payout_details": d})
+    return {"ok": True}
+
+
+@app.post("/api/sp/redeem")
+def sp_do_redeem(authorization: str = Header(None)):
+    _, sp = current_sp(authorization)
+    p = sp_redeem(sp)
+    return {"ok": True, "amount": p["amount"]}
+
+
+class RefIn(BaseModel):
+    code: str
+
+
+@app.post("/api/referral")
+def add_referral(b: RefIn, authorization: str = Header(None)):
+    uid = current_user(authorization)
+    apply_referral(uid, b.code)
+    return {"ok": True}
+
+
+@app.get("/api/referral")
+def get_referral(authorization: str = Header(None)):
+    uid = current_user(authorization)
+    r = db("GET", "referrals", {"user_id": f"eq.{uid}"})
+    return {"code": r[0]["code"] if r else None}
+
+
+@app.get("/api/admin/content")
+def admin_get_content(authorization: str = Header(None)):
+    current_admin(authorization)
+    c = get_setting("content", {}) or {}
+    return {k: c.get(k) for k in ("sp_script", "sp_terms") if c.get(k)}
+
+
+@app.get("/api/admin/sales")
+def admin_sales(authorization: str = Header(None)):
+    current_admin(authorization)
+    people = db("GET", "sales_people", {"order": "created_at.desc", "limit": "500"})
+    names = {p["id"]: p["name"] for p in people}
+    out = []
+    for p in people:
+        b = sp_balance(p["id"])
+        out.append({**p, "clients": len(db("GET", "referrals", {"sp_id": f"eq.{p['id']}", "select": "user_id", "limit": "5000"})), **{k: b[k] for k in ("earned", "paid", "pending", "available")}})
+    com = db("GET", "commissions", {"order": "created_at.desc", "limit": "100"})
+    pm = profiles_map({c["client_user_id"] for c in com if c.get("client_user_id")})
+    return {"rates": sp_rates(), "people": out,
+            "payouts": [{**x, "name": names.get(x["sp_id"], "?")} for x in db("GET", "payouts", {"order": "requested_at.desc", "limit": "200"})],
+            "commissions": [{**c, "name": names.get(c["sp_id"], "?"), "company": pm.get(c.get("client_user_id"), {}).get("company_name") or "Client"} for c in com]}
+
+
+class SPRates(BaseModel):
+    first: int
+    renew: int
+    min_payout: int
+
+
+@app.put("/api/admin/sales/rates")
+def admin_sp_rates(b: SPRates, authorization: str = Header(None)):
+    current_admin(authorization)
+    if min(b.first, b.renew, b.min_payout) < 0 or max(b.first, b.renew, b.min_payout) > 100000:
+        raise HTTPException(400, "Please enter sensible amounts")
+    set_setting("sp_rates", b.dict())
+    return {"ok": True}
+
+
+class SPEdit(BaseModel):
+    status: Optional[str] = None
+    name: Optional[str] = None
+    phone: Optional[str] = None
+
+
+@app.patch("/api/admin/sales/{spid}")
+def admin_sp_edit(spid: str, b: SPEdit, authorization: str = Header(None)):
+    current_admin(authorization)
+    f = {k: v for k, v in b.dict().items() if v is not None}
+    if f.get("status") not in (None, "active", "paused"):
+        raise HTTPException(400, "Status must be active or paused")
+    if f:
+        db("PATCH", "sales_people", {"id": f"eq.{spid}"}, f)
+    return {"ok": True}
+
+
+class PayRef(BaseModel):
+    reference: str = ""
+
+
+@app.post("/api/admin/payouts/{pid}/paid")
+def admin_payout_paid(pid: str, b: PayRef, authorization: str = Header(None)):
+    current_admin(authorization)
+    rows = db("PATCH", "payouts", {"id": f"eq.{pid}", "status": "eq.requested"}, {"status": "paid", "paid_at": datetime.now(timezone.utc).isoformat(), "reference": b.reference[:120]})
+    if not rows:
+        raise HTTPException(404, "This payout is not waiting for payment")
+    sp = db("GET", "sales_people", {"id": f"eq.{rows[0]['sp_id']}"})
+    if sp:
+        send_mail(email_of(sp[0]["user_id"]), f"Your Rnexa payout of Rs. {rows[0]['amount']} was paid",
+                  f"We paid Rs. {rows[0]['amount']} to {rows[0].get('details') or 'your account'}.\nReference: {b.reference or '-'}\n\nRnexa")
+    return {"ok": True}
+
+
+@app.post("/api/admin/payouts/{pid}/reject")
+def admin_payout_reject(pid: str, authorization: str = Header(None)):
+    current_admin(authorization)
+    db("PATCH", "payouts", {"id": f"eq.{pid}", "status": "eq.requested"}, {"status": "rejected"})
+    return {"ok": True}
+
+
+@app.post("/api/admin/commissions/{cid}/cancel")
+def admin_cancel_commission(cid: str, authorization: str = Header(None)):
+    current_admin(authorization)
+    db("PATCH", "commissions", {"id": f"eq.{cid}"}, {"status": "cancelled", "note": "Cancelled by admin"})
     return {"ok": True}
 
 
