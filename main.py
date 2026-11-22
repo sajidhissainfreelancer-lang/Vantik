@@ -486,6 +486,7 @@ def bh():
 def send_mail(to, subject, body, html=None):
     host = os.getenv("SMTP_HOST")
     if not host or not to:
+        print("mail skipped:", "SMTP_HOST is not set" if not host else "no recipient email", "-", subject)
         return
     msg = EmailMessage()
     msg["From"], msg["To"], msg["Subject"] = os.getenv("MAIL_FROM", "Rnexa <ss@rnexa.in>"), to, subject
@@ -503,7 +504,15 @@ def send_mail(to, subject, body, html=None):
 
 def email_of(uid):
     r = db("GET", "account_status", {"user_id": f"eq.{uid}"})
-    return r[0]["email"] if r else None
+    if r and r[0].get("email"):
+        return r[0]["email"]
+    try:                                    # the saved row has no email: ask Supabase auth instead
+        u = requests.get(f"{SB}/auth/v1/admin/users/{uid}", headers=H, timeout=15)
+        if u.ok:
+            return u.json().get("email")
+    except Exception as e:
+        print("email lookup error:", e)
+    return None
 
 
 def build_prompt(b):
