@@ -483,6 +483,35 @@ def bh():
     return {"Authorization": f"Bearer {os.environ['BOLNA_API_KEY']}", "Content-Type": "application/json"}
 
 
+def _brand_html(subject, body):
+    """Dresses a plain-text email in the Rnexa look (dark card, logo, gold button), like the signup confirmation mail."""
+    e = _html.escape
+    gold = "background-color:#f5a623;background-image:linear-gradient(135deg,#ffd45e,#f5a623,#e07a10)"
+
+    def link(m):
+        url, trail = m.group(1), ""
+        while url and url[-1] in ".,);":
+            trail, url = url[-1] + trail, url[:-1]
+        return f'<a href="{url}" style="color:#f5a623">{url}</a>{trail}'
+
+    parts = []
+    for para in re.split(r"\n\s*\n", body.strip()):
+        lines = para.split("\n")
+        if len(lines) == 1 and re.fullmatch(r"https?://\S+", lines[0].strip()):
+            parts.append(f'<p style="margin:22px 0;text-align:center"><a href="{e(lines[0].strip(), True)}" style="display:inline-block;{gold};color:#1b1305;text-decoration:none;font-weight:800;font-size:15px;padding:13px 30px;border-radius:12px">Open Rnexa</a></p>')
+            continue
+        txt = "<br>".join(re.sub(r"(https?://[^\s<]+)", link, e(l)) for l in lines)
+        parts.append(f'<p style="color:#cfcabd;font-size:15px;line-height:1.65;margin:0 0 14px;text-align:left">{txt}</p>')
+    return ('<div style="background:#09090b;padding:28px 12px;font-family:Segoe UI,Arial,sans-serif"><table align="center" width="100%" style="max-width:560px;margin:auto"><tr>'
+            '<td style="background:#131316;border:1px solid #2a2a30;border-radius:20px;padding:34px 30px">'
+            f'<div style="text-align:center"><img src="{SITE_URL}/logo-mark.png" width="64" height="64" alt="Rnexa" style="display:block;margin:0 auto 12px">'
+            f'<div style="color:#f6f2e9;font-size:22px;font-weight:800;margin-bottom:20px">{e(subject)}</div></div>'
+            + "".join(parts) +
+            '<hr style="border:0;border-top:1px solid #2a2a30;margin:22px 0 12px">'
+            '<p style="color:#6f6b62;font-size:12px;margin:0;text-align:center">Rnexa &middot; Tondiarpet, Chennai &middot; ss@rnexa.in &middot; +91 7358145522</p>'
+            '</td></tr></table></div>')
+
+
 def _sender():
     raw = os.getenv("MAIL_FROM", "Rnexa <ss@rnexa.in>")
     m = re.match(r"\s*(.*?)\s*<([^>]+)>\s*$", raw)
@@ -494,6 +523,8 @@ def send_mail(to, subject, body, html=None):
     if not to:
         print("mail skipped: no recipient email -", subject)
         return
+    if html is None:
+        html = _brand_html(subject, body)
     key = os.getenv("BREVO_API_KEY")
     if key:
         name, addr = _sender()
