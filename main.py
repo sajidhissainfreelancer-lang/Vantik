@@ -97,8 +97,8 @@ def run_campaign(cid, uid):
     extra = {"ai_name": camp.get("ai_name") or "Riya", "client_instructions": camp.get("prompt") or "",
              "company_name": prof.get("company_name") or "", "business_name": prof.get("company_name") or ""}
     db("PATCH", "campaigns", {"id": f"eq.{cid}"}, {"status": "running"})
-    done, stopped = 0, False
-    for lead in db("GET", "leads", {"campaign_id": f"eq.{cid}", "order": "idx"}):
+    done, stopped = (camp.get("done") or 0), False
+    for lead in db("GET", "leads", {"campaign_id": f"eq.{cid}", "status": "eq.pending", "order": "idx"}):
         if stopped or (rpc("get_minutes", {"p_user": uid}) or 0) <= 0:
             stopped = True
             db("PATCH", "leads", {"id": f"eq.{lead['id']}"}, {"status": "skipped", "result": {"call_status": "skipped (no minutes left)"}})
@@ -113,7 +113,7 @@ def run_campaign(cid, uid):
         mins = max(1, math.ceil(dur / 60)) if dur > 0 else 0
         res["minutes_used"] = mins
         if mins:
-            left = rpc("use_minutes", {"p_user": uid, "p_n": mins})
+            left = rpc("charge_minutes", {"p_user": uid, "p_n": mins})
             if left is not None and left <= LOW_MIN < left + mins:
                 send_mail(email_of(uid), "Your Rnexa minutes are running low",
                           f"You have {left} minutes left. Buy more at {SITE_URL}/app/billing so your calls keep going.\n\nRnexa")
@@ -627,7 +627,7 @@ async def bolna_webhook(request: Request, key: str = ""):
                               "status": "completed", "duration_sec": dur, "minutes": mins, "transcript": ev.get("transcript"),
                               "summary": summary or ev.get("summary"), "extracted": ext, "recording_url": td.get("recording_url")})
     if mins:
-        left = rpc("use_minutes", {"p_user": uid, "p_n": mins})
+        left = rpc("charge_minutes", {"p_user": uid, "p_n": mins})
         if left is not None and left <= LOW_MIN < left + mins:
             send_mail(email_of(uid), "Your Rnexa minutes are running low",
                       f"You have {left} minutes left on your AI receptionist.\nBuy more at {SITE_URL}/#/app so your customers keep getting answers.\n\nRnexa")
@@ -1387,6 +1387,9 @@ def _lifecycle_loop():
 @app.on_event("startup")
 def _start_background():
     threading.Thread(target=_lifecycle_loop, daemon=True).start()
+    # resume campaigns that were interrupted by a restart or deploy
+    for c in _safe(lambda: db("GET", "campaigns", {"status": "eq.running"}), []):
+        threading.Thread(target=run_campaign, args=(c["id"], c["user_id"]), daemon=True).start()
 
 
 @app.post("/api/admin/run-checks")

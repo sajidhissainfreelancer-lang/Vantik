@@ -62,7 +62,8 @@ class Bolna:
             "recipient_phone_number": phone,
             "user_data": user_data,
         })
-        r.raise_for_status()
+        if not r.ok:  # show Bolna's real reason instead of a bare "400 Bad Request"
+            raise RuntimeError(f"Bolna {r.status_code}: {r.text[:300]}")
         return r.json()["execution_id"]
 
     def wait_result(self, execution_id, timeout=600, every=5):
@@ -87,7 +88,7 @@ def process_row(client, row, phone_col, on_status=None, extra=None):
     for k, v in (extra or {}).items():
         user_data.setdefault(k, v)
     if not user_data.get("customer_name"):
-        user_data["customer_name"] = "there"
+        user_data["customer_name"] = user_data.get("name") or "there"
     try:
         eid = client.start_call(phone, user_data)
         ex = client.wait_result(eid)
