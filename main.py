@@ -97,7 +97,7 @@ def run_campaign(cid, uid):
     extra = {"ai_name": camp.get("ai_name") or "Riya", "client_instructions": camp.get("prompt") or "",
              "company_name": prof.get("company_name") or "", "business_name": prof.get("company_name") or ""}
     db("PATCH", "campaigns", {"id": f"eq.{cid}"}, {"status": "running"})
-    done, stopped = (camp.get("done") or 0), False
+    done, stopped, trial_alerted = (camp.get("done") or 0), False, False
     for lead in db("GET", "leads", {"campaign_id": f"eq.{cid}", "status": "eq.pending", "order": "idx"}):
         if stopped or (rpc("get_minutes", {"p_user": uid}) or 0) <= 0:
             stopped = True
@@ -109,6 +109,12 @@ def run_campaign(cid, uid):
             res = process_row(client, pd.Series(lead["row"]), "phone_number", extra=extra)
         except Exception as e:
             res = {"call_status": f"error: {e}"}
+        if "Trial accounts" in str(res.get("call_status")):      # Bolna account is still on trial
+            res["call_status"] = "calling is not available yet - please contact Rnexa support"
+            if not trial_alerted:
+                trial_alerted = True
+                alert_admin("bolna_trial", "Bolna trial limit blocked a client campaign",
+                            "Bolna says trial accounts can only call verified numbers. Upgrade the Bolna account so client campaigns can run.")
         dur = int(float(res.get("duration_sec") or 0))
         mins = max(1, math.ceil(dur / 60)) if dur > 0 else 0
         res["minutes_used"] = mins
@@ -605,6 +611,18 @@ def relink(uid):
             db("PATCH", "lines", {"user_id": f"eq.{uid}"}, {"error": str(e)[:300]})
 
 
+_hook_lock = threading.Lock()
+
+
+def _record_call_once(eid, row):
+    """Saves the call only if this execution_id is not saved yet. Returns False for a duplicate."""
+    with _hook_lock:
+        if db("GET", "calls", {"execution_id": f"eq.{eid}", "select": "execution_id"}):
+            return False
+        db("POST", "calls", json=row)
+        return True
+
+
 @app.post("/api/bolna-webhook")
 async def bolna_webhook(request: Request, key: str = ""):
     if not HOOK_KEY or not hmac.compare_digest(key, HOOK_KEY):
@@ -623,9 +641,10 @@ async def bolna_webhook(request: Request, key: str = ""):
     td = ev.get("telephony_data") or {}
     ext = ev.get("extracted_data") or {}
     summary = ext.get("General", {}).get("Call Summary", {}).get("subjective") if isinstance(ext.get("General"), dict) else None
-    db("POST", "calls", json={"execution_id": eid, "user_id": uid, "line_id": line["id"], "from_number": td.get("from_number"),
+    if not _record_call_once(eid, {"execution_id": eid, "user_id": uid, "line_id": line["id"], "from_number": td.get("from_number"),
                               "status": "completed", "duration_sec": dur, "minutes": mins, "transcript": ev.get("transcript"),
-                              "summary": summary or ev.get("summary"), "extracted": ext, "recording_url": td.get("recording_url")})
+                              "summary": summary or ev.get("summary"), "extracted": ext, "recording_url": td.get("recording_url")}):
+        return {"ok": True}
     if mins:
         left = rpc("charge_minutes", {"p_user": uid, "p_n": mins})
         if left is not None and left <= LOW_MIN < left + mins:

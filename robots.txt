@@ -4,6 +4,6 @@ Disallow: /api/
 Disallow: /app
 Disallow: /admin
 Disallow: /reset
+Disallow: /sp
 
 Sitemap: https://rnexa.in/sitemap.xml
-Disallow: /sp

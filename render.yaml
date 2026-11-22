@@ -5,14 +5,23 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
+      - {key: PYTHON_VERSION, value: "3.11.9"}
+      - {key: SITE_URL, value: "https://rnexa.in"}
       - {key: SUPABASE_URL, sync: false}
       - {key: SUPABASE_ANON_KEY, sync: false}
       - {key: SUPABASE_SERVICE_KEY, sync: false}
       - {key: BOLNA_API_KEY, sync: false}
       - {key: BOLNA_AGENT_ID, sync: false}
+      - {key: BOLNA_TEMPLATE_AGENT_ID, sync: false}
+      - {key: BOLNA_WEBHOOK_KEY, sync: false}
       - {key: RAZORPAY_KEY_ID, sync: false}
       - {key: RAZORPAY_KEY_SECRET, sync: false}
       - {key: RAZORPAY_WEBHOOK_SECRET, sync: false}
+      - {key: SMTP_HOST, sync: false}
+      - {key: SMTP_PORT, value: "587"}
+      - {key: SMTP_USER, sync: false}
+      - {key: SMTP_PASS, sync: false}
+      - {key: MAIL_FROM, value: "Rnexa <ss@rnexa.in>"}
       - {key: ADMIN_EMAILS, value: "syedshahid3533@gmail.com"}
       - {key: COST_PER_CALL_INR, value: "8"}
       - {key: FREE_CALLS, value: "2"}
