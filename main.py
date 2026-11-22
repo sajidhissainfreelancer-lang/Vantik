@@ -119,7 +119,7 @@ def run_campaign(cid, uid):
         mins = max(1, math.ceil(dur / 60)) if dur > 0 else 0
         res["minutes_used"] = mins
         if mins:
-            left = rpc("charge_minutes", {"p_user": uid, "p_n": mins})
+            left = rpc("use_minutes", {"p_user": uid, "p_n": mins})
             if left is not None and left <= LOW_MIN < left + mins:
                 send_mail(email_of(uid), "Your Rnexa minutes are running low",
                           f"You have {left} minutes left. Buy more at {SITE_URL}/app/billing so your calls keep going.\n\nRnexa")
@@ -646,7 +646,7 @@ async def bolna_webhook(request: Request, key: str = ""):
                               "summary": summary or ev.get("summary"), "extracted": ext, "recording_url": td.get("recording_url")}):
         return {"ok": True}
     if mins:
-        left = rpc("charge_minutes", {"p_user": uid, "p_n": mins})
+        left = rpc("use_minutes", {"p_user": uid, "p_n": mins})
         if left is not None and left <= LOW_MIN < left + mins:
             send_mail(email_of(uid), "Your Rnexa minutes are running low",
                       f"You have {left} minutes left on your AI receptionist.\nBuy more at {SITE_URL}/#/app so your customers keep getting answers.\n\nRnexa")

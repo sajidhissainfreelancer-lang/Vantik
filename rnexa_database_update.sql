@@ -2,12 +2,7 @@
 -- Safe on your live database: it only creates what is missing and never deletes data.
 -- NOTE: get_minutes / add_minutes / use_minutes already exist in your database and are NOT touched here.
 
--- 1) Charge minutes down to zero (calls that run past the balance are no longer free)
-create or replace function public.charge_minutes(p_user uuid, p_n int) returns int language sql security definer as $$
-  update public.wallets set minutes = greatest(minutes - p_n, 0) where user_id = p_user returning minutes $$;
-revoke execute on function public.charge_minutes(uuid,int) from public, anon, authenticated;
-
--- 2) Tables the app uses (created only if missing)
+-- 1) Tables the app uses (created only if missing)
 alter table public.wallets   add column if not exists minutes int not null default 0;
 alter table public.campaigns add column if not exists prompt text;
 alter table public.campaigns add column if not exists ai_name text;
@@ -71,7 +66,7 @@ create table if not exists public.payouts (
   id uuid primary key default gen_random_uuid(), sp_id uuid not null references public.sales_people(id) on delete cascade,
   amount int not null, details text, status text default 'requested', requested_at timestamptz default now(), paid_at timestamptz, reference text);
 
--- 3) Lock every table so nobody can read it with the public (anon) key.
+-- 2) Lock every table so nobody can read it with the public (anon) key.
 -- Your server uses the service key, which ignores these locks. The website only reads "profiles" directly, which already has its own policies.
 alter table public.profiles        enable row level security;
 alter table public.campaigns       enable row level security;
