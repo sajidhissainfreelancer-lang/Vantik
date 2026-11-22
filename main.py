@@ -483,10 +483,34 @@ def bh():
     return {"Authorization": f"Bearer {os.environ['BOLNA_API_KEY']}", "Content-Type": "application/json"}
 
 
+def _sender():
+    raw = os.getenv("MAIL_FROM", "Rnexa <ss@rnexa.in>")
+    m = re.match(r"\s*(.*?)\s*<([^>]+)>\s*$", raw)
+    return ((m.group(1) or "Rnexa"), m.group(2)) if m else ("Rnexa", raw.strip())
+
+
 def send_mail(to, subject, body, html=None):
+    """Sends over Brevo's web API when BREVO_API_KEY is set (works on Render's free plan), otherwise over SMTP."""
+    if not to:
+        print("mail skipped: no recipient email -", subject)
+        return
+    key = os.getenv("BREVO_API_KEY")
+    if key:
+        name, addr = _sender()
+        payload = {"sender": {"name": name, "email": addr}, "to": [{"email": to}], "subject": subject, "textContent": body}
+        if html:
+            payload["htmlContent"] = html
+        try:
+            r = requests.post("https://api.brevo.com/v3/smtp/email", timeout=20, json=payload,
+                              headers={"api-key": key, "accept": "application/json", "content-type": "application/json"})
+            if not r.ok:
+                print("mail error (brevo):", r.status_code, r.text[:200])
+        except Exception as e:
+            print("mail error (brevo):", e)
+        return
     host = os.getenv("SMTP_HOST")
-    if not host or not to:
-        print("mail skipped:", "SMTP_HOST is not set" if not host else "no recipient email", "-", subject)
+    if not host:
+        print("mail skipped: neither BREVO_API_KEY nor SMTP_HOST is set -", subject)
         return
     msg = EmailMessage()
     msg["From"], msg["To"], msg["Subject"] = os.getenv("MAIL_FROM", "Rnexa <ss@rnexa.in>"), to, subject
